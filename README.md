@@ -23,21 +23,9 @@ Pestañas organizadas según el mapa conceptual del tema:
 
 Cada pestaña incluye autoevaluación y, cuando procede, las correcciones respecto al texto de la Unidad Didáctica. La pestaña Inicio reúne todas en una tabla.
 
-## Publicar en GitHub Pages
-1. Crea un repositorio y sube `index.html` (y este README) a la rama `main`.
-2. En *Settings → Pages*, elige *Deploy from a branch*, rama `main`, carpeta `/ (root)`.
-3. La página quedará en `https://<usuario>.github.io/<repositorio>/`.
-
 ## Datos y licencias
 - Líneas de costa: Natural Earth 1:110m (dominio público), vía el paquete `world-atlas`.
 - Municipios (8.132, con coordenadas): paquete `spanish-cities-info` (licencia ISC), verificado con el INE.
 - Parámetros: elipsoide WGS84; oblicuidad 23,44°; constante solar 1.361 W/m²; posición solar con las fórmulas de baja precisión del *Astronomical Almanac*.
 
-## Editar
-El código fuente está en `src/` (un archivo por pestaña) y los datos geográficos compactados en `data/`. Tras cualquier cambio, regenera el archivo publicado con:
 
-```
-python3 build.py
-```
-
-que vuelve a ensamblar `index.html`.
