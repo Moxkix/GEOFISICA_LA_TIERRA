@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Convierte el GeoTIFF exportado por gee/era5_isotermas_tema2.js (13 bandas: t01…t12, elev; 1°)
-en data/tema2/era5_grid.json: rejilla de 2° con enteros en décimas (base64, int16 little-endian).
+"""Convierte el GeoTIFF exportado por gee/era5_isotermas_tema2.js (13 bandas: t01…t12, elev;
+0,25°; enteros de 16 bits con la temperatura en décimas de °C) en data/tema2/era5_grid.json:
+rejilla de 2° (media de las celdas finas) con enteros en décimas (base64, int16 little-endian).
+Acepta también GeoTIFF en coma flotante (°C) y cualquier resolución que divida la rejilla.
 
-Uso:  python3 data/tema2/make_grid.py ruta/era5_t2m_clim_1991_2020_1deg.tif
+Uso:  python3 data/tema2/make_grid.py ruta/era5_t2m_clim_1991_2020_025deg.tif
 """
 import base64, json, pathlib, sys
 import numpy as np
@@ -27,7 +29,13 @@ def read(path):
     if arr.shape[0] == 13: pass
     elif arr.shape[2] == 13: arr = np.moveaxis(arr, 2, 0)
     else: raise SystemExit(f'Se esperaban 13 bandas; forma {arr.shape}')
-    return arr.astype('float64'), x0, y0, dx, dy
+    tenths = np.issubdtype(arr.dtype, np.integer)  # exportación en enteros: t en décimas de °C
+    nodata = (arr == -32768) if tenths else None
+    arr = arr.astype('float64')
+    if tenths:
+        arr[nodata] = np.nan
+        arr[:12] /= 10
+    return arr, x0, y0, dx, dy
 
 def regrid(band, x0, y0, dx, dy):
     """Promedia la banda en celdas de RES grados alineadas con -180/90."""

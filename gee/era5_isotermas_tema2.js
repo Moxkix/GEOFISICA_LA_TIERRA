@@ -1,37 +1,30 @@
 // =====================================================================
 // Geografía General I (UNED) · Tema 2 · Isotermas mundiales
-// Climatología ERA5 1991-2020 de la temperatura a 2 m + altitud de la celda
+// Climatología ERA5 1991-2020 de la temperatura a 2 m + altitud
 //
-// Exporta a Google Drive (carpeta GEE_tema2) un GeoTIFF de 13 bandas a 1°:
-//   t01 … t12  temperatura media mensual a 2 m (°C), periodo 1991-2020
-//   elev       altitud media de la celda (m, el mar cuenta como 0), de ETOPO1
-//              (superficie del hielo), para reducir al nivel del mar en el hub
+// Exporta a Google Drive (carpeta GEE_tema2) un GeoTIFF de 13 bandas en la
+// rejilla nativa de ERA5 (0,25°; 1440 × 720 píxeles; enteros de 16 bits):
+//   t01 … t12  temperatura media mensual a 2 m, en DÉCIMAS de °C, 1991-2020
+//   elev       altitud en m (el mar cuenta como 0), de ETOPO1 (superficie
+//              del hielo), para reducir al nivel del mar en el hub
 //
 // Notas
 // · ECMWF/ERA5/MONTHLY termina en junio de 2020; los meses de julio a
 //   diciembre de 2020 se completan con la media de ECMWF/ERA5/HOURLY, de modo
 //   que cada mes promedia exactamente 30 años.
-// · Las medias se agregan de 0,25° a 1° promediando (no por vecino más próximo).
+// · No se reproyecta ni se agrega en Earth Engine: reduceResolution() sobre la
+//   rejilla global en EPSG:4326 provoca el error «Unable to transform edge».
+//   La media por celdas de 2° la calcula después data/tema2/make_grid.py.
 // =====================================================================
 
 var START = 1991, END = 2020;
-var FINE = {crs: 'EPSG:4326', crsTransform: [0.25, 0, -180, 0, -0.25, 90]};
-var GRID = {crs: 'EPSG:4326', crsTransform: [1, 0, -180, 0, -1, 90]};
 var GLOBE = ee.Geometry.Rectangle([-180, -90, 180, 90], null, false);
 
 var monthly = ee.ImageCollection('ECMWF/ERA5/MONTHLY').select('mean_2m_air_temperature');
 var hourly  = ee.ImageCollection('ECMWF/ERA5/HOURLY').select('temperature_2m');
-var era5proj = monthly.first().projection();
 
-// Promedia una imagen de 0,25° a la rejilla de 1°
-function toGrid(img) {
-  return img.setDefaultProjection(era5proj)
-    .reduceResolution({reducer: ee.Reducer.mean(), maxPixels: 64})
-    .reproject(GRID);
-}
-
-// --- Climatología mensual -------------------------------------------------
-var bands = [];
+// --- Climatología mensual (°C) --------------------------------------------
+var bandsC = [];
 for (var m = 1; m <= 12; m++) {
   var col = monthly
     .filter(ee.Filter.calendarRange(START, END, 'year'))
@@ -43,37 +36,32 @@ for (var m = 1; m <= 12; m++) {
     col = col.merge(ee.ImageCollection([h]));
   }
   print('Mes ' + m + ' · años promediados (deben ser 30):', col.size());
-  var tC = col.mean().subtract(273.15);
-  bands.push(toGrid(tC).rename(m < 10 ? 't0' + m : 't' + m));
+  bandsC.push(col.mean().subtract(273.15).rename(m < 10 ? 't0' + m : 't' + m));
 }
+var tempC = ee.Image.cat(bandsC);
 
-// --- Altitud media de la celda (ETOPO1, superficie del hielo; mar = 0) ------
-var etopo = ee.Image('NOAA/NGDC/ETOPO1').select('ice_surface').max(0);
-var elev = etopo
-  .reduceResolution({reducer: ee.Reducer.mean(), maxPixels: 256})
-  .reproject(FINE)
-  .reduceResolution({reducer: ee.Reducer.mean(), maxPixels: 64})
-  .reproject(GRID)
-  .rename('elev');
+// --- Altitud (ETOPO1, superficie del hielo; mar = 0) --------------------------
+var elev = ee.Image('NOAA/NGDC/ETOPO1').select('ice_surface').max(0).rename('elev');
 
-var clim = ee.Image.cat(bands).addBands(elev).toFloat();
+// Enteros de 16 bits: décimas de °C y metros (archivo más pequeño, sin pérdida útil)
+var clim = tempC.multiply(10).round().addBands(elev.round()).toInt16();
 
 // --- Vista previa -----------------------------------------------------------
 var pal = ['#2c1b6b', '#2b4ea2', '#3f8fc5', '#8cc8d6', '#e8edc8', '#f6c36b', '#ea7d3c', '#b8312b', '#6b0f1a'];
-Map.addLayer(clim.select('t01'), {min: -45, max: 35, palette: pal}, 'Enero (°C)');
-Map.addLayer(clim.select('t07'), {min: -45, max: 35, palette: pal}, 'Julio (°C)', false);
-Map.addLayer(clim.select('elev'), {min: 0, max: 4000}, 'Altitud de la celda (m)', false);
+Map.addLayer(tempC.select('t01'), {min: -45, max: 35, palette: pal}, 'Enero (°C)');
+Map.addLayer(tempC.select('t07'), {min: -45, max: 35, palette: pal}, 'Julio (°C)', false);
+Map.addLayer(elev, {min: 0, max: 4000}, 'Altitud (m)', false);
 print('Bandas exportadas:', clim.bandNames());
 
-// --- Exportación --------------------------------------------------------------
+// --- Exportación (rejilla de 0,25° alineada con -180 / 90) ---------------------
 Export.image.toDrive({
   image: clim,
-  description: 'era5_t2m_clim_1991_2020_1deg',
+  description: 'era5_t2m_clim_1991_2020_025deg',
   folder: 'GEE_tema2',
-  fileNamePrefix: 'era5_t2m_clim_1991_2020_1deg',
+  fileNamePrefix: 'era5_t2m_clim_1991_2020_025deg',
   region: GLOBE,
-  crs: GRID.crs,
-  crsTransform: GRID.crsTransform,
+  crs: 'EPSG:4326',
+  crsTransform: [0.25, 0, -180, 0, -0.25, 90],
   fileFormat: 'GeoTIFF',
   maxPixels: 1e9
 });
