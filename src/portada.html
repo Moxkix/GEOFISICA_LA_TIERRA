@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Geografía Física · Interactivos</title>
+<meta name="description" content="Interactivos de apoyo a la tutoría de Geografía General I (Geografía Física) del Grado en Geografía e Historia de la UNED, organizados por temas.">
+<link rel="icon" href="ICON_HREF">
+<script>
+  /* Enlaces antiguos al Tema 1 (antes publicado en la raíz): …/#estaciones → tema1/#estaciones */
+  (function () {
+    var t1 = ['inicio', 'forma', 'insolacion', 'coordenadas', 'hora', 'coriolis', 'estaciones', 'proyecciones', 'escala', 'relieve', 'cuestionario'];
+    var h = location.hash.slice(1);
+    if (h && t1.indexOf(h) >= 0) location.replace("tema1/index.html#" + h);
+  })();
+</script>
+<style>/*CSS*/
+.portada-head{background:var(--ink);color:#f3efe4;padding:34px 20px 30px}
+.portada-head .in{max-width:1080px;margin:0 auto}
+.portada-head .kicker{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:#d9b48f}
+.portada-head h1{font-size:2.1rem;margin:.25em 0 .3em;color:#fff}
+.portada-head p{max-width:760px;color:#cfd6df;margin:0}
+.temas{max-width:1080px;margin:26px auto 0;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.tema{display:flex;flex-direction:column;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:transform .15s,border-color .15s,box-shadow .15s}
+.tema:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 8px 22px rgba(28,40,54,.08)}
+.tema .band{height:118px;position:relative}
+.tema .band svg{position:absolute;inset:0;width:100%;height:100%}
+.tema .num{position:absolute;left:18px;bottom:10px;font-family:var(--serif);font-size:2.6rem;line-height:1;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+.tema .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tema h2{font-size:1.25rem;margin:0}
+.tema .sub{color:var(--muted);font-size:.9rem;margin:0}
+.tema ul{margin:6px 0 0;padding-left:1.1em;font-size:.88rem;color:var(--ink)}
+.tema ul li{margin:2px 0}
+.tema .go{margin-top:auto;padding-top:10px;font-weight:700;color:var(--accent);font-size:.9rem}
+.portada-foot{max-width:1080px;margin:30px auto 40px;padding:0 20px;font-size:.8rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="portada-head"><div class="in">
+  <div class="kicker">Geografía General I · Geografía Física · UNED</div>
+  <h1>Interactivos de tutoría</h1>
+  <p>Un hub por tema, organizado según el mapa conceptual de la Unidad Didáctica. Cada interactivo incluye preguntas de autoevaluación, y cada tema cierra con un cuestionario y una tabla de correcciones al manual. Los cálculos que dependen del lugar usan el municipio que elijas, que se recuerda de un tema a otro.</p>
+</div></div>
+
+<div class="temas">
+  <a class="tema" href="tema1/index.html">
+    <div class="band" style="background:#1f6f8b">
+      <svg viewBox="0 0 320 118" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <circle cx="250" cy="66" r="78" fill="#cfe0ea" opacity=".9"/>
+        <path d="M172 66h156M250-12c-34 26-34 130 0 156M250-12c34 26 34 130 0 156M182 30h136M182 102h136" fill="none" stroke="#1c2836" stroke-width="1.4" opacity=".45"/>
+        <circle cx="250" cy="66" r="78" fill="none" stroke="#1c2836" stroke-width="2"/>
+        <circle cx="56" cy="34" r="16" fill="#ffd34d"/>
+      </svg>
+      <span class="num">1</span>
+    </div>
+    <div class="body">
+      <h2>La Tierra planeta</h2>
+      <p class="sub">Movimientos y representación</p>
+      <ul>
+        <li>Forma, dimensiones e insolación</li>
+        <li>Coordenadas, hora y efecto de Coriolis</li>
+        <li>Traslación y estaciones</li>
+        <li>Proyecciones, escala y curvas de nivel</li>
+      </ul>
+      <span class="go">Abrir el Tema 1 →</span>
+    </div>
+  </a>
+
+  <a class="tema" href="tema2/index.html">
+    <div class="band" style="background:#b4531d">
+      <svg viewBox="0 0 320 118" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <path d="M0 92 C60 70 110 104 170 84 S270 64 320 78 V118 H0Z" fill="#e4d3a8"/>
+        <path d="M0 60 C70 40 120 76 190 54 S280 36 320 46" fill="none" stroke="#f6e3d6" stroke-width="2" opacity=".8"/>
+        <path d="M0 34 C80 18 130 48 200 30 S290 14 320 22" fill="none" stroke="#f6e3d6" stroke-width="2" opacity=".55"/>
+        <rect x="262" y="14" width="14" height="70" rx="7" fill="#fff" opacity=".92"/>
+        <circle cx="269" cy="86" r="13" fill="#fff"/>
+        <rect x="266" y="38" width="6" height="50" rx="3" fill="#b0393a"/>
+        <circle cx="269" cy="86" r="9" fill="#b0393a"/>
+      </svg>
+      <span class="num">2</span>
+    </div>
+    <div class="body">
+      <h2>La temperatura</h2>
+      <p class="sub">Elementos y factores climáticos I</p>
+      <ul>
+        <li>Estructura de la atmósfera y propiedades del aire</li>
+        <li>Balance energético, tierras y mares</li>
+        <li>Ciclos diario y anual, régimen térmico</li>
+        <li>Isotermas mundiales</li>
+      </ul>
+      <span class="go">Abrir el Tema 2 →</span>
+    </div>
+  </a>
+</div>
+
+<div class="portada-foot">Material de apoyo a la tutoría de Geografía General I (Geografía Física), Grado en Geografía e Historia, UNED. Cada tema es un único archivo HTML autocontenido que funciona sin conexión.</div>
+</body>
+</html>

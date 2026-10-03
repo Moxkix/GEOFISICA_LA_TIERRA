@@ -154,6 +154,15 @@ details.open-q .ans{margin-top:8px;font-size:.93rem;border-top:1px dashed var(--
 .cmap .node text{font-family:var(--sans);font-size:13.5px;fill:var(--ink);pointer-events:none}
 .cmap .node.root rect{fill:var(--ink)} .cmap .node.root text{fill:#fff;font-weight:700}
 .cmap .node.hub rect{fill:var(--soft)}
+.cmap .node.dis{cursor:default}.cmap .node.dis rect,.cmap .node.dis:hover rect{fill:#f3f0e8;stroke:#b7ae9c;stroke-dasharray:4 3}.cmap .node.dis text{fill:#8a8272}
+.cmap .node.ext rect{stroke:var(--blue);stroke-dasharray:5 3}
+.cmap .node text.tag{font-size:9.5px;fill:var(--blue);font-weight:700;letter-spacing:.04em}
+.tlegend{margin-top:6px}
+.wide-svg{overflow-x:auto}
+@media (max-width:700px){.wide-svg svg{min-width:640px}}
+.chipbar{display:flex;flex-wrap:wrap;gap:6px}
+.chipbar .chip{font-family:var(--sans);font-size:.82rem;padding:4px 10px}
+.flowtable td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cmap .edge{stroke:#8a96a3;stroke-width:1.2;fill:none}
 .cmap .tag{font-size:10px;fill:var(--accent);font-weight:700;letter-spacing:.04em}
 .toc{display:grid;gap:8px}
@@ -180,4 +189,6 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding-top:14px;font-si
 .result-box{text-align:center;padding:20px;border-radius:12px;background:var(--soft);margin-bottom:12px}
 .result-box .big{font-family:var(--serif);font-size:3rem;line-height:1}
 @media print{header.top,nav.tabs{display:none}section.tab{display:block!important}}
-@media (max-width:700px){header.top{position:static}.brand .kicker{display:none}.brand .title{font-size:1.05rem}main{padding:16px 12px 50px}h2{font-size:1.4rem}.card{padding:14px 12px}}
+.brand .kicker .home-link{color:#f3efe4;text-decoration:none;font-weight:700;border-bottom:1px solid rgba(243,239,228,.4)}
+.brand .kicker .home-link:hover{border-bottom-color:#f3efe4}
+@media (max-width:700px){header.top{position:static}.brand .kicker{font-size:0;letter-spacing:0}.brand .kicker .home-link{font-size:.75rem;letter-spacing:.1em}.brand .title{font-size:1.05rem}main{padding:16px 12px 50px}h2{font-size:1.4rem}.card{padding:14px 12px}}

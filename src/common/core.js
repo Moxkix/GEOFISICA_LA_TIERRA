@@ -19,7 +19,7 @@ const H = (() => {
       if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
       else if (k === 'html') e.innerHTML = v;
       else if (k === 'style' && typeof v === 'object') Object.assign(e.style, v);
-      else e.setAttribute(k, v === true ? '' : v);
+      else e.setAttribute(k, v === true ? (k.startsWith('aria-') ? 'true' : '') : v);
     }
     for (const k of kids.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(k));
     return e;
@@ -209,6 +209,7 @@ const H = (() => {
     const P = { l: 54, r: 14, t: 14, b: 38 };
     const st = H.autoCanvas(canvas, aspect, (ctx, w, h) => {
       const o = ch.opts; if (!o) return;
+      Object.assign(P, { l: 54, r: 14, t: 14, b: 38 }, o.pad || {});
       ctx.clearRect(0, 0, w, h);
       const X = (v) => P.l + (v - o.xMin) / (o.xMax - o.xMin) * (w - P.l - P.r);
       const Y = (v) => h - P.b - (v - o.yMin) / (o.yMax - o.yMin) * (h - P.t - P.b);
@@ -290,10 +291,10 @@ const H = (() => {
   H.findMuni = (name) => MUNI.find((m) => m.name === name);
   const DEF = Object.assign({}, H.findMuni('Madrid'), { def: true });
   H.place = DEF;
-  try { const s = JSON.parse(localStorage.getItem('t1-place') || 'null'); if (s && isFinite(s.lat)) H.place = s; } catch (e) { }
+  try { const s = JSON.parse(localStorage.getItem('geo-place') || localStorage.getItem('t1-place') || 'null'); if (s && isFinite(s.lat)) H.place = s; } catch (e) { }
   const subs = [];
   H.onPlace = (fn) => { subs.push(fn); };
-  H.setPlace = (p) => { H.place = p; try { localStorage.setItem('t1-place', JSON.stringify(p)); } catch (e) { } subs.forEach((f) => f(p)); updatePill(); };
+  H.setPlace = (p) => { H.place = p; try { localStorage.setItem('geo-place', JSON.stringify(p)); } catch (e) { } subs.forEach((f) => f(p)); updatePill(); };
   H.placeLabel = (p = H.place) => p.es ? `${p.name}${p.prov && p.prov !== p.name ? ' (' + p.prov + ')' : ''}` : (p.name || 'Punto personalizado');
   const updatePill = () => { const b = H.$('#place-name'); if (b) b.textContent = H.placeLabel() + (H.place.def ? ' · por defecto' : ''); };
 
@@ -356,7 +357,7 @@ const H = (() => {
   /* ---------- pestañas ---------- */
   H.TABS = [];
   H.tab = (def) => H.TABS.push(def);
-  const GROUPS = [['', ['inicio']], ['Planeta', ['forma', 'insolacion']], ['Rotación', ['coordenadas', 'hora', 'coriolis']], ['Traslación', ['estaciones']], ['Mapa', ['proyecciones', 'escala', 'relieve']], ['', ['cuestionario']]];
+  H.GROUPS = [['', H.TABS.map((t) => t.id)]];
   H.go = (id) => { location.hash = '#' + id; };
   const show = (id) => {
     const t = H.TABS.find((x) => x.id === id) || H.TABS[0];
@@ -369,7 +370,7 @@ const H = (() => {
   };
   H.start = () => {
     const nav = H.$('nav.tabs'), main = H.$('main');
-    GROUPS.forEach(([g, ids0], gi) => {
+    H.GROUPS.forEach(([g, ids0], gi) => {
       const ids = ids0.filter((id) => H.TABS.find((x) => x.id === id)); if (!ids.length) return;
       if (gi) nav.append(H.h('div', { class: 'sep' }));
       const btns = H.h('div', { class: 'grp-btns' });
