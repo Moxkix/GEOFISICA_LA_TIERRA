@@ -83,32 +83,40 @@ H.tab({
       let mn = Infinity, mx = -Infinity; for (const v of F) { if (v < mn) mn = v; if (v > mx) mx = v; }
       const cx = (i) => X(G.lon0 + (i + 0.5) * G.res), cy = (j) => Y(G.lat0 - (j + 0.5) * G.res);
       ctx.lineWidth = 0.9; ctx.strokeStyle = 'rgba(28,40,54,.7)';
-      const labels = [];
-      for (let L = Math.ceil(mn / step) * step; L <= mx; L += step) {
+      const labels = [], W = X(180), Hh = Y(-90), TARGETS = [-35, 165, -150, 70, -100, 20];
+      for (let L = Math.ceil(mn / step) * step, li = 0; L <= mx; L += step, li++) {
         const major = s.varb === 'temp' && L % 10 === 0; ctx.lineWidth = major ? 1.3 : 0.7;
-        ctx.beginPath(); let first = null, bd = 1e9; const target = ((L / step) % 2 === 0 ? -35 : 165);
+        ctx.beginPath(); const cand = []; const target = TARGETS[li % TARGETS.length];
         for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
           const a = F[j * nx + i], b = F[j * nx + i + 1], c = F[(j + 1) * nx + i + 1], d = F[(j + 1) * nx + i];
           const k = (a > L ? 8 : 0) | (b > L ? 4 : 0) | (c > L ? 2 : 0) | (d > L ? 1 : 0); if (k === 0 || k === 15) continue;
           const t = (p, q) => (L - p) / (q - p);
           const top = [i + t(a, b), j], right = [i + 1, j + t(b, c)], bot = [i + t(d, c), j + 1], left = [i, j + t(a, d)];
           const S = { 1: [[left, bot]], 2: [[bot, right]], 3: [[left, right]], 4: [[top, right]], 5: [[left, top], [bot, right]], 6: [[top, bot]], 7: [[left, top]], 8: [[left, top]], 9: [[top, bot]], 10: [[top, right], [left, bot]], 11: [[top, right]], 12: [[left, right]], 13: [[bot, right]], 14: [[left, bot]] }[k];
-          for (const [p, q] of S) { const px = cx(p[0]), py = cy(p[1]); ctx.moveTo(px, py); ctx.lineTo(cx(q[0]), cy(q[1])); const dd = Math.abs(G.lon0 + (p[0] + 0.5) * G.res - target); if (dd < bd) { bd = dd; first = [px, py]; } }
+          for (const [p, q] of S) { const px = cx(p[0]), py = cy(p[1]); ctx.moveTo(px, py); ctx.lineTo(cx(q[0]), cy(q[1])); cand.push([px, py, Math.abs(G.lon0 + (p[0] + 0.5) * G.res - target)]); }
         }
         ctx.stroke();
-        if (first) labels.push([first, L]);
+        // etiqueta: el punto más cercano a la longitud elegida que no choque con otras ni con los bordes
+        cand.sort((a, b) => a[2] - b[2]);
+        const ok = cand.find(([x, y]) => x > 20 && x < W - 20 && y > 10 && y < Hh - 10 && labels.every(([[lx, ly]]) => Math.abs(lx - x) > 36 || Math.abs(ly - y) > 16));
+        if (ok) labels.push([[ok[0], ok[1]], L]);
       }
       ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       for (const [[x, y], L] of labels) { const t = H.f(L) + '°'; const tw = ctx.measureText(t).width + 4; ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(x - tw / 2, y - 6, tw, 12); ctx.fillStyle = '#1c2836'; ctx.fillText(t, x, y); }
     };
-    const eqLine = () => { // latitud de la temperatura máxima (reducida) entre 30° S y 30° N, suavizada
-      const pts = []; const red0 = s.red; s.red = true;
-      for (let lon = -180; lon <= 180; lon += 2) { let best = -999, bl = 0; for (let lat = -30; lat <= 30; lat += 0.5) { const v = at(lat, lon); if (v > best) { best = v; bl = lat; } } pts.push([lon, bl]); }
-      s.red = red0;
+    const eqLine = () => { // centro de la franja más cálida (temperatura reducida; hasta 1,5 °C bajo el máximo) entre 30° S y 30° N, suavizado
+      const pts = []; const red0 = s.red, v0 = s.varb; s.red = true; s.varb = 'temp';
+      for (let lon = -180; lon < 180; lon += 2) {
+        const pr = []; let M = -999; for (let lat = -30; lat <= 30; lat += 0.5) { const v = at(lat, lon); pr.push([lat, v]); if (v > M) M = v; }
+        let a = 0, n = 0; for (const [lat, v] of pr) { const wt = v - (M - 1.5); if (wt > 0) { a += wt * lat; n += wt; } }
+        pts.push([lon, a / n]);
+      }
+      s.red = red0; s.varb = v0;
+      pts.push([180, pts[0][1]]);
       const sm = pts.map((p, i) => { let a = 0, n = 0; for (let k = -4; k <= 4; k++) { const q = pts[(i + k + pts.length) % pts.length]; a += q[1]; n++; } return [p[0], a / n]; });
       return sm;
     };
-    const drawEq = (ctx, X, Y, w) => { const e = eqLine(); ctx.strokeStyle = '#b0393a'; ctx.lineWidth = 2.5; ctx.setLineDash([8, 5]); ctx.beginPath(); e.forEach(([lo, la], i) => (i ? ctx.lineTo(X(lo), Y(la)) : ctx.moveTo(X(lo), Y(la)))); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#b0393a'; ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'left'; const p = e[Math.round(e.length * 0.83)]; ctx.fillText('ecuador térmico', X(p[0]) + 4, Y(p[1]) - 7); };
+    const drawEq = (ctx, X, Y, w) => { const e = eqLine(); ctx.strokeStyle = '#b0393a'; ctx.lineWidth = 2.5; ctx.setLineDash([8, 5]); ctx.beginPath(); e.forEach(([lo, la], i) => (i ? ctx.lineTo(X(lo), Y(la)) : ctx.moveTo(X(lo), Y(la)))); ctx.stroke(); ctx.setLineDash([]); ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'left'; const p = e.find((q) => q[0] >= -160); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.strokeText('ecuador térmico', X(p[0]), Y(p[1]) - 8); ctx.fillStyle = '#b0393a'; ctx.fillText('ecuador térmico', X(p[0]), Y(p[1]) - 8); };
     const drawCur = (ctx, X, Y) => {
       for (const [k, n, pts] of CUR) {
         const col = k === 'c' ? '#c0392b' : '#1f5fa8'; ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 2.6;
@@ -163,12 +171,13 @@ H.tab({
 
     const mapCard = H.h('div', { class: 'card' }, H.h('h3', {}, 'Mapa mundial de temperaturas medias'));
     if (!G) mapCard.append(H.info('<b>Capa en rejilla pendiente.</b> El mapa continuo de temperaturas (reanálisis ERA5, 1991–2020) se añadirá en cuanto se exporte desde Google Earth Engine. Mientras tanto, los puntos muestran las temperaturas medias de las estaciones disponibles.'));
-    mapCard.append(H.h('p', { class: 'sub' }, G ? 'Haz clic en el mapa para leer valores. Las líneas discontinuas son el ecuador, los trópicos y los círculos polares; la roja, el ecuador térmico (máximo de temperatura reducida entre 30° S y 30° N).' : 'Cada punto es una estación con normales 1991–2020; el color indica su temperatura media del mes elegido.'),
+    mapCard.append(H.h('p', { class: 'sub' }, G ? 'Haz clic en el mapa para leer valores. Las líneas discontinuas son el ecuador, los trópicos y los círculos polares; la roja, el ecuador térmico (centro de la franja más cálida entre 30° S y 30° N, con la temperatura reducida al nivel del mar).' : 'Cada punto es una estación con normales 1991–2020; el color indica su temperatura media del mes elegido.'),
       H.h('div', { class: 'viz framed', style: { position: 'relative' } }, cv, tip), legend,
+      G ? H.h('p', { class: 'small' }, 'Datos: reanálisis ERA5 (Copernicus/ECMWF), temperatura media a 2 m del periodo 1991–2020 (de julio a diciembre, 1991–2019, porque la serie mensual de Google Earth Engine termina en junio de 2020), promediada en celdas de 2°; altitud de ETOPO1 (NOAA).') : '',
       H.h('div', { class: 'grid2', style: { marginTop: '12px' } },
         H.h('div', {}, H.h('div', { class: 'row', style: { justifyContent: 'flex-start', gap: '8px' } }, H.h('span', { style: { flex: 'none' } }, mSeg)), H.h('div', { style: { height: '6px' } }), mS, vSeg, H.h('div', { style: { height: '8px' } }), rSeg, H.h('div', { style: { height: '8px' } }), G ? stepSeg : '',
           H.h('div', { style: { marginTop: '8px' } }, G ? chk('lines', 'Isotermas') : '', G ? chk('eq', 'Ecuador térmico') : '', chk('cur', 'Corrientes marinas (esquema)'), G ? chk('stations', 'Estaciones') : '')),
-        H.h('div', {}, H.h('div', { class: 'readouts' }, ...(G ? [ro.pos, ro.t, ro.tr, ro.el, ro.st] : [ro.pos, ro.st])), H.h('p', { class: 'small' }, 'Reducción al nivel del mar: T + 0,65 °C × (altitud / 100 m). En las estaciones se usa su altitud; en la rejilla, la altitud media de cada celda.'))));
+        H.h('div', {}, H.h('div', { class: 'readouts' }, ...(G ? [ro.pos, ro.t, ro.tr, ro.el, ro.st] : [ro.pos, ro.st])), H.h('p', { class: 'small' }, 'Reducción al nivel del mar: T + 0,65 °C × (altitud / 100 m). En las estaciones se usa su altitud; en la rejilla, la altitud media de cada celda. Sobre las grandes altiplanicies (Tíbet, Altiplano andino, Antártida) la reducción exagera la temperatura: es un nivel del mar ficticio, sin una columna de aire real debajo. Por eso los mapas clásicos suavizan esas áreas.'))));
     el.append(mapCard);
     if (G) el.append(H.h('div', { class: 'card' }, H.h('h3', {}, 'Perfil a lo largo de un paralelo'),
       H.h('p', { class: 'sub' }, 'Temperatura a lo largo del paralelo elegido; en ocre, los tramos sobre tierra. En enero, a 50° N, el océano es mucho más templado que los continentes; en julio ocurre lo contrario.'),

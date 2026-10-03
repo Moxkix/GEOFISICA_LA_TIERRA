@@ -104,6 +104,6 @@ H.tab({
       </tbody></table></div>`;
     el.append(tbl);
 
-    el.append(H.html(`<footer>Material de apoyo a la tutoría de Geografía General I (Geografía Física), Grado en Geografía e Historia, UNED. Datos: normales climatológicas OMM 1991–2020 (NOAA NCEI, accesión 0253808, v6.6; ${T2.ST.length} estaciones); reanálisis ERA5 1991–2020 (Copernicus/ECMWF, vía Google Earth Engine); Atmósfera Estándar de EE. UU. (1976) y perfiles tipo AFGL (Anderson y otros, 1986); balance energético de Trenberth, Fasullo y Kiehl (2009); presión de vapor de saturación por la fórmula de Magnus (OMM, 2018); costas de Natural Earth; municipios del paquete <i>spanish-cities-info</i> (ISC), verificados con el INE. Funciona sin conexión salvo la geolocalización.</footer>`));
+    el.append(H.html(`<footer>Material de apoyo a la tutoría de Geografía General I (Geografía Física), Grado en Geografía e Historia, UNED. Datos: normales climatológicas OMM 1991–2020 (NOAA NCEI, accesión 0253808, v6.6; ${T2.ST.length} estaciones); reanálisis ERA5 1991–2020 (julio–diciembre, 1991–2019; Copernicus/ECMWF, vía Google Earth Engine) y altitud de ETOPO1 (NOAA); Atmósfera Estándar de EE. UU. (1976) y perfiles tipo AFGL (Anderson y otros, 1986); balance energético de Trenberth, Fasullo y Kiehl (2009); presión de vapor de saturación por la fórmula de Magnus (OMM, 2018); costas de Natural Earth; municipios del paquete <i>spanish-cities-info</i> (ISC), verificados con el INE. Funciona sin conexión salvo la geolocalización.</footer>`));
   },
 });
