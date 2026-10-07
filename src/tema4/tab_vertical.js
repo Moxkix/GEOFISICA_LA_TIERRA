@@ -136,7 +136,7 @@ H.tab({
       const rows = B.map(([n, z, a, b, sM, tM, oM]) => { const t = band(O.sst, a, b), s = band(O.sss, a, b); return `<tr><td><b>${n}</b><br><small>${z}</small></td><td>${H.f(s.m, 2)}<br><small class="bad">manual: ${sM}</small></td><td>${T4.fT(t.m)}<br><small class="bad">manual: ${tM}</small></td><td>${H.f(t.r, 1)} °C<br><small class="bad">manual: ${oM}</small></td></tr>`; }).join('');
       el.append(H.h('div', { class: 'card' }, H.h('h3', {}, 'Masas de agua superficiales (cuadro 4.1 con datos actuales)'),
         H.html(`<div style="overflow-x:auto"><table class="t"><thead><tr><th>Masas de agua</th><th>Salinidad media</th><th>Temperatura media anual</th><th>Oscilación anual (media de la banda)</th></tr></thead><tbody>${rows}</tbody></table>
-          <p class="small">Medias de todas las celdas de mar de cada banda de latitud: temperatura de OISST (1991-2020) y salinidad de HYCOM (2014-2023). La salinidad del manual en las aguas subárticas y circumpolares es demasiado baja (32 y 30-32): en mar abierto se mantiene en 33-34; los valores más bajos solo se dan junto a las desembocaduras de grandes ríos y en verano junto al hielo. La temperatura de las aguas centrales es mucho mayor que 8-15 °C, que corresponde más bien a su base, hacia 300-500 m.</p></div>`)));
+          <p class="small">Medias de todas las celdas de mar de cada banda de latitud: temperatura de OISST (1991-2020) y salinidad de HYCOM (2014-2023). La salinidad de 32 que da el manual para las aguas subárticas solo vale para el Pacífico norte (32,6 de media entre 45° y 60° N); en el Atlántico norte, por la deriva noratlántica, pasa de 35. La media de la banda baja por el Báltico y la bahía de Hudson, casi dulces. La de las aguas circumpolares antárticas (30-32) es demasiado baja: en mar abierto se mantiene cerca de 34, y los valores más bajos solo se dan en verano junto al hielo. La temperatura de las aguas centrales es mucho mayor que 8-15 °C, que corresponde más bien a su base, hacia 300-500 m.</p></div>`)));
     }
 
     /* ================= C · corte del Atlántico ================= */
@@ -170,7 +170,12 @@ H.tab({
       const cvG = H.h('canvas');
       section(cvG, { data: () => ({ xs, zs: Gb.z }), get: (i, k) => Gb.S[k][i], x0: -12, x1: -1, zMax: 1600, split: 1, zTicks: [0, 200, 400, 600, 800, 1000, 1200, 1400, 1600],
         color: sCol, levels: [36, 36.5, 37, 37.5, 38], xTicks: [-12, -10, -8, -6, -4, -2].map((v) => [v, Math.abs(v) + '° O']), xLabel: 'Longitud a lo largo de 35,95° N (golfo de Cádiz a la izquierda, mar de Alborán a la derecha)', aspect: (w) => Math.min(w * 0.42, 340),
-        after: (ctx, X, Y) => { ctx.font = 'bold 11px system-ui'; ctx.fillStyle = '#1c2836'; ctx.textAlign = 'center'; ctx.fillText('Estrecho', X(-5.6), Y(0) + 14); ctx.fillStyle = '#7a1c1c'; ctx.fillText('← agua mediterránea, salada y densa, por el fondo', X(-8.6), Y(1000)); ctx.fillStyle = '#1f4f8b'; ctx.fillText('agua atlántica, menos salada, por la superficie →', X(-3.5), Y(60)); } });
+        after: (ctx, X, Y) => {
+          const lbl = (t, x, y, c) => { ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(t).width; ctx.fillStyle = 'rgba(255,255,255,.82)'; ctx.fillRect(x - tw / 2 - 4, y - 8, tw + 8, 16); ctx.fillStyle = c; ctx.fillText(t, x, y); };
+          lbl('Estrecho', X(-5.6), Y(0) + 14, '#1c2836');
+          lbl('← agua mediterránea, salada y densa, por el fondo', X(-9), Y(1000), '#7a1c1c');
+          lbl('agua atlántica, menos salada, por la superficie →', X(-3.3), Y(0) + 34, '#1f4f8b');
+        } });
       el.append(H.h('div', { class: 'card', id: 'gibraltar' }, H.h('h3', {}, 'El estrecho de Gibraltar: un intercambio en dos capas'),
         H.h('p', { class: 'sub' }, 'El Mediterráneo pierde por evaporación más agua de la que recibe. El déficit se compensa con agua atlántica que entra por la superficie del estrecho (unos 0,8 millones de m³/s). El agua mediterránea, más salada y densa por la evaporación y el enfriamiento invernal, sale por debajo, por encima del umbral de Camarinal (unos 290 m de profundidad), y se hunde por el talud del golfo de Cádiz hasta estabilizarse hacia 1.000 m, donde forma la lengua salada que se ve en el corte del Atlántico.'),
         H.h('div', { class: 'viz framed' }, cvG), T3.legend(sCol, 33.8, 38.8, [35, 36, 37, 38], (v) => H.f(v, 0)),

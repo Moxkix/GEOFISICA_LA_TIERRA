@@ -10,7 +10,7 @@ H.tab({
     const sst = O.sst ? O.sst.map((a) => T4.grid(a, G1)) : null;
     const sss = O.sss ? O.sss.map((a) => T4.grid(a, G1)) : null;
     const ice = O.ice && O.iceOK ? O.ice.map((a) => T4.grid(a, G1)) : null;
-    const EP = O.e && O.p ? O.e.map((e, m) => T4.grid(e.map((v, i) => v - O.p[m][i]), G1)) : null;
+    const EP = O.ep ? O.ep.map((a) => T4.grid(a, G1)) : O.e && O.p ? O.e.map((e, m) => T4.grid(e.map((v, i) => v - O.p[m][i]), G1)) : null;
     const annual = (arr) => (arr ? T4.grid(T4.meanLayers(arr.map((g) => g.data)), G1) : null);
     const sstA = annual(sst), sssA = annual(sss), epA = annual(EP);
 

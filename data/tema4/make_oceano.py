@@ -8,7 +8,8 @@ Todas las rejillas son globales de 1° (360 × 180), con NaN en tierra; se usan 
   modis_clorofila_05deg.tif     → chl (4 estaciones, DEF, MAM, JJA y SON; log10 de mg/m³)
   hycom_salinidad_1deg.tif      → sss (12 meses, salinidad práctica)
   hycom_corrientes_1deg.tif     → u y v (12 meses, m/s)   (o hycom_superficie_1deg.tif, con las tres, de la versión anterior)
-  merra2_evap_prec_nativa.tif   → e y p (12 meses, mm/día; de la rejilla de 0,625° × 0,5° de MERRA-2 a 1°)
+  merra2_evap_prec_nativa.tif   → ep: evaporación − precipitación sobre el mar (12 meses, mm/día; de la rejilla
+                                  de 0,625° × 0,5° de MERRA-2 a 1°)
 
 Uso:  python3 data/tema4/make_oceano.py carpeta_con_los_tif [salida.json]
 """
@@ -88,12 +89,18 @@ def main(a):
             (a_s, g_s), (a_c, g_c) = read_tif(fs), read_tif(fc)
         else:
             a_s, g_s = read_tif(f1); a_c, g_c = a_s[12:], g_s
+        # HYCOM no enmascara siempre la tierra: en algunos meses viene como 0 en bruto (20 de salinidad, velocidad nula).
+        # Una salinidad de exactamente 20,000 o una corriente exactamente nula en las dos componentes es relleno.
+        a_s = a_s.copy(); a_s[a_s == 0] = np.nan
+        a_c = a_c.copy(); mz = (a_c[:12] == 0) & (a_c[12:24] == 0); a_c[:12][mz] = np.nan; a_c[12:24][mz] = np.nan
         sss = [g1(a_s[m] * 0.001 + 20, g_s) for m in range(12)]
         u = [g1(a_c[m] * 0.001, g_c) for m in range(12)]
         v = [g1(a_c[12 + m] * 0.001, g_c) for m in range(12)]
-        out['sss'] = pack([np.clip(s, 28, 41) for s in sss], lo=28, hi=41); check('sss', out['sss'], [np.clip(s, 28, 41) for s in sss])
-        out['u'] = pack([np.clip(x, -1.6, 1.6) for x in u], lo=-1.6, hi=1.6); check('u', out['u'], [np.clip(x, -1.6, 1.6) for x in u])
-        out['v'] = pack([np.clip(x, -1.6, 1.6) for x in v], lo=-1.6, hi=1.6); check('v', out['v'], [np.clip(x, -1.6, 1.6) for x in v])
+        # tabla de valores: de 1 en 1 por debajo de 30 (mares de dilución: Báltico, mar Negro) y de 0,05 en 0,05 entre 30 y 41
+        TS_ = [float(x) for x in np.arange(0, 30, 1)] + [round(float(x), 2) for x in np.arange(30, 41.001, 0.05)]
+        out['sss'] = pack([np.clip(s, 0, 41) for s in sss], mode='lut', table=TS_); check('sss', out['sss'], [np.clip(s, 0, 41) for s in sss])
+        out['u'] = pack([np.clip(x, -1.6, 1.6) for x in u], lo=-1.6, step=0.02); check('u', out['u'], [np.clip(x, -1.6, 1.6) for x in u])
+        out['v'] = pack([np.clip(x, -1.6, 1.6) for x in v], lo=-1.6, step=0.02); check('v', out['v'], [np.clip(x, -1.6, 1.6) for x in v])
         src['hycom'] = 'HYCOM + NCODA (GOFS 3.1), análisis diario, medias 2014-2023'
 
     f = d / 'merra2_evap_prec_nativa.tif'
@@ -101,8 +108,11 @@ def main(a):
         arr, geo = read_tif(f)
         e = [g1(arr[m] / 100, geo) for m in range(12)]
         p = [g1(arr[12 + m] / 100, geo) for m in range(12)]
-        out['e'] = pack(e, 'sq', hi=12); check('e', out['e'], e)
-        out['p'] = pack(p, 'sq', hi=40); check('p', out['p'], p)
+        # el hub solo usa E − P sobre el mar: se guarda la diferencia, con la máscara de tierra de OISST
+        sea = np.isfinite(np.nanmean(np.stack(unpack(out['sst'])), axis=0)).reshape(180, 360) if 'sst' in out else np.ones((180, 360), bool)
+        ep = [np.where(sea, np.clip(e[m] - p[m], -12, 12), np.nan) for m in range(12)]
+        out['ep'] = pack(ep, lo=-12, step=0.2); check('ep', out['ep'], ep)
+        out.pop('e', None); out.pop('p', None)
         src['merra2'] = 'NASA GMAO MERRA-2 (flujos de superficie), medias 1991-2020'
 
     out['srcs'] = src

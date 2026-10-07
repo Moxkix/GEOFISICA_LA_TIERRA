@@ -26,6 +26,16 @@ LEVEQ = [z for z in LEV if z <= 500]
 TS = lambda a: a * 0.001 + 20  # noqa: E731
 
 
+def bottom_fill(arr, n):
+    """En HYCOM de Earth Engine, las celdas bajo el fondo marino no están enmascaradas: valen 0 en bruto (20 °C y
+    20 de salinidad). Una celda con las dos variables exactamente a 0 es relleno: se pasa a NaN. `arr` tiene n bandas
+    de una variable seguidas de n de la otra (T y S, o T media y T de diciembre de 2015)."""
+    a, b = arr[:n], arr[n:2 * n]
+    m = (a == 0) & (b == 0)
+    a[m] = np.nan; b[m] = np.nan
+    return int(m.sum())
+
+
 def packTS(T, S):
     return {'T': pack([np.clip(t, -2.5, 33) for t in T], lo=-2.5, step=0.15), 'S': pack([np.clip(s, 30, 41.5) for s in S], lo=30, step=0.05)}
 
@@ -68,6 +78,7 @@ def main(a):
     if f.exists():
         arr, geo = read_tif(f)
         n = len(LEV19)
+        print(f'  perfiles: {bottom_fill(arr[:2 * n], n) + bottom_fill(arr[2 * n:], n)} celdas bajo el fondo')
         lay = {}
         for mi, tag in enumerate(('02', '08')):
             T = [cell_mean(TS(arr[mi * 2 * n + k]), geo, [-180, 180, -90, 90], 5, wrap=True) for k in range(n)]
@@ -81,6 +92,7 @@ def main(a):
     f = d / 'hycom_atlantico_25W.tif'
     if f.exists():
         arr, geo = read_tif(f)
+        bottom_fill(arr, len(LEV))
         sec = section(TS(arr), geo, 'lat', len(LEV), 69.5, -1, 150)
         T, S = sec[:len(LEV)], sec[len(LEV):]
         out['atl'] = {'lat0': 69.5, 'dlat': -1, 'n': 150, 'z': LEV, 'lon': -25, **packTS(list(T), list(S))}
@@ -89,6 +101,7 @@ def main(a):
     f = d / 'hycom_gibraltar_36N.tif'
     if f.exists():
         arr, geo = read_tif(f)
+        bottom_fill(arr, len(LEV))
         sec = section(TS(arr), geo, 'lon', len(LEV), -19.95, 0.1, 200)
         T, S = sec[:len(LEV)], sec[len(LEV):]
         out['gib'] = {'lon0': -19.95, 'dlon': 0.1, 'n': 200, 'z': LEV, 'lat': 35.95, **packTS(list(T), list(S))}
@@ -97,6 +110,7 @@ def main(a):
     fw, fe = d / 'hycom_ecuador_oeste.tif', d / 'hycom_ecuador_este.tif'
     if fw.exists() and fe.exists():
         aw, gw = read_tif(fw); ae, ge = read_tif(fe)
+        bottom_fill(aw, len(LEVEQ)); bottom_fill(ae, len(LEVEQ))
         sw = section(TS(aw), gw, 'lon', 2 * len(LEVEQ), 120.5, 1, 60)
         se = section(TS(ae), ge, 'lon', 2 * len(LEVEQ), -179.5, 1, 100)
         sec = np.concatenate([sw, se], axis=1)  # 120,5° E … 80,5° O

@@ -9,7 +9,7 @@ H.CORRECCIONES = [
   ['Calor latente (1.2)', 'Mantiene la temperatura cerca del punto de «licuefacción»', 'Cerca del punto de congelación o de fusión; la licuefacción es el paso de gas a líquido', 'densidad'],
   ['Evaporación (1.2)', 'Se produce cuando el aire está 0,3 °C más frío que el agua', 'Depende de la humedad del aire respecto a la saturación junto al mar y del viento', 'densidad'],
   ['Fig. 4.4', 'Densidad en kg/cm³', 'g/cm³ (1,025-1,028); en el fondo, por la compresión, más de 1,05', 'densidad'],
-  ['Cuadro 4.1', 'Salinidad de 32 (subárticas) y 30-32 (circumpolares); aguas centrales de 8-15 °C', 'En mar abierto, 33-34; las aguas centrales superan los 18-20 °C en superficie', 'vertical'],
+  ['Cuadro 4.1', 'Salinidad de 32 (subárticas) y 30-32 (circumpolares); aguas centrales de 8-15 °C', 'Subárticas: 32,6 en el Pacífico norte, pero más de 35 en el Atlántico norte; circumpolares, cerca de 34. Las aguas centrales superan los 18-20 °C en superficie', 'vertical'],
   ['Masas intermedias (1.3)', 'Se mezclan por difusión molecular', 'Por turbulencia (ondas internas y remolinos); la difusión molecular es mil veces más lenta', 'vertical'],
   ['Aguas profundas (2.1)', 'La corriente circumpolar antártica se origina en los mares de Weddell y Ross', 'Allí se forma el agua de fondo antártica; la corriente circumpolar la mueve el viento del oeste', 'vertical'],
   ['Origen de las mareas (2.2)', 'En la cara opuesta a la Luna la fuerza centrífuga es máxima', 'La aceleración del giro Tierra-Luna es igual en todos los puntos; el abultamiento opuesto se debe a que allí la atracción es menor que en el centro', 'mareas'],
@@ -111,7 +111,7 @@ H.tab({
     el.append(tbl);
 
     const D = T4.DATA();
-    const src = ['temperatura del mar y anomalías: NOAA OISST v2.1 (Huang y otros, 2021)', D.OCEANO && D.OCEANO.sss ? 'salinidad, corrientes y perfiles: modelo HYCOM + NCODA, GOFS 3.1 (2014-2023)' : null, D.OCEANO && D.OCEANO.e ? 'evaporación y precipitación: NASA MERRA-2' : null,
+    const src = ['temperatura del mar y anomalías: NOAA OISST v2.1 (Huang y otros, 2021)', D.OCEANO && D.OCEANO.sss ? 'salinidad, corrientes y perfiles: modelo HYCOM + NCODA, GOFS 3.1 (2014-2023)' : null, D.OCEANO && (D.OCEANO.ep || D.OCEANO.e) ? 'evaporación y precipitación: NASA MERRA-2' : null,
       'clorofila: NASA MODIS-Aqua', 'vientos, presión, temperatura del aire y borrasca Ciarán: reanálisis ERA5 (Copernicus/ECMWF)', D.CIARAN && D.CIARAN.hs ? 'oleaje: NOAA WAVEWATCH III' : null,
       'mareas: constantes armónicas de TICON-4 (Hart-Davis, Dettmering y Seitz, 2025; CC BY 4.0) y NOAA CO-OPS, vía la base de datos Neaps', D.RELIEVE ? 'relieve: NOAA ETOPO1' : null, D.CICLONES ? 'ciclones: NOAA IBTrACS v4' : null,
       'nivel del mar: CSIRO y NOAA (indicador de la EPA)' + (D.NIVEL && D.NIVEL.star ? ', NOAA STAR' : '') + (D.NIVEL && D.NIVEL.gauges ? ', PSMSL' : ''), typeof ENSO !== 'undefined' && ENSO ? 'índice ONI: NOAA CPC' : null,

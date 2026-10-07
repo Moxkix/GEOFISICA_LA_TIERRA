@@ -50,6 +50,20 @@ La portada (`index.html`) enlaza un hub por tema. Cada hub es un único archivo 
 7. Regímenes (climograma de la estación más cercana al municipio; los seis regímenes del manual; práctica de clasificación; la lluvia tropical sigue al Sol)
 8. Cuestionario final (20 preguntas aleatorias de un banco de 31)
 
+## Tema 4 · Los océanos (`tema4/`)
+1. Salinidad (composición del agua del mar; mapas mensuales de temperatura, salinidad, evaporación − precipitación y hielo marino; la fig. 4.3 con datos actuales; mares de dilución y de concentración)
+2. Densidad (diagrama T-S con la ecuación de estado UNESCO, masas de agua y mezcla; hielo y salmuera; calor almacenado)
+3. Profundidad (perfiles de temperatura, salinidad y densidad en febrero y agosto; cuadro 4.1 con datos actuales; corte del Atlántico a 25° O, estrecho de Gibraltar y Pacífico ecuatorial)
+4. Mareas (fuerza de marea; marea de equilibrio; vivas y muertas; 65 puertos reales con sus componentes armónicas, tabla de mareas en hora oficial; tipos de marea y energía)
+5. Olas (movimiento orbital; generador de oleaje con fetch y duración; mar de fondo; rompientes; tsunamis; la borrasca Ciarán con ERA5 y WAVEWATCH III)
+6. Corrientes (corrientes medias de HYCOM con vientos y presión; monzón del Índico; el circuito del Atlántico Norte; ejercicio 5)
+7. Afloramientos (espiral de Ekman; afloramiento costero; clorofila estacional; giro de Stommel)
+8. Botella a la deriva (simulación con las corrientes reales; islas de basura)
+9. Circulación abisal (cinta transportadora; ¿hasta dónde se hunde un agua?; la AMOC y el cambio climático)
+10. Nivel del mar (simulador con el relieve ETOPO1 en el mundo, la Península y Canarias; series desde 1880, altimetría y proyecciones del IPCC; isostasia)
+11. Océano y clima (mar frente a aire; cuadro 4.2 con normales actuales; ciclones tropicales; El Niño con el índice ONI hasta 2026; masas de aire y nieblas)
+12. Cuestionario final (20 preguntas aleatorias de un banco de 38)
+
 Los contenidos del factor cósmico (insolación, estaciones) y el efecto de Coriolis enlazan con las pestañas correspondientes del Tema 1; los de humedad, con el Tema 2.
 
 Cada pestaña incluye autoevaluación y, cuando procede, las correcciones respecto al texto de la Unidad Didáctica. La pestaña Inicio de cada tema las reúne en una tabla.
@@ -65,5 +79,6 @@ Cada pestaña incluye autoevaluación y, cuando procede, las correcciones respec
 - Casos reales: ERA5 horario (Copernicus/ECMWF) en superficie de la DANA del 28–30 de octubre de 2024 y del viento sur del 23–26 de febrero de 2026 en Bilbao, con los niveles de 850, 500 y 250 hPa de MERRA-2 (NASA GMAO), porque la colección de ERA5 en niveles de presión de Earth Engine no tiene esas horas (`gee/era5_tema3_casos.js` elige la fuente automáticamente; `data/tema3/make_casos.py`); observaciones de AEMET citadas en el texto (efemérides de febrero de 2026).
 - Altitud de los municipios: modelo digital SRTM de 1" (NASA/USGS) en el núcleo de población, localizado como el lugar con más población en su entorno (GHSL 2020, JRC) cerca del centroide del término y comprobado con los límites municipales del IGN (paquete `es-atlas`); si no se encuentra (un 5 % de los municipios), en el centroide. Script `gee/altitud_municipios.js`, generado por `data/tema3/gen_altitud_gee.py` y fusionado en `data/mun.json` con `data/tema3/add_altitudes.py`.
 - Geoide: modelo EGM96 de la NGA (rejilla oficial de 15′, tomada del paquete `egm96-universal`), en nodos de 1° y, para España, en la rejilla de 15′ (`data/tema1/make_geoide.py` → `data/tema1/geoide.json`).
+- Tema 4: temperatura, anomalías y hielo del mar de NOAA OISST v2.1 (1991-2020); salinidad, corrientes, perfiles y cortes del modelo HYCOM + NCODA GOFS 3.1 (2014-2023, rejilla nativa de 1/12°); evaporación y precipitación de NASA MERRA-2 (1991-2020); clorofila de NASA MODIS-Aqua (2003-2022); relieve NOAA ETOPO1; ciclones de NOAA IBTrACS v4 (1991-2020); viento, presión y temperatura del aire de ERA5; oleaje de NOAA WAVEWATCH III (ERDDAP de PacIOOS); nivel del mar de CSIRO y NOAA (indicador de la EPA) y de NOAA STAR (altimetría); índice ONI de NOAA CPC; constantes armónicas de marea de TICON-4 (Hart-Davis, Dettmering y Seitz, 2025; CC BY 4.0) y NOAA CO-OPS, vía Neaps. Scripts de Earth Engine en `gee/tema4_*.js` y conversores en `data/tema4/make_*.py`.
 - Costas regionales de los mapas de la Península: Natural Earth 1:50m (dominio público). Ciclo hidrológico: Trenberth y otros (2007).
 - Parámetros: elipsoide WGS84; oblicuidad 23,44°; constante solar 1.361 W/m²; posición solar con las fórmulas de baja precisión del *Astronomical Almanac*; Atmósfera Estándar de EE. UU. (1976) y perfiles tipo AFGL; balance energético de Trenberth, Fasullo y Kiehl (2009); presión de vapor de saturación con la fórmula de Magnus (OMM, 2018).
