@@ -114,7 +114,7 @@ H.tab({
     const src = ['temperatura del mar y anomalías: NOAA OISST v2.1 (Huang y otros, 2021)', D.OCEANO && D.OCEANO.sss ? 'salinidad, corrientes y perfiles: modelo HYCOM + NCODA, GOFS 3.1 (2014-2023)' : null, D.OCEANO && (D.OCEANO.ep || D.OCEANO.e) ? 'evaporación y precipitación: NASA MERRA-2' : null,
       'clorofila: NASA MODIS-Aqua', 'vientos, presión, temperatura del aire y borrasca Ciarán: reanálisis ERA5 (Copernicus/ECMWF)', D.CIARAN && D.CIARAN.hs ? 'oleaje: NOAA WAVEWATCH III' : null,
       'mareas: constantes armónicas de TICON-4 (Hart-Davis, Dettmering y Seitz, 2025; CC BY 4.0) y NOAA CO-OPS, vía la base de datos Neaps', D.RELIEVE ? 'relieve: NOAA ETOPO1' : null, D.CICLONES ? 'ciclones: NOAA IBTrACS v4' : null,
-      'nivel del mar: CSIRO y NOAA (indicador de la EPA)' + (D.NIVEL && D.NIVEL.star ? ', NOAA STAR' : '') + (D.NIVEL && D.NIVEL.gauges ? ', PSMSL' : ''), typeof ENSO !== 'undefined' && ENSO ? 'índice ONI: NOAA CPC' : null,
+      'nivel del mar: CSIRO y NOAA (indicador de la EPA)' + (D.NIVEL && D.NIVEL.star ? ', NOAA STAR' : '') + (D.NIVEL && D.NIVEL.gauges ? ', mareógrafos del PSMSL (Holgate y otros, 2013)' : '') + (D.NIVEL && D.NIVEL.paleo ? ', Spratt y Lisiecki (2016)' : ''), typeof ENSO !== 'undefined' && ENSO ? 'índice ONI: NOAA CPC' : null,
       'normales climatológicas: OMM 1991-2020 (NOAA NCEI)', 'ecuación de estado del agua del mar: UNESCO (1981)'].filter(Boolean);
     el.append(H.html(`<footer>Material de apoyo a la tutoría de Geografía General I (Geografía Física), Grado en Geografía e Historia, UNED. Datos: ${src.join('; ')}. Datos de satélite y modelos procesados con Google Earth Engine. Funciona sin conexión salvo la geolocalización.</footer>`));
   },

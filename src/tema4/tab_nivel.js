@@ -74,6 +74,14 @@ H.tab({
       const z = [0, 0, 0]; for (let r = 2; r >= 0; r--) { let s = M[r][3]; for (let k = r + 1; k < 3; k++) s -= M[r][k] * z[k]; z[r] = s / M[r][r]; }
       z.x0 = x0; return z;
     };
+    // explicación de la tendencia de cada mareógrafo: nota propia (movimientos del terreno conocidos) o lectura según la serie
+    const gNote = (g) => {
+      if (g.note) return g.note;
+      if (g.y0 >= 1985) return `Serie corta (desde ${g.y0}): recoge la subida acelerada de las últimas décadas, más rápida que la media del siglo XX (unos 1,5 mm/año), y la variabilidad de unos años a otros, por eso no se puede comparar con las series largas.`;
+      if (g.lon > -6 && g.lon < 36 && g.lat > 30 && g.lat < 46 && g.tr < 1.2) return 'Menos que la media: en el Mediterráneo el nivel apenas subió entre 1960 y 1990, por el aumento de la presión atmosférica y de la salinidad del agua (más densa), y después ha subido al ritmo global.';
+      if (g.tr > 3) return 'Algo más que la media global del mismo periodo: puede influir un ligero hundimiento del terreno o del muelle donde está el mareógrafo.';
+      return 'Parecido a la media global del mismo periodo: el terreno es bastante estable.';
+    };
     const updB = () => {
       gSel.style.display = sB.v === 'gauge' ? '' : 'none';
       if (sB.v === 'inst') {
@@ -96,11 +104,11 @@ H.tab({
       } else if (sB.v === 'paleo') {
         if (NV && NV.paleo) {
           const p = NV.paleo, pts = p.ka.map((k, i) => [-k, p.v[i]]);
-          chB.draw({ xMin: -800, xMax: 0, yMin: -140, yMax: 20, xLabel: 'Miles de años antes del presente', yLabel: 'Nivel del mar (m)', xTicks: [-800, -700, -600, -500, -400, -300, -200, -100, 0].map((v) => ({ v, label: H.f(-v) })), yTicks: [-120, -80, -40, 0].map((v) => ({ v })), series: [{ pts, color: '#1f6f8b', width: 1.6 }], hlines: [{ y: 0, color: '#888' }] });
-          info.innerHTML = `<p class="small">Ocho ciclos glaciales en 800.000 años: el nivel del mar bajó repetidamente 100-130 m en las glaciaciones, que duraban unos 100.000 años, y volvió a niveles parecidos al actual en los cortos interglaciales. Fuente: ${p.src}.</p>`;
+          chB.draw({ xMin: -800, xMax: 0, yMin: -140, yMax: 20, xLabel: 'Miles de años antes del presente', yLabel: 'Nivel del mar (m)', xTicks: [-800, -700, -600, -500, -400, -300, -200, -100, 0].map((v) => ({ v, label: H.f(Math.abs(v)) })), yTicks: [-120, -80, -40, 0].map((v) => ({ v })), series: [{ pts, color: '#1f6f8b', width: 1.6 }], hlines: [{ y: 0, color: '#888' }] });
+          info.innerHTML = `<p class="small">Ocho ciclos glaciales en 800.000 años: el nivel del mar bajó repetidamente 100-130 m en las glaciaciones, que duraban unos 100.000 años, y volvió a niveles parecidos al actual en los cortos interglaciales. Es una reconstrucción indirecta, a partir de los isótopos de oxígeno de los sedimentos marinos, con una incertidumbre de unos ±10 m: por eso el valor más reciente no coincide con 0 y los máximos de los interglaciales salen suavizados (en el último, hace unos 125.000 años, el mar estuvo entre 5 y 10 m más alto que hoy, según el IPCC). Fuente: ${p.src}.</p>`;
         } else {
           const K = [[-21, -134], [-14.5, null], [-6.7, -4], [-4.2, -1], [0, 0]];
-          chB.draw({ xMin: -25, xMax: 0, yMin: -140, yMax: 10, xLabel: 'Miles de años antes del presente', yLabel: 'Nivel del mar (m)', xTicks: [-25, -20, -15, -10, -5, 0].map((v) => ({ v, label: H.f(-v) })), yTicks: [-140, -120, -100, -80, -60, -40, -20, 0].map((v) => ({ v })), series: [],
+          chB.draw({ xMin: -25, xMax: 0, yMin: -140, yMax: 10, xLabel: 'Miles de años antes del presente', yLabel: 'Nivel del mar (m)', xTicks: [-25, -20, -15, -10, -5, 0].map((v) => ({ v, label: H.f(Math.abs(v)) })), yTicks: [-140, -120, -100, -80, -60, -40, -20, 0].map((v) => ({ v })), series: [],
             markers: K.filter((k) => k[1] != null).map(([x, y]) => ({ x, y, label: `${H.f(y)} m`, align: x > -3 ? 'right' : 'left' })), vlines: [{ x: -14.5, color: '#b4531d', label: 'pulso de deshielo 1A' }, { x: -21, color: '#1f4f8b', label: 'máximo glacial' }] });
           info.innerHTML = '<p class="small">Según Lambeck y otros (2014), el nivel del mar llegó a su mínimo, unos 134 m por debajo del actual, hace unos 21.000 años. Durante el «pulso de agua de deshielo 1A», hace unos 14.500 años, subió unos 20 m en menos de 500 años (40 mm/año o más). Hace 6.700 años estaba a unos 4 m del actual y hace 4.200 años, a menos de 1 m; desde entonces y hasta hace unos 150 años apenas cambió (menos de 20 cm).</p>';
         }
@@ -110,7 +118,7 @@ H.tab({
         const ref = NV.csiro ? NV.csiro.y.map((y, i) => [y + 0.5, (NV.csiro.v[i] - NV.csiro.v[NV.csiro.y.indexOf(2000)]) / 10]) : [];
         chB.draw({ xMin: Math.floor(g.y0 / 20) * 20, xMax: 2030, yMin: Math.min(mn, -30), yMax: Math.max(mx, 15), xLabel: 'Año', yLabel: 'cm respecto a 1991-2020', xTicks: Array.from({ length: 12 }, (_, i) => 1800 + i * 20).filter((v) => v >= Math.floor(g.y0 / 20) * 20).map((v) => ({ v })), yTicks: Array.from({ length: 20 }, (_, i) => -100 + i * 10).filter((v) => v >= Math.min(mn, -30) && v <= Math.max(mx, 15)).map((v) => ({ v })),
           series: [{ pts: ref, color: 'rgba(28,40,54,.35)', width: 1.5, dash: [4, 3] }, { pts, color: '#1f6f8b', width: 1.8 }] });
-        info.innerHTML = `<p class="small"><b>${g.name}</b>: tendencia de <b>${H.fs(g.tr, 1)} mm/año</b> del nivel relativo del mar (mar respecto a la tierra). En gris, la media global (CSIRO). ${g.tr < 0 ? 'El nivel baja porque el suelo sube más deprisa que el mar: es el rebote isostático tras la fusión del gran manto de hielo escandinavo, que todavía levanta el norte de Europa casi 1 cm al año.' : g.tr > 3.5 ? 'Sube más que la media porque el terreno se hunde (subsidencia de deltas y llanuras por compactación de sedimentos y extracción de agua o petróleo).' : 'Muy parecido a la media global: el terreno es estable.'} Fuente: ${NV.gsrc}.</p>`;
+        info.innerHTML = `<p class="small"><b>${g.name}</b>: tendencia de <b>${H.fs(g.tr, 1)} mm/año</b> del nivel relativo del mar (mar respecto a la tierra). En gris, la media global (CSIRO). ${gNote(g)} Fuente: ${NV.gsrc}.</p>`;
       } else if (sB.v === 'proj') {
         const P = [['SSP1-1.9', 0.38, 0.28, 0.55], ['SSP1-2.6', 0.44, 0.32, 0.62], ['SSP2-4.5', 0.56, 0.44, 0.76], ['SSP3-7.0', 0.68, 0.55, 0.90], ['SSP5-8.5', 0.77, 0.63, 1.01]];
         chB.draw({ xMin: -0.5, xMax: 4.5, yMin: 0, yMax: 1.2, xLabel: 'Escenario de emisiones (de menos a más)', yLabel: 'Subida en 2100 (m)', pad: { b: 40 }, xTicks: P.map(([n], i) => ({ v: i, label: n })), yTicks: [0, 0.2, 0.4, 0.6, 0.8, 1, 1.2].map((v) => ({ v, label: H.f(v, 1) })), series: [],

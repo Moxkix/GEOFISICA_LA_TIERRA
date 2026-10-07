@@ -10,16 +10,21 @@
 
 Uso:  python3 data/tema4/make_nivel.py carpeta [salida.json]
 """
-import csv, io, json, pathlib, re, sys, zipfile
+import csv, io, json, pathlib, re, sys, unicodedata, zipfile
 import numpy as np
 
 R = pathlib.Path(__file__).parent
 # mareógrafos elegidos (nombre en el catálogo PSMSL → nombre en el hub)
-GAUGES = [('SANTANDER I', 'Santander'), ('CORUNA I', 'A Coruña'), ('VIGO', 'Vigo'), ('CADIZ III', 'Cádiz'), ('MALAGA II', 'Málaga'),
-          ('ALICANTE I', 'Alicante'), ('BARCELONA', 'Barcelona'), ('CEUTA', 'Ceuta'), ('LAS PALMAS', 'Las Palmas'),
-          ('BREST', 'Brest (Francia)'), ('NEWLYN', 'Newlyn (Reino Unido)'), ('STOCKHOLM', 'Estocolmo (Suecia)'),
-          ('GALVESTON II, PIER 21, TX', 'Galveston (EE. UU.)'), ('JUNEAU', 'Juneau, Alaska (EE. UU.)'), ('HONOLULU', 'Honolulu (EE. UU.)'),
-          ('SYDNEY, FORT DENISON', 'Sídney (Australia)'), ('SAN FRANCISCO', 'San Francisco (EE. UU.)'), ('MUMBAI/BOMBAY', 'Bombay (India)')]
+# mareógrafos elegidos: (nombre en el catálogo PSMSL, nombre en el hub, nota sobre los movimientos del terreno o la serie)
+GAUGES = [('SANTANDER I', 'Santander', ''), ('LA CORUNA I', 'A Coruña', ''), ('VIGO', 'Vigo', ''), ('CADIZ III', 'Cádiz', ''),
+          ('MALAGA', 'Málaga', ''), ('ALICANTE 2', 'Alicante', ''), ('BARCELONA', 'Barcelona', ''), ('CEUTA', 'Ceuta', ''),
+          ('LAS PALMAS D', 'Las Palmas', ''), ('BILBAO', 'Bilbao', ''),
+          ('BREST', 'Brest (Francia)', ''), ('NEWLYN', 'Newlyn (Reino Unido)', ''),
+          ('STOCKHOLM', 'Estocolmo (Suecia)', 'El nivel baja porque el suelo sube más deprisa que el mar: es el rebote isostático tras la fusión del manto de hielo escandinavo, que todavía levanta esta región unos 5 mm al año.'),
+          ('GALVESTON II, PIER 21, TX', 'Galveston (EE. UU.)', 'Sube mucho más que la media porque el terreno se hunde: compactación de los sedimentos de la costa del golfo de México y extracción de agua subterránea, gas y petróleo.'),
+          ('JUNEAU', 'Juneau, Alaska (EE. UU.)', 'El nivel baja muy deprisa porque el suelo sube: la corteza se recupera de la gran pérdida de hielo de los glaciares del sur de Alaska desde la Pequeña Edad de Hielo.'),
+          ('HONOLULU', 'Honolulu (EE. UU.)', ''), ('SYDNEY, FORT DENISON 2', 'Sídney (Australia)', ''),
+          ('SAN FRANCISCO', 'San Francisco (EE. UU.)', ''), ('MUMBAI / BOMBAY (APOLLO BANDAR)', 'Bombay (India)', '')]
 
 
 def main(a):
@@ -65,13 +70,19 @@ def main(a):
         names = z.namelist()
         fl = [n for n in names if n.endswith('filelist.txt')][0]
         cat = {}
-        for line in z.read(fl).decode('latin-1').splitlines():
+        raw = z.read(fl)
+        try:
+            txt = raw.decode('utf-8')
+        except UnicodeDecodeError:
+            txt = raw.decode('latin-1')
+        norm = lambda t: unicodedata.normalize('NFD', t).encode('ascii', 'ignore').decode().upper().strip()  # noqa: E731
+        for line in txt.splitlines():
             p = [x.strip() for x in line.split(';')]
             if len(p) >= 4:
-                cat[p[3].upper()] = (int(p[0]), float(p[1]), float(p[2]))
+                cat[norm(p[3])] = (int(p[0]), float(p[1]), float(p[2]))
         g = []
-        for key, nm in GAUGES:
-            hit = cat.get(key) or next((v for k, v in cat.items() if k.startswith(key)), None)
+        for key, nm, note in GAUGES:
+            hit = cat.get(norm(key)) or next((v for k, v in cat.items() if k.startswith(norm(key))), None)
             if not hit:
                 print('  (no encontrado en PSMSL:', key, ')'); continue
             sid, la, lo = hit
@@ -89,7 +100,7 @@ def main(a):
             ref = vs[(ys >= 1991) & (ys <= 2020)].mean() if ((ys >= 1991) & (ys <= 2020)).sum() >= 10 else vs.mean()
             k = ys >= 1900
             tr = np.polyfit(ys[k], vs[k], 1)[0] if k.sum() > 30 else np.polyfit(ys, vs, 1)[0]
-            g.append({'id': sid, 'name': nm, 'lat': la, 'lon': lo, 'y0': int(ys[0]), 'y': ys.tolist(), 'v': [round(x - ref) for x in vs], 'tr': round(float(tr), 2)})
+            g.append({'id': sid, 'name': nm, 'lat': la, 'lon': lo, 'y0': int(ys[0]), 'y': ys.tolist(), 'v': [round(x - ref) for x in vs], 'tr': round(float(tr), 2), 'note': note})
             print(f'  {nm}: {ys[0]}-{ys[-1]} ({len(ys)} años), tendencia {tr:.2f} mm/año')
         out['gauges'] = g
         out['gsrc'] = 'PSMSL, medias anuales «revised local reference» (Holgate y otros, 2013)'
