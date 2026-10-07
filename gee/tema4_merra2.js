@@ -10,8 +10,9 @@
 //   en el tema 2: Earth Engine no consigue pasar los bordes de las teselas de la rejilla
 //   de salida a la de estas colecciones horarias.
 // · Aquí no se reproyecta nada: se exporta en la misma proyección y rejilla que los datos
-//   de origen, y se dejan fuera los casquetes polares (más allá de 89°), donde las celdas
-//   de MERRA-2 rebasan el polo. El paso a 1° lo hace después data/tema4/make_oceano.py.
+//   de origen (en Earth Engine, MERRA-2 está guardado «al revés», con las filas de sur a norte:
+//   transform [0.625, 0, -180.5, 0, 0.5, -90.5]) y se dejan fuera los casquetes polares (más allá
+//   de 89°), donde la rejilla rebasa el polo. El paso a 1° lo hace data/tema4/make_oceano.py.
 // =====================================================================
 
 var pad = function (m) { return m < 10 ? '0' + m : '' + m; };
@@ -39,6 +40,6 @@ Export.image.toDrive({image: img.round().unmask(-32768).toInt16(), description: 
   region: ee.Geometry.Rectangle([-180, -89, 180, 89], null, false),
   crs: nat.crs, crsTransform: nat.transform, fileFormat: 'GeoTIFF', maxPixels: 1e10});
 
-// ---------- Vista previa ----------
-Map.addLayer(img.select('e07').subtract(img.select('p07')).divide(100), {min: -6, max: 6,
-  palette: ['#2166ac', '#f7f7f7', '#b2182b']}, 'E − P julio (mm/día)');
+// Sin vista previa en el mapa: promediar 30 años de datos cada 6 h en las teselas del mapa interactivo agota la
+// memoria del Code Editor («User memory limit exceeded»). La exportación por lotes (pestaña Tasks) sí tiene memoria suficiente.
+print('Lanza la tarea merra2_evap_prec_nativa desde la pestaña Tasks (botón RUN).');
