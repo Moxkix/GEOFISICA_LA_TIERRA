@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """Convierte el extracto de las normales OMM 1991-2020 (NCEI, accesión 0253808, v6.6)
-en data/tema2/stations.json con nombres en castellano y una categoría de régimen."""
+en data/tema2/stations.json (compartido por los temas 2 y 3) con nombres en castellano
+y una categoría de régimen.
+
+Cada estación: [id, nombre, país, lat, lon, altitud, categoría, ta, tx, tn, pr, vp]
+  ta, tx, tn: temperatura media, máxima y mínima (décimas de °C; 12 meses + año)
+  pr: precipitación (décimas de mm; 12 meses + año), de data/tema3/wmo_prcp_raw.txt
+  vp: tensión media de vapor (décimas de hPa), solo en las estaciones añadidas en el Tema 3
+"""
 import json, pathlib
 R = pathlib.Path(__file__).parent
 ES = {
@@ -51,7 +58,20 @@ W = {
  '89034':('Base Belgrano II','Antártida','pol'),'87585':('Buenos Aires','Argentina','sbt'),'68816':('Ciudad del Cabo','Sudáfrica','med'),
  '94768':('Sídney','Australia','sbt'),'85934':('Punta Arenas','Chile','sub'),'91182':('Honolulú','Estados Unidos','tro'),
  '36870':('Almaty (847 m)','Kazajistán','con')}
+W.update({'65344': ('Cotonú', 'Benín', 'tro'), '65330': ('Parakou', 'Benín', 'tro'), '61099': ('Gaya', 'Níger', 'tro'),
+ '61043': ('Tahoua', 'Níger', 'tro'), '61024': ('Agadez', 'Níger', 'des'), '61017': ('Bilma', 'Níger', 'des'),
+ '64456': ('Makoua', 'República del Congo', 'ecu'), '43003': ('Bombay (Santacruz)', 'India', 'mzn'),
+ '42515': ('Cherrapunji (1.313 m)', 'India', 'mzn')})
 FIX = {'8430': (38.002, -1.171)}  # coordenadas erróneas en el fichero OMM; valores de la estación AEMET 7178I (Murcia)
+def vecx(s):
+    if not s: return None
+    v = [int(x) if x != '' else None for x in s.split(',')]
+    return None if any(x is None or x <= -9000 for x in v[:12]) else v
+PR = {}
+for l in (R.parent / 'tema3' / 'wmo_prcp_raw.txt').read_text().splitlines():
+    i, lat, v, cs = l.split('|'); vv = [int(x) for x in v.split(',')]
+    assert sum(vv) == int(cs), i
+    PR[i] = None if any(x <= -900 for x in vv[:12]) else vv[:12] + [sum(vv[:12])]
 out = []
 for l in (R / 'wmo_9120_raw.txt').read_text().splitlines():
     p = l.split('|'); i = p[0]
@@ -65,6 +85,15 @@ for l in (R / 'wmo_9120_raw.txt').read_text().splitlines():
         name, country, cat = ES[i], 'España', 'es'
     else:
         name, country, cat = W[i]
-    out.append([i, name, country, round(lat, 3), round(lon, 3), int(float(p[5])), cat, ta, tx, tn])
+    out.append([i, name, country, round(lat, 3), round(lon, 3), int(float(p[5])), cat, ta, tx, tn, PR.get(i), None])
+# estaciones añadidas en el Tema 3 (transecto de África occidental y ejemplos de regímenes)
+for l in (R.parent / 'tema3' / 'wmo_extra_raw.txt').read_text().splitlines():
+    p = l.split('|'); i = p[0]
+    pr, ta, tx, tn, vp = (vecx(x) for x in p[6:11])
+    prev = next((o for o in out if o[0] == i), None)
+    if prev: prev[11] = vp; continue  # ya estaba (Niamey): solo se añade la tensión de vapor
+    if ta is None and tx and tn: ta = [round((a + b) / 2) for a, b in zip(tx, tn)]
+    name, country, cat = W[i]
+    out.append([i, name, country, round(float(p[3]), 3), round(float(p[4]), 3), int(float(p[5])), cat, ta, tx, tn, pr, vp])
 json.dump({'s': out}, open(R / 'stations.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 print(len(out), 'estaciones;', (R / 'stations.json').stat().st_size, 'bytes')

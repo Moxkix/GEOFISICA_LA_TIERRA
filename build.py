@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ensambla los HTML autocontenidos: portada (index.html), tema1/ y tema2/."""
+"""Ensambla los HTML autocontenidos: portada (index.html), tema1/, tema2/ y tema3/."""
 import json, pathlib
 R = pathlib.Path(__file__).parent
 CSS = (R / 'src/common/style.css').read_text()
@@ -62,6 +62,15 @@ TEMAS = {
         data=[('LAND', 'data/land2.json'), ('MUN', 'data/mun.json'), ('ST', 'data/tema2/stations.json'), ('GRID', 'data/tema2/era5_grid.json')],
         files=['_config.js', 'common2.js', 'tab_inicio.js', 'tab_estructura.js', 'tab_aire.js', 'tab_balance.js', 'tab_tierramar.js',
                'tab_diario.js', 'tab_anual.js', 'tab_isotermas.js', 'tab_cuestionario.js'],
+    ),
+    'tema3': dict(
+        title='Tema 3 · La presión y la humedad',
+        desc='Interactivos del Tema 3 de Geografía General I (Geografía Física, UNED): presión atmosférica, vientos y circulación general, humedad y precipitación.',
+        header='Tema 3 · Elementos y factores climáticos II. La presión y la humedad atmosféricas',
+        data=[('LAND', 'data/land2.json'), ('MUN', 'data/mun.json'), ('ST', 'data/tema2/stations.json'), ('COAST', 'data/tema3/coast_eu.json'),
+              ('CLIMA', 'data/tema3/era5_clima.json'), ('DANA', 'data/tema3/dana.json'), ('VSUR', 'data/tema3/vsur.json')],
+        files=['_config.js', '../tema2/common2.js', 'common3.js', 'casos.js', 'tab_inicio.js', 'tab_isobaras.js', 'tab_viento.js', 'tab_circulacion.js',
+               'tab_adiabatico.js', 'tab_frentes.js', 'tab_precipitacion.js', 'tab_regimenes.js', 'tab_cuestionario.js'],
     ),
 }
 

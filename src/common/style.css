@@ -192,3 +192,4 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding-top:14px;font-si
 .brand .kicker .home-link{color:#f3efe4;text-decoration:none;font-weight:700;border-bottom:1px solid rgba(243,239,228,.4)}
 .brand .kicker .home-link:hover{border-bottom-color:#f3efe4}
 @media (max-width:700px){header.top{position:static}.brand .kicker{font-size:0;letter-spacing:0}.brand .kicker .home-link{font-size:.75rem;letter-spacing:.1em}.brand .title{font-size:1.05rem}main{padding:16px 12px 50px}h2{font-size:1.4rem}.card{padding:14px 12px}}
+.ro.wide{grid-column:1/-1}.ro.wide .v{font-size:1.1rem}

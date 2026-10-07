@@ -26,17 +26,32 @@ La portada (`index.html`) enlaza un hub por tema. Cada hub es un único archivo 
 3. Balance energético (esquema del manual frente a valores actuales; modelo de efecto invernadero; espectros; ejercicios 3 y 5)
 4. Tierras y mares (modelo de calentamiento; continentalidad y fachadas con estaciones reales)
 5. Ciclo diario (insolación y temperatura en la estación más cercana al municipio; ejercicio 2; práctica)
-6. Régimen térmico (ciclo anual, amplitud y retraso; comparador de 165 estaciones; práctica)
+6. Régimen térmico (ciclo anual, amplitud y retraso; comparador de 174 estaciones; práctica)
 7. Isotermas (mapa mundial mes a mes, temperatura real o reducida al nivel del mar; ecuador térmico; corrientes; perfil por paralelos; ejercicio 4)
 8. Cuestionario final (20 preguntas aleatorias de un banco de 28)
 
-Los contenidos del factor cósmico (insolación, estaciones) enlazan con las pestañas correspondientes del Tema 1.
+## Tema 3 · Elementos y factores climáticos II. La presión y la humedad atmosféricas (`tema3/`)
+1. Isobaras (laboratorio de individuos isobáricos con práctica; viento sur de febrero de 2026; reducción al nivel del mar con la altitud del municipio; la DANA del 29 de octubre de 2024 en superficie y a 500 hPa)
+2. El viento (fuerzas de gradiente, Coriolis y rozamiento; viento geostrófico y en superficie; convergencia y divergencia, ejercicios 3 y 5; ángulo real del viento con las isobaras sobre mar y tierra; escala de Beaufort)
+3. Circulación general (presión y vientos medios mes a mes con ERA5, centros de acción y ZCIT; perfiles zonales; modelo de tres células y corrientes en chorro; ejercicio 4; zonas climáticas)
+4. Ascenso y foehn (diagrama de ascenso con nivel de condensación y estabilidad; la fig. 3.16 con números actuales; corte del efecto foehn; foehn real en Bilbao, 24 de febrero de 2026)
+5. Nubes y frentes (los diez géneros de nubes en ilustraciones propias, con juego; ciclo de vida de la borrasca noruega con corte y meteograma; meteograma real del paso del frente frío por Bilbao)
+6. Distribución mundial (mapa de isoyetas anual y mensual de ERA5; 17 lugares extremos; perfil por latitudes; ciclo hidrológico; ejercicio 2, transecto del golfo de Guinea al Sáhara)
+7. Regímenes (climograma de la estación más cercana al municipio; los seis regímenes del manual; práctica de clasificación; la lluvia tropical sigue al Sol)
+8. Cuestionario final (20 preguntas aleatorias de un banco de 31)
+
+Los contenidos del factor cósmico (insolación, estaciones) y el efecto de Coriolis enlazan con las pestañas correspondientes del Tema 1; los de humedad, con el Tema 2.
 
 Cada pestaña incluye autoevaluación y, cuando procede, las correcciones respecto al texto de la Unidad Didáctica. La pestaña Inicio de cada tema las reúne en una tabla.
 
 ## Datos y licencias
 - Líneas de costa: Natural Earth 1:110m (dominio público), vía el paquete `world-atlas`.
 - Municipios (8.132, con coordenadas): paquete `spanish-cities-info` (licencia ISC), verificado con el INE.
-- Normales climatológicas 1991–2020 (temperatura media, máxima y mínima mensual): OMM, distribuidas por NOAA NCEI (accesión 0253808, v6.6); 83 estaciones españolas y 82 del resto del mundo (`data/tema2/`).
+- Normales climatológicas 1991–2020 (temperatura media, máxima y mínima mensual): OMM, distribuidas por NOAA NCEI (accesión 0253808, v6.6); 83 estaciones españolas y 91 del resto del mundo (`data/tema2/`).
 - Temperatura en rejilla para las isotermas: reanálisis ERA5 1991–2020 (Copernicus/ECMWF; de julio a diciembre, 1991–2019, porque la serie mensual de Earth Engine termina en junio de 2020), con altitud de ETOPO1 (NOAA). Se exporta a 0,25° con Google Earth Engine (`gee/era5_isotermas_tema2.js`) y `data/tema2/make_grid.py` la promedia en celdas de 2° (`data/tema2/era5_grid.json`).
+- Precipitación 1991–2020 de las estaciones: normales de la OMM (NOAA NCEI, accesión 0253808, v6.6), con 9 estaciones añadidas para el Tema 3 (transecto del golfo de Guinea al Sáhara, Bombay, Cherrapunji); 174 estaciones en total (`data/tema2/stations.json`).
+- Presión, viento y precipitación medios en rejilla: reanálisis ERA5 1991–2020 (`gee/era5_tema3_clima.js`; `data/tema3/make_clima.py` los promedia en celdas de 2° y 4°).
+- Casos reales: ERA5 horario y en niveles de presión (Copernicus/ECMWF) de la DANA del 28–30 de octubre de 2024 y del viento sur del 23–26 de febrero de 2026 en Bilbao (`gee/era5_tema3_casos.js`, `data/tema3/make_casos.py`); observaciones de AEMET citadas en el texto.
+- Altitud de los municipios: modelo digital SRTM de 1" (NASA/USGS), extraída con `gee/altitud_municipios.js` y añadida a `data/mun.json` con `data/tema3/add_altitudes.py`.
+- Costas regionales de los mapas de la Península: Natural Earth 1:50m (dominio público). Ciclo hidrológico: Trenberth y otros (2007).
 - Parámetros: elipsoide WGS84; oblicuidad 23,44°; constante solar 1.361 W/m²; posición solar con las fórmulas de baja precisión del *Astronomical Almanac*; Atmósfera Estándar de EE. UU. (1976) y perfiles tipo AFGL; balance energético de Trenberth, Fasullo y Kiehl (2009); presión de vapor de saturación con la fórmula de Magnus (OMM, 2018).

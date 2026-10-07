@@ -9,7 +9,7 @@ const T2 = (() => {
   /* ---------- estaciones (normales OMM 1991-2020) ---------- */
   const tenth = (a) => (a ? a.map((v) => (v == null ? null : v / 10)) : null);
   T.ST = ST.s.map(([id, name, country, lat, lon, elev, cat, ta, tx, tn]) => ({ id, name, country, lat, lon, elev, cat, es: country === 'España', ta: tenth(ta), tx: tenth(tx), tn: tenth(tn) }));
-  T.CATS = { es: 'España', ecu: 'Ecuatorial', mon: 'Ecuatorial de montaña', tro: 'Tropical', des: 'Desértico / árido', med: 'Mediterráneo', sbt: 'Subtropical húmedo', oce: 'Oceánico', sub: 'Subpolar oceánico', con: 'Continental', sba: 'Subártico', pol: 'Polar' };
+  T.CATS = { es: 'España', ecu: 'Ecuatorial', mon: 'Ecuatorial de montaña', tro: 'Tropical', mzn: 'Monzónico', des: 'Desértico / árido', med: 'Mediterráneo', sbt: 'Subtropical húmedo', oce: 'Oceánico', sub: 'Subpolar oceánico', con: 'Continental', sba: 'Subártico', pol: 'Polar' };
   T.byId = (id) => T.ST.find((s) => s.id === id);
   T.nearest = (lat, lon, spainOnly = true) => {
     let best = null, bd = 1e9;

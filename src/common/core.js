@@ -286,7 +286,7 @@ const H = (() => {
   const PROVS = MUN.p;
   const CAN = new Set(['Las Palmas', 'Santa Cruz de Tenerife']);
   const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  const MUNI = MUN.m.map(([n, p, la, lo]) => ({ name: n, prov: PROVS[p], lat: la, lon: lo, es: true, can: CAN.has(PROVS[p]), k: norm(n) }));
+  const MUNI = MUN.m.map(([n, p, la, lo, al]) => ({ name: n, prov: PROVS[p], lat: la, lon: lo, alt: al, es: true, can: CAN.has(PROVS[p]), k: norm(n) }));
   H.MUNI = MUNI;
   H.findMuni = (name) => MUNI.find((m) => m.name === name);
   const DEF = Object.assign({}, H.findMuni('Madrid'), { def: true });
