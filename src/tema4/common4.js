@@ -279,6 +279,9 @@ const T4 = (() => {
   T.springRange = (st) => 2 * (T.amp(st, 'M2') + T.amp(st, 'S2'));
   T.neapRange = (st) => 2 * Math.abs(T.amp(st, 'M2') - T.amp(st, 'S2'));
 
+  /* puerto de referencia más cercano (base de mareas) */
+  T.nearestPort = (lat, lon, esOnly) => { let b = null, bd = 1e9; for (const s of (MAREAS && MAREAS.st) || []) { if (esOnly && s.group !== 'es') continue; const d = H.haversine(lat, lon, s.lat, s.lon); if (d < bd) { bd = d; b = s; } } return { s: b, d: bd }; };
+
   /* ---------- fases de la Luna (precisión de unas horas) ---------- */
   /* edad de la Luna en días desde la luna nueva de referencia (6 ene 2000, 18:14 UTC) */
   T.SYN = 29.530588853;

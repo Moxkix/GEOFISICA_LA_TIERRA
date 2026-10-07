@@ -4,6 +4,8 @@ presión a nivel del mar (hPa) y viento a 10 m (u, v en m/s) de ERA5 cada 3 h de
 en una rejilla de 0,5° (40° O – 10° E, 35° – 62° N). Si en la carpeta hay también un CSV de oleaje de WAVEWATCH III
 (ww3_ciaran.csv, con columnas time, latitude, longitude, Thgt o shgt), se añade la altura significativa (hs).
 
+(ERDDAP de NOAA CoastWatch o de PacIOOS; también en dos archivos, ww3_ciaran_oeste.csv y ww3_ciaran_este.csv).
+
 Uso:  python3 data/tema4/make_ciaran.py carpeta [salida.json]
 """
 import csv, json, pathlib, sys
@@ -40,6 +42,34 @@ def main(a):
     for key in ('p', 'u', 'v'):
         ref = {'p': P, 'u': U, 'v': V}[key]
         print(f'  {key}: {size_kb(out[key]):.0f} KB, error máx. {np.nanmax(np.abs(unpack(out[key]) - np.stack(ref).reshape(nt, -1))):.2f}')
+    # oleaje de WAVEWATCH III (NOAA) desde ERDDAP, si está: ww3_ciaran_oeste.csv (320-359,5° E) y ww3_ciaran_este.csv (0-10° E)
+    ww = [d / 'ww3_ciaran_oeste.csv', d / 'ww3_ciaran_este.csv', d / 'ww3_ciaran.csv']
+    if any(f.exists() for f in ww):
+        nxw, nyw = 101, 55  # celdas centradas en −40…10° E y 62…35° N (0,5°)
+        HS = np.full((nt, nyw, nxw), np.nan)
+        tidx = {t: k for k, t in enumerate(times)}
+        for f in ww:
+            if not f.exists():
+                continue
+            rd = csv.reader(open(f, newline=''))
+            head = next(rd); next(rd, None)  # la segunda fila de ERDDAP son las unidades
+            ci = {h: i for i, h in enumerate(head)}
+            hcol = 'Thgt' if 'Thgt' in ci else 'shgt'
+            for r in rd:
+                try:
+                    tt = r[ci['time']][:13]; la = float(r[ci['latitude']]); lo = float(r[ci['longitude']]); hs = float(r[ci[hcol]])
+                except (ValueError, KeyError, IndexError):
+                    continue
+                if tt not in tidx or hs != hs:
+                    continue
+                lo = ((lo + 540) % 360) - 180
+                i, j = int(round((lo + 40) / 0.5)), int(round((62 - la) / 0.5))
+                if 0 <= i < nxw and 0 <= j < nyw:
+                    HS[tidx[tt], j, i] = hs
+        out['hs'] = pack(list(np.clip(HS, 0, 20)), lo=0, step=0.1)
+        out['hsG'] = {'nx': nxw, 'ny': nyw, 'lon0': -40.25, 'lat0': 62.25, 'res': 0.5}
+        out['hsSrc'] = 'NOAA WAVEWATCH III (modelo global, 0,5°), vía ERDDAP'
+        print(f'  Hs: máximo {np.nanmax(HS):.1f} m; {size_kb(out["hs"]):.0f} KB')
     out_path.write_text(json.dumps(out, separators=(',', ':')))
     print(f'{out_path}: {out_path.stat().st_size / 1024:.0f} KB')
 

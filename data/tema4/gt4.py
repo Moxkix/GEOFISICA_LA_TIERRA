@@ -107,7 +107,7 @@ def pack(layers, mode='lin', lo=None, hi=None, table=None, dec=4, step=None):
         out.update({'s': s, 'f': 'sq'})
     else:
         lo = float(np.nanmin(a)) if lo is None else lo
-        hi = float(np.nanmax(a)) if hi is None else hi
+        hi = (float(np.nanmax(a)) if np.isfinite(a).any() else lo + 1) if hi is None else hi
         o = math.floor(lo * 1000) / 1000
         s = step or float(f'{max(hi - o, 1e-6) / 254 * 1.0001:.{dec}g}')  # con step, cuantificación más gruesa (comprime más)
         q = np.where(nan, 255, np.clip(np.round((np.nan_to_num(a) - o) / s), 0, 254)).astype('int32')

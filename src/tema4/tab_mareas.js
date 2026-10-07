@@ -102,7 +102,7 @@ H.tab({
       const lx = cx + Math.cos(dl) * R * 1.75, ly = cy - Math.sin(dl) * R * 1.75;
       ctx.strokeStyle = 'rgba(28,40,54,.35)'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(cx - Math.cos(dl) * R * 1.4, cy + Math.sin(dl) * R * 1.4); ctx.lineTo(lx, ly); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = '#c9c6bd'; ctx.strokeStyle = '#8a877e'; ctx.beginPath(); ctx.arc(Math.min(w - 12, lx + 8), ly, 9, 0, 7); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#1c2836'; ctx.textAlign = 'right'; ctx.fillText(`Luna (declinación ${H.fs(sB.dec, 0)}°)`, w - 6, Math.min(h - 8, ly + 24));
+      ctx.fillStyle = '#1c2836'; ctx.textAlign = 'right'; ctx.fillText(`Luna (declinación ${H.fs(sB.dec, 0)}°)`, w - 6, w < 480 ? h - 26 : Math.min(h - 8, ly + 24));
       // paralelo del lugar: posiciones a las 0 h y 12 h
       const p = sB.lat * D2R;
       const yL = cy - Math.sin(p) * R, xL = Math.cos(p) * R;

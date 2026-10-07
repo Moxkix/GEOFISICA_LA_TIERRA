@@ -6,7 +6,8 @@
     a las corrientes (fig. 4.8 del manual).
   · en data/tema4/oceano.json, la clave 'aire': medias zonales sobre el océano (rejilla de 2°) de la temperatura del
     mar (OISST) y del aire a 2 m (ERA5, data/tema2/era5_grid.json), anual, enero y julio, para comparar con el
-    apartado 3.2 del manual (diferencia mar − aire según la latitud).
+    apartado 3.2 del manual (diferencia mar − aire según la latitud); 'dif': mapas de la diferencia mar − aire;
+    't2a': anomalía de la temperatura del aire respecto a la media de su paralelo (anual, enero y julio).
 
 Uso:  python3 data/tema4/make_extra.py   (después de make_oceano.py)
 """
@@ -65,6 +66,11 @@ def main():
     oc['dif'] = pack([np.clip(d, -6, 10) for d in difs], lo=-6, step=0.1)
     oc['difG'] = {'nx': 180, 'ny': 90, 'lon0': -180, 'lat0': 90, 'res': 2}
     print(f"  dif: {size_kb(oc['dif']):.0f} KB")
+    # anomalía de la temperatura del aire respecto a la media de su paralelo (2°): anual, enero y julio
+    ta = [np.mean(t2, axis=0), t2[0], t2[6]]
+    an = [np.clip(t - t.mean(axis=1, keepdims=True), -25, 25) for t in ta]
+    oc['t2a'] = pack(an, lo=-25, step=0.2)
+    print(f"  t2a: {size_kb(oc['t2a']):.0f} KB")
     (R / 'oceano.json').write_text(json.dumps(oc, separators=(',', ':'), ensure_ascii=False))
     for la in (49, 41, 29, 19, 9, 1, -11, -21, -41):
         j = int((89 - la) / 2); a = res['ann']
