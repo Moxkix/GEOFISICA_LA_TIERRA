@@ -51,8 +51,8 @@ TEMAS = {
         title='Tema 1 · La Tierra planeta',
         desc='Interactivos del Tema 1 de Geografía General I (Geografía Física, UNED): forma y movimientos de la Tierra y su representación cartográfica.',
         header='Tema 1 · La Tierra planeta. Movimientos y representación',
-        data=[('LAND', 'data/land2.json'), ('SHAPES', 'data/shapes.json'), ('MUN', 'data/mun.json')],
-        files=['_config.js', 'tab_inicio.js', 'tab_forma.js', 'tab_insolacion.js', 'tab_coordenadas.js', 'tab_hora.js',
+        data=[('LAND', 'data/land2.json'), ('SHAPES', 'data/shapes.json'), ('MUN', 'data/mun.json'), ('GEOIDE', 'data/tema1/geoide.json')],
+        files=['_config.js', 'geoide3d.js', 'tab_inicio.js', 'tab_forma.js', 'tab_insolacion.js', 'tab_coordenadas.js', 'tab_hora.js',
                'tab_coriolis.js', 'tab_estaciones.js', 'tab_proyecciones.js', 'tab_escala.js', 'tab_relieve.js', 'tab_cuestionario.js'],
     ),
     'tema2': dict(

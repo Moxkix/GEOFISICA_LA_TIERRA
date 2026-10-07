@@ -97,6 +97,6 @@ H.tab({
         <div class="ro"><div class="k">Solsticio de diciembre</div><div class="v">${fe(ev.dic)}</div></div>
       </div><p class="hint">Solsticios y equinoccios calculados con las fórmulas solares de baja precisión del <i>Astronomical Almanac</i> (error de pocos minutos). Perihelio y afelio: ${H.EV.verified ? 'valores publicados para ' + H.year : 'cálculo aproximado (puede desviarse 1–2 días)'}; su fecha oscila de un año a otro por la influencia de la Luna. Ninguna de estas fechas cae fija el día 22.</p></div>`));
 
-    el.append(H.html(`<footer>Material de apoyo a la tutoría de Geografía General I (Geografía Física), Grado en Geografía e Historia, UNED. Datos: líneas de costa Natural Earth (dominio público, vía world-atlas); municipios con coordenadas del paquete <i>spanish-cities-info</i> (ISC), verificados con el INE. Parámetros: elipsoide WGS84, oblicuidad 23,44°, constante solar 1.361 W/m². Funciona sin conexión salvo la geolocalización.</footer>`));
+    el.append(H.html(`<footer>Material de apoyo a la tutoría de Geografía General I (Geografía Física), Grado en Geografía e Historia, UNED. Datos: líneas de costa Natural Earth (dominio público, vía world-atlas); municipios con coordenadas del paquete <i>spanish-cities-info</i> (ISC), verificados con el INE. Geoide: modelo EGM96 (NGA). Parámetros: elipsoide WGS84, oblicuidad 23,44°, constante solar 1.361 W/m². Funciona sin conexión salvo la geolocalización.</footer>`));
   },
 });
