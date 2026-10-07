@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ensambla los HTML autocontenidos: portada (index.html), tema1/, tema2/ y tema3/."""
+"""Ensambla los HTML autocontenidos: portada (index.html), tema1/, tema2/, tema3/ y tema4/."""
 import json, pathlib
 R = pathlib.Path(__file__).parent
 CSS = (R / 'src/common/style.css').read_text()
@@ -71,6 +71,18 @@ TEMAS = {
               ('CLIMA', 'data/tema3/era5_clima.json'), ('DANA', 'data/tema3/dana.json'), ('VSUR', 'data/tema3/vsur.json')],
         files=['_config.js', '../tema2/common2.js', 'common3.js', 'casos.js', 'tab_inicio.js', 'tab_isobaras.js', 'tab_viento.js', 'tab_circulacion.js',
                'tab_adiabatico.js', 'tab_frentes.js', 'tab_precipitacion.js', 'tab_regimenes.js', 'tab_cuestionario.js'],
+    ),
+    'tema4': dict(
+        title='Tema 4 · Los océanos',
+        desc='Interactivos del Tema 4 de Geografía General I (Geografía Física, UNED): las aguas marinas, sus movimientos (mareas, olas, corrientes, circulación abisal, nivel del mar) y la relación entre océano y atmósfera.',
+        header='Tema 4 · Los océanos',
+        data=[('LAND', 'data/land2.json'), ('MUN', 'data/mun.json'), ('ST', 'data/tema2/stations.json'), ('COAST', 'data/tema3/coast_eu.json'),
+              ('VIENTOS', 'data/tema4/vientos.json'), ('MAREAS', 'data/tema4/mareas.json'), ('OCEANO', 'data/tema4/oceano.json'), ('PERFILES', 'data/tema4/perfiles.json'),
+              ('RELIEVE', 'data/tema4/relieve.json'), ('CICLONES', 'data/tema4/ciclones.json'), ('CIARAN', 'data/tema4/ciaran.json'),
+              ('NIVEL', 'data/tema4/nivel.json')],
+        files=['_config.js', '../tema2/common2.js', '../tema3/common3.js', 'common4.js', 'tab_inicio.js', 'tab_salinidad.js', 'tab_densidad.js',
+               'tab_vertical.js', 'tab_mareas.js', 'tab_olas.js', 'tab_corrientes.js', 'tab_ekman.js', 'tab_botella.js', 'tab_abisal.js',
+               'tab_nivel.js', 'tab_clima.js', 'tab_cuestionario.js'],
     ),
 }
 
