@@ -168,11 +168,11 @@ H.tab({
     updF();
 
     /* ================= C · caso real: viento sur en Bilbao ================= */
-    const real = H.h('div', { class: 'card' }, H.h('h3', {}, 'Caso real: viento sur en Bilbao, 24 de febrero de 2026'));
-    real.append(H.html('<p class="sub">El 24 de febrero de 2026 el aeropuerto de Bilbao llegó a <b>27,1 °C</b>, la temperatura más alta de su serie (desde 1948) en un mes de invierno (AEMET). Soplaba viento del sur, con rachas de hasta 91 km/h, y la humedad relativa bajó al 21 %.</p>'));
+    const real = H.h('div', { class: 'card' }, H.h('h3', {}, 'Caso real: viento sur en Bilbao, 25 de febrero de 2026'));
+    real.append(H.html('<p class="sub">El 25 de febrero de 2026 el aeropuerto de Bilbao llegó a <b>27,1 °C</b>, la máxima más alta de un mes de febrero desde que empezó su serie, en 1948 (la anterior era de 26,9 °C, el 27 de febrero de 2019; AEMET). Llevaba dos días soplando el viento del sur, cálido y seco, hasta que por la tarde entró el aire del noroeste.</p>'));
     if (typeof VSUR === 'undefined' || !VSUR) real.append(H.info('<b>Datos pendientes.</b> Aquí irán los mapas horarios de ERA5 (temperatura, presión y viento) y la comparación entre la meseta y la costa; se añadirán en cuanto se exporten desde Google Earth Engine.'));
     else T3.vsurFoehnCard && T3.vsurFoehnCard(real);
-    real.append(H.html('<p class="small">En el Cantábrico el «viento sur» no es un foehn de libro: rara vez llueve en la vertiente sur de la cordillera. El aire, cálido y seco, procede de la meseta y de capas más altas, y al descender hasta el mar se calienta por compresión (≈ 1 °C cada 100 m). Por delante de una borrasca atlántica, el flujo del sur arrastra además aire subtropical. La secuencia completa, con la llegada del frente frío el día 25, está en <a href="#frentes">Nubes, frentes y borrascas</a>.</p>'));
+    real.append(H.html('<p class="small">En el Cantábrico el «viento sur» no es un foehn de libro: rara vez llueve en la vertiente sur de la cordillera. El aire, cálido y seco, procede de la meseta y de capas más altas, y al descender hasta el mar se calienta por compresión (≈ 1 °C cada 100 m). Por delante de una borrasca atlántica, el flujo del sur arrastra además aire subtropical. La secuencia completa, con el giro del viento al noroeste la tarde del día 25, está en <a href="#frentes">Nubes, frentes y borrascas</a>.</p>'));
     el.append(real);
 
     el.append(H.fix('Enfriamiento adiabático', [

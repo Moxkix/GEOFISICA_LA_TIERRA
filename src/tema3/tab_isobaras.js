@@ -30,19 +30,21 @@ H.tab({
     const RES = 0.5, NX = (BBOX[1] - BBOX[0]) / RES, NY = (BBOX[3] - BBOX[2]) / RES;
     const buildGrid = () => { const d = new Float32Array(NX * NY); for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) d[j * NX + i] = field(BBOX[3] - (j + 0.5) * RES, BBOX[0] + (i + 0.5) * RES); return T3.grid(d, NX, NY, BBOX[0], BBOX[3], RES); };
     const cv = H.h('canvas'), tip = H.h('div', { class: 'tooltip' });
-    const cs = H.autoCanvas(cv, (w) => w * T3.aspect(BBOX), (ctx, w, h) => {
-      const P = T3.proj(BBOX, w, h); cs.P = P;
+    const curBB = () => (s.mode === 'real' && T3.VS && T3.VS.has ? T3.VS.bbox : BBOX); // en el caso real, el recuadro de los datos
+    const cs = H.autoCanvas(cv, (w) => w * T3.aspect(curBB()), (ctx, w, h) => {
+      const BB = curBB(), P = T3.proj(BB, w, h); cs.P = P;
       let g, rgP = null;
       if (s.mode === 'real' && T3.VS && T3.VS.has) { g = T3.VS.field('p', s.vt); rgP = T3.VS.bbox; } else g = buildGrid();
       const bg = T3.landRaster(P, w, h, (lat, lon) => { const base = H.mix([222, 233, 241], [240, 233, 214], H.land(lat, lon)); if (!s.fill) return base; const inside = !rgP || (lon >= rgP[0] && lon <= rgP[1] && lat >= rgP[2] && lat <= rgP[3]); return inside ? H.mix(T3.pColor(g.at(lat, lon)), base, 0.35) : base; });
       ctx.drawImage(bg, 0, 0, w, h);
-      T3.graticule(ctx, P, 10, { labels: true });
+      T3.graticule(ctx, P, BB === BBOX ? 10 : 5, { labels: true });
       T3.drawCoast(ctx, P, { regional: true, color: 'rgba(28,40,54,.55)' });
       const levels = []; for (let L = 960; L <= 1060; L += 4) levels.push(L);
-      T3.contour(ctx, T3.refine(g, 2), levels, P, { style: (L) => ({ width: L === 1012 || L === 1016 ? 1.6 : 1.1, color: 'rgba(28,40,54,.8)' }), fmt: (L) => H.f(L) });
+      T3.contour(ctx, T3.refine(g, 2), levels, P, { style: (L) => ({ width: L === 1012 || L === 1016 ? 1.6 : 1.1, color: 'rgba(28,40,54,.8)' }), fmt: (L) => H.f(L), avoid: BB === BBOX ? [] : [[156, 16, 156, 12]] });
       if (s.wind) { // viento geostrófico aproximado a partir del gradiente
         ctx.save(); ctx.strokeStyle = 'rgba(31,111,139,.9)'; ctx.fillStyle = ctx.strokeStyle; ctx.lineWidth = 1.4;
-        for (let lat = BBOX[2] + 2; lat < BBOX[3]; lat += 4) for (let lon = BBOX[0] + 2; lon < BBOX[1]; lon += 4) {
+        const st4 = BB === BBOX ? 4 : 2.5;
+        for (let lat = BB[2] + st4 / 2; lat < BB[3]; lat += st4) for (let lon = BB[0] + st4 / 2; lon < BB[1]; lon += st4) {
           const e = 0.25, px = (g.at(lat, lon + e) - g.at(lat, lon - e)) / (2 * e * KM * Math.cos(lat * H.D2R)), py = (g.at(lat + e, lon) - g.at(lat - e, lon)) / (2 * e * KM);
           const gm = Math.hypot(px, py); if (gm < 1e-4) continue; let ux = -py / gm, uy = px / gm; // paralelo a las isobaras, bajas a la izquierda
           const L = Math.min(24, 6 + gm * 100 * 9), x = P.X(lon), y = P.Y(lat), dx = ux * L / 2, dy = -uy * L / 2;
@@ -102,7 +104,7 @@ H.tab({
       const vtS = H.slider('Hora', 0, T3.VS.n - 1, 1, s.vt, (v) => T3.VS.label(v), (v) => { s.vt = v; cs.redraw(); if (s.pick) onPick(...s.pick); });
       realCtl.append(vtS, H.html('<p class="small">Presión a nivel del mar de ERA5 durante el episodio de viento sur de febrero de 2026: una borrasca profunda al oeste de Irlanda y altas presiones sobre el Mediterráneo dejan entre ambas un fuerte flujo del sur sobre la Península. Identifica la borrasca, el anticiclón y la dorsal; observa cómo se acerca la vaguada del frente frío el día 25.</p>'));
     }
-    const modeSeg = H.seg([['lab', 'Campo de prácticas (como la fig. 3.1)'], ['real', 'Caso real: viento sur, febrero de 2026']], s.mode, (v) => { if (v === 'real' && !hasVS) { modeSeg.set('lab'); alertBox.style.display = ''; return; } s.mode = v; s.pick = null; labCtl.style.display = v === 'lab' ? '' : 'none'; realCtl.style.display = v === 'real' ? '' : 'none'; cs.redraw(); });
+    const modeSeg = H.seg([['lab', 'Campo de prácticas (como la fig. 3.1)'], ['real', 'Caso real: viento sur, febrero de 2026']], s.mode, (v) => { if (v === 'real' && !hasVS) { modeSeg.set('lab'); alertBox.style.display = ''; return; } s.mode = v; s.pick = null; labCtl.style.display = v === 'lab' ? '' : 'none'; realCtl.style.display = v === 'real' ? '' : 'none'; cs.refit(); });
     const alertBox = H.info('El caso real se añadirá en cuanto se exporten los datos horarios de ERA5 desde Google Earth Engine.'); alertBox.style.display = 'none';
     el.append(H.h('div', { class: 'card' }, H.h('h3', {}, 'Laboratorio de isobaras'),
       H.h('p', { class: 'sub' }, 'Isobaras cada 4 hPa sobre Europa occidental. Arrastra las letras A y B para mover anticiclones y borrascas y observa cómo cambian las isobaras; pulsa cualquier punto para leer su presión y saber qué individuo isobárico hay en él.'),
@@ -147,7 +149,7 @@ H.tab({
     dana.append(H.html('<p class="sub">En altura no se representa la presión a una altitud fija, sino la <b>altitud de una superficie de igual presión</b>: las isohipsas. En el mapa de 500 hPa, una isohipsa de 5.820 m une los puntos donde la presión de 500 hPa se alcanza a 5.820 m. Valores altos equivalen a altas presiones y valores bajos, a bajas presiones (fig. 3.2). Una DANA (depresión aislada en niveles altos, la antigua «gota fría») es una borrasca cerrada en altura, con aire muy frío en su núcleo, que puede no tener casi reflejo en superficie.</p>'));
     if (typeof DANA === 'undefined' || !DANA) dana.append(H.info('<b>Datos pendientes.</b> Aquí irán los mapas de ERA5 en superficie y a 500 hPa del 28 al 30 de octubre de 2024 y la precipitación del día 29; se añadirán en cuanto se exporten desde Google Earth Engine.'));
     else T3.danaCard && T3.danaCard(dana);
-    dana.append(H.html('<p class="small">El 29 de octubre de 2024 la estación de AEMET en Turís (Valencia) recogió 771,8 l/m² en 14 horas, muy cerca del récord español en un día (817 l/m², Oliva, 1987), y 184,6 l/m² en una sola hora, récord de España. La DANA, situada sobre el golfo de Cádiz y el sur peninsular, mantuvo durante horas un flujo del este muy húmedo desde el Mediterráneo, que se elevaba al llegar a las montañas valencianas.</p>'));
+    dana.append(H.html('<p class="small">El 29 de octubre de 2024 la estación de AEMET en Turís (Valencia) recogió 771,8 l/m² en 14 horas, muy cerca del récord español en un día (817 l/m², Oliva, 1987), y 184,6 l/m² en una sola hora, récord de España. La DANA, centrada entre el golfo de Cádiz y el norte de Marruecos, y las altas presiones situadas al norte mantuvieron durante horas un flujo del este muy húmedo desde el Mediterráneo, que se elevaba al llegar a las montañas valencianas.</p>'));
     el.append(dana);
 
     el.append(H.fix('La presión', [

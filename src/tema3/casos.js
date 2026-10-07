@@ -38,7 +38,9 @@
     const [dx, dy, al, bl] = { r: [7, 0, 'left', 'middle'], l: [-7, 0, 'right', 'middle'], t: [0, -7, 'center', 'bottom'], b: [0, 7, 'center', 'top'] }[pos];
     ctx.font = 'bold 11px system-ui'; ctx.textAlign = al; ctx.textBaseline = bl; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.strokeText(label, x + dx, y + dy); ctx.fillStyle = '#1c2836'; ctx.fillText(label, x + dx, y + dy);
   };
-  const isobars = (ctx, g, P, step = 4) => { const lv = []; for (let L = 952; L <= 1056; L += step) lv.push(L); T3.contour(ctx, T3.refine(g, 2), lv, P, { color: 'rgba(28,40,54,.8)', width: 1.1, fmt: (L) => H.f(L) }); };
+  const isobars = (ctx, g, P, step = 4, avoid = []) => { const lv = []; for (let L = 952; L <= 1056; L += step) lv.push(L); T3.contour(ctx, T3.refine(g, 2), lv, P, { color: 'rgba(28,40,54,.8)', width: 1.1, fmt: (L) => H.f(L), avoid: [[160, 16, 160, 12], ...avoid] }); };
+  // recuadros aproximados de las etiquetas de los observatorios (para que no las tapen las de las isobaras)
+  const siteBoxes = (P) => SITES.map(([n, la, lo, pos]) => { const x = P.X(lo), y = P.Y(la), w = 52; return pos === 'r' ? [x + 7 + w, y, w + 4, 8] : pos === 'l' ? [x - 7 - w, y, w + 4, 8] : pos === 't' ? [x, y - 13, w, 8] : [x, y + 13, w, 8]; });
   /* ángulo entre el viento y las isobaras (positivo: hacia las bajas presiones) */
   const crossAngle = (pg, ug, vg, lat, lon) => {
     const e = 0.25, KM = 111.2, px = (pg.at(lat, lon + e) - pg.at(lat, lon - e)) / (2 * e * KM * Math.cos(lat * H.D2R)), py = (pg.at(lat + e, lon) - pg.at(lat - e, lon)) / (2 * e * KM), gm = Math.hypot(px, py);
@@ -69,20 +71,20 @@
   /* ================= foehn real (pestaña Ascenso y foehn) ================= */
   T3.vsurFoehnCard = (card) => {
     const S = T3.VS; if (!S.has) return;
-    const bb = [-10, 2, 40.5, 45.5], st = { i: 9 };
+    const bb = [-10, 2, 40.5, 45.5], st = { i: Math.max(0, S.times.indexOf('2026-02-25T12')) };
     const ser = VSUR.series, t0 = new Date(ser.t0 + ':00:00Z');
     const idxS = (i) => Math.round((S.date(i) - t0) / 3600e3);
     const cs = caseMap(S, bb, (ctx, P, w, h) => {
       const tg = S.field('t', st.i);
       const bg = T3.landRaster(P, w, h, (lat, lon) => H.mix(T2.tColor(tg.at(lat, lon)), [255, 255, 255], 0.15 + 0.15 * (1 - H.land(lat, lon)))); ctx.drawImage(bg, 0, 0, w, h);
       T3.graticule(ctx, P, 2, { labels: true }); T3.drawCoast(ctx, P, { regional: true, color: 'rgba(28,40,54,.8)', width: 1.2 });
-      isobars(ctx, S.field('p', st.i), P, 2);
+      isobars(ctx, S.field('p', st.i), P, 2, siteBoxes(P));
       T3.arrows(ctx, S.field('u', st.i), S.field('v', st.i), P, { step: 0.75, scale: 1.4, base: 4, maxLen: 22, color: 'rgba(28,40,54,.85)', min: 1 });
       const k = idxS(st.i);
       for (const [n, la, lo, pos] of SITES) { const T = ser.sites[n].T[k]; dot(ctx, P.X(lo), P.Y(la), `${n} ${T3.fT(T)}`, '#1c2836', pos); }
       ctx.font = 'bold 12px system-ui'; ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(6, 6, 330, 20); ctx.fillStyle = '#1c2836'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('ERA5 · ' + S.label(st.i), 10, 10);
     });
-    const ro = { bi: H.ro('Bilbao (40 m)', 'hl'), bu: H.ro('Burgos (890 m)', 'bl'), d: H.ro('Burgos bajado hasta Bilbao'), t8: H.ro('Aire a 850 hPa sobre la meseta') };
+    const ro = { bi: H.ro('Bilbao (40 m)', 'hl'), bu: H.ro('Burgos (890 m)', 'bl'), d: H.ro('Burgos bajado hasta Bilbao'), t8: H.ro('Aire a 850 hPa sobre la meseta', 'wide') };
     const upd = () => {
       const k = idxS(st.i), sb = ser.sites.Bilbao, sg = ser.sites.Burgos;
       ro.bi.v.innerHTML = `${T3.fT(sb.T[k])} <small>HR ${H.f(T3.hr(sb.T[k], sb.Td[k]))} %</small>`;
@@ -93,8 +95,9 @@
       cs.redraw();
     };
     const sl = H.slider('Hora', 0, S.n - 1, 1, st.i, (v) => S.label(v), (v) => { st.i = v; upd(); });
-    card.append(H.h('p', { class: 'sub' }, 'Temperatura a 2 m (colores), isobaras cada 2 hPa y viento a 10 m de ERA5. Busca la tarde del día 24: el aire del sur desciende de la meseta hacia la costa y llega más cálido y seco.'),
-      H.h('div', { class: 'grid2' }, H.h('div', { class: 'viz framed', style: { position: 'relative' } }, cs.cv), H.h('div', {}, sl, H.h('div', { class: 'readouts' }, ro.bi, ro.bu, ro.d, ro.t8), H.html('<p class="small">«Burgos bajado hasta Bilbao» suma 0,98 °C por cada 100 m de desnivel (unos 850 m). La última lectura hace lo mismo con el aire de 850 hPa: es la temperatura que tendría si descendiera hasta el nivel del mar sin intercambiar calor. ERA5, con celdas de unos 25 km, suaviza el máximo: el termómetro de AEMET marcó 27,1 °C.</p>'), T2.legendBar(-5, 30, 5))));
+    const sb = ser.sites.Bilbao, kmx = sb.T.indexOf(Math.max(...sb.T)), dmx = new Date(t0.getTime() + kmx * 3600e3);
+    card.append(H.h('p', { class: 'sub' }, 'Temperatura a 2 m (colores), isobaras cada 2 hPa y viento a 10 m de ERA5. Compara los mediodías del 24 y del 25 con las madrugadas: con viento del sur, el aire que baja de la meseta deja la costa tan cálida como el interior, aunque esté 850 m más abajo.'),
+      H.h('div', { class: 'grid2' }, H.h('div', { class: 'viz framed', style: { position: 'relative' } }, cs.cv), H.h('div', {}, sl, H.h('div', { class: 'readouts' }, ro.bi, ro.bu, ro.d, ro.t8), H.html(`<p class="small">«Burgos bajado hasta Bilbao» suma 0,98 °C por cada 100 m de desnivel (unos 850 m). La última lectura hace lo mismo con el aire de 850 hPa: es la temperatura que tendría si descendiera hasta el nivel del mar sin intercambiar calor. Compárala con lo observado: el calor del viento sur procede sobre todo del aire de altura que baja hasta la costa. ERA5, con celdas de unos 25 km y un relieve suavizado, se queda corto: en la celda de Bilbao su máxima es de ${T3.fT(sb.T[kmx])} (día ${dmx.getUTCDate()}, ${String(dmx.getUTCHours()).padStart(2, '0')} UTC), mientras que el termómetro de AEMET marcó 27,1 °C.</p>`), T2.legendBar(-5, 30, 5))));
     upd();
   };
 
@@ -104,8 +107,14 @@
     const ser = VSUR.series, t0 = new Date(ser.t0 + ':00:00Z'), st = { site: 'Bilbao', guess: null };
     const met = T3.meteogram(H.h('canvas'));
     const N = ser.sites.Bilbao.T.length, hrs = Array.from({ length: N }, (_, i) => i);
-    // hora del frente: mayor descenso de temperatura en 3 h con giro del viento
-    const front = (d) => { let best = 0, bi = 0; for (let i = 3; i < N; i++) { const dT = d.T[i - 3] - d.T[i]; if (dT > best) { best = dT; bi = i; } } return bi - 1; };
+    const dry = Object.values(ser.sites).every((d) => d.r.reduce((a, b) => a + (b || 0), 0) < 1);
+    // hora del frente: el viento deja de soplar del sur o sureste y gira al oeste o al norte durante al menos 3 h,
+    // y la presión empieza a subir; si no se encuentra, mayor descenso de temperatura en 3 h
+    const front = (d) => {
+      const dir = d.u.map((u, i) => T3.windFrom(u, d.v[i])), back = (a) => a >= 240 || a <= 60;
+      for (let i = 2; i < N - 3; i++) if (dir[i - 2] >= 100 && dir[i - 2] <= 235 && back(dir[i]) && back(dir[i + 1]) && back(dir[i + 2]) && d.p[i + 3] > d.p[i - 1]) return i;
+      let best = 0, bi = 0; for (let i = 3; i < N; i++) { const dT = d.T[i - 3] - d.T[i]; if (dT > best) { best = dT; bi = i; } } return bi - 1;
+    };
     const tmax = (d) => d.T.indexOf(Math.max(...d.T));
     const lab = (i) => { const d = new Date(t0.getTime() + i * 3600e3); return `${d.getUTCDate()} ${H.MES3[d.getUTCMonth()]} ${String((d.getUTCHours() + 1) % 24).padStart(2, '0')} h`; };
     const draw = () => {
@@ -116,11 +125,11 @@
       met.draw({ t: hrs, T: d.T, Td: d.Td, p: d.p, dir, spd, pr: d.r, xTicks, marks, cursor: st.guess, legend: [['#b0393a', 'temperatura'], ['#2d7a4c', 'punto de rocío', [5, 3]]] });
     };
     const q = H.h('p', { class: 'small' }, 'Pulsa en el meteograma el momento en que crees que pasa el frente frío por la estación elegida.');
-    met.st.canvas.addEventListener('click', (e) => { const t = Math.round(met.tAt(e)); st.guess = H.clamp(t, 0, N - 1); const d = ser.sites[st.site], fi = front(d), ok = Math.abs(st.guess - fi) <= 3; q.innerHTML = ok ? `<span style="color:var(--ok)">✔ Correcto.</span> El frente pasa hacia el ${lab(fi)} (hora peninsular): la temperatura cae, el viento gira al oeste-noroeste y la presión, que había bajado, empieza a subir.` : `<span style="color:var(--bad)">✘ No.</span> Fíjate en el momento en que la temperatura cae bruscamente y el viento cambia de dirección: fue hacia el ${lab(fi)}.`; draw(); });
+    met.st.canvas.addEventListener('click', (e) => { const t = Math.round(met.tAt(e)); st.guess = H.clamp(t, 0, N - 1); const d = ser.sites[st.site], fi = front(d), ok = Math.abs(st.guess - fi) <= 3; q.innerHTML = ok ? `<span style="color:var(--ok)">✔ Correcto.</span> El frente pasa hacia el ${lab(fi)} (hora peninsular): el viento deja de soplar del sur y gira al oeste o al norte, la temperatura cae y la presión, que había bajado, empieza a subir. ${dry ? 'No llueve: fue un frente casi seco.' : ''}` : `<span style="color:var(--bad)">✘ No.</span> No basta con que baje la temperatura (eso pasa cada tarde): busca el momento en que el viento deja de soplar del sur y la presión empieza a subir. Fue hacia el ${lab(fi)}.`; draw(); });
     const seg = H.seg(SITES.map(([n]) => [n, n]), st.site, (v) => { st.site = v; st.guess = null; q.textContent = 'Pulsa en el meteograma el momento en que crees que pasa el frente frío por la estación elegida.'; draw(); });
     card.append(H.h('p', { class: 'sub' }, 'Serie horaria de ERA5 en la celda de cada observatorio (hora peninsular, UTC+1). Antes del frente, el viento del sur seca y calienta la costa; después, entra aire atlántico más frío y húmedo del oeste y noroeste.'),
       seg, H.h('div', { class: 'viz framed', style: { marginTop: '8px' } }, met.st.canvas), q,
-      H.html('<p class="small">Datos observados por AEMET en el aeropuerto de Bilbao en febrero de 2026: máxima de 27,1 °C el día 24 (récord de invierno de la serie, desde 1948), humedad relativa mínima del 21 % y racha máxima de 90,7 km/h, con viento predominante del sur.</p>'));
+      H.html(`<p class="small">Observado por AEMET en el aeropuerto de Bilbao: máxima de 27,1 °C el día 25, la más alta de un mes de febrero desde que empezó la serie en 1948 (la anterior, 26,9 °C, era del 27 de febrero de 2019). En la celda de ERA5 la máxima es de ${T3.fT(Math.max(...ser.sites.Bilbao.T))} y la racha más fuerte de ${H.f(Math.max(...ser.sites.Bilbao.g) * 3.6)} km/h: el reanálisis suaviza el relieve y los extremos locales.${dry ? ' Tampoco da lluvia en ninguno de los cinco observatorios: el cambio de masa de aire fue casi seco.' : ''}</p>`));
     draw();
   };
 

@@ -147,7 +147,7 @@ H.tab({
       H.openQ('Ejercicio 5 del manual: si la fuerza del gradiente es perpendicular a las isobaras, ¿por qué el aire se mueve casi paralelo a ellas?', 'Porque en cuanto el aire se pone en movimiento aparece la <b>fuerza de Coriolis</b>, perpendicular a la velocidad (hacia la derecha en el hemisferio norte). El aire se va desviando hasta que Coriolis equilibra al gradiente: entonces sopla paralelo a las isobaras, con las bajas a su izquierda (ley de Buys Ballot). Es el <b>viento geostrófico</b>, que se cumple bien en la atmósfera libre. Cerca del suelo el <b>rozamiento</b> frena el aire, Coriolis se debilita y el viento cruza las isobaras hacia las bajas presiones con un ángulo de 10° a 45°. En el ecuador, donde no hay Coriolis, el aire va directo hacia las bajas.')));
 
     /* ================= C · caso real: viento e isobaras ================= */
-    const realCard = H.h('div', { class: 'card' }, H.h('h3', {}, 'Caso real: viento e isobaras el 24 de febrero de 2026'));
+    const realCard = H.h('div', { class: 'card' }, H.h('h3', {}, 'Caso real: viento e isobaras, 23–26 de febrero de 2026'));
     if (typeof VSUR === 'undefined' || !VSUR) realCard.append(H.info('<b>Datos pendientes.</b> Este mapa usa la presión y el viento horarios de ERA5 del episodio de viento sur de febrero de 2026; se añadirá en cuanto se exporten desde Google Earth Engine.'));
     else T3.realWindCard && T3.realWindCard(realCard);
     el.append(realCard);

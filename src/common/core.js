@@ -188,6 +188,7 @@ const H = (() => {
       return false;
     };
     st.redraw = () => { if (!canvas.parentElement) return; if (!st.w) fit(); if (st.w) { st.ctx.setTransform(st.dpr, 0, 0, st.dpr, 0, 0); draw(st.ctx, st.w, st.h, st); } };
+    st.refit = () => { fit(); st.redraw(); }; // cuando cambia la proporción (p. ej., otro recuadro de mapa)
     const attach = () => { if (!canvas.parentElement) return setTimeout(attach, 20); new ResizeObserver(() => { if (fit()) st.redraw(); }).observe(canvas.parentElement); };
     attach();
     st.pos = (e) => { const r = canvas.getBoundingClientRect(); const t = e.touches ? e.touches[0] : e; return [(t.clientX - r.left) * st.w / r.width, (t.clientY - r.top) * st.h / r.height]; };
