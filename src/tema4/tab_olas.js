@@ -216,6 +216,14 @@ H.tab({
         } });
       cvE.addEventListener('click', (e) => { const [x, y] = mapE.pos(e); sE.pt = mapE.P.inv(x, y); updE(); });
       T4.hover(cvE, mapE, (lat, lon) => { const u = G.u[sE.k].at(lat, lon), v = G.v[sE.k].at(lat, lon), p = G.p[sE.k].at(lat, lon); if (!(u === u)) return null; return `${H.f(p, 0)} hPa · ${H.f(Math.hypot(u, v) * 3.6)} km/h${hasHs ? ' · Hs ' + T4.fN(G.hs[sE.k].at(lat, lon), 1) + ' m' : ''}`; });
+      // nota con el máximo del modelo y el valor frente a Donostia, calculados con los datos
+      const hsNote = () => {
+        let mx = -1, at = null;
+        G.hs.forEach((g, k) => { for (let i = 0; i < g.data.length; i++) if (g.data[i] > mx) { mx = g.data[i]; at = [k, g.latAt(Math.floor(i / g.nx)), g.lonAt(i % g.nx)]; } });
+        const dn = Math.max(...G.hs.map((g) => g.at(43.5, -2.0)).filter((v) => v === v));
+        const t = new Date(C.times[at[0]] + ':00:00Z');
+        return `En el modelo, la ola significativa más alta fue de <b>${H.f(mx, 1)} m</b>, el ${t.getUTCDate()} de noviembre a las ${String(t.getUTCHours()).padStart(2, '0')} UTC en ${T4.ll(at[1], at[2], 1)}, en pleno océano, donde el viento sopló más tiempo y sobre más distancia (fetch). Frente a Donostia el modelo da ${H.f(dn, 1)} m, menos que la boya (más de 8 m): cada celda promedia unos 50 km y el modelo global no resuelve bien el oleaje junto a la costa.`;
+      };
       const roE = { p: H.ro('Presión'), w: H.ro('Viento medio a 10 m', 'hl'), b: H.ro('Beaufort'), h: H.ro('Altura significativa', 'bl') };
       const cvE2 = H.h('canvas'); const chE = H.chart(cvE2, 0.45);
       const updE = () => {
@@ -228,7 +236,7 @@ H.tab({
         const sp = [], sw = [], shs = [];
         for (let i = 0; i < nt; i++) { sp.push([i * 3, G.p[i].at(lat, lon)]); const uu = G.u[i].at(lat, lon), vv = G.v[i].at(lat, lon); sw.push([i * 3, Math.hypot(uu, vv) * 3.6]); if (hasHs) shs.push([i * 3, G.hs[i].at(lat, lon) * 10]); }
         const pm = Math.min(...sp.map((q) => q[1])), pM = Math.max(...sp.map((q) => q[1]));
-        chE.draw({ xMin: 0, xMax: (nt - 1) * 3, yMin: 0, yMax: 140, xLabel: `${T4.ll(lat, lon)} · horas desde el 1 nov 00 UTC`, yLabel: 'km/h' + (hasHs ? ' · Hs (dm)' : ''),
+        chE.draw({ xMin: 0, xMax: (nt - 1) * 3, yMin: 0, yMax: 140, pad: { r: 26 }, xLabel: `${T4.ll(lat, lon)} · horas desde el 1 nov 00 UTC`, yLabel: 'km/h' + (hasHs ? ' · Hs (dm)' : ''),
           xTicks: [0, 12, 24, 36, 48].map((v) => ({ v, label: ['1 nov 00', '12', '2 nov 00', '12', '3 nov 00'][v / 12] })), yTicks: [0, 20, 40, 60, 80, 100, 120, 140].map((v) => ({ v })),
           series: [{ pts: sw, color: '#b4531d', width: 2.2 }].concat(hasHs ? [{ pts: shs, color: '#1f6f8b', width: 2.2 }] : []), vlines: [{ x: k * 3, color: '#1c2836', dash: [3, 3] }],
           after: (ctx, X, Y, w) => { ctx.font = '11px system-ui'; ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillStyle = '#b4531d'; ctx.fillText('viento medio (km/h)', w - 18, 18); if (hasHs) { ctx.fillStyle = '#1f6f8b'; ctx.fillText('altura de ola (dm)', w - 18, 32); } ctx.fillStyle = '#5a6878'; ctx.fillText(`presión: ${H.f(pm, 0)}–${H.f(pM, 0)} hPa`, w - 18, hasHs ? 46 : 32); } });
@@ -246,7 +254,7 @@ H.tab({
         H.h('p', { class: 'sub' }, `Una ciclogénesis explosiva cruzó el Atlántico y tocó tierra en Bretaña con unos 954 hPa en su centro. En la punta del Raz se midió una racha de 207 km/h; en el País Vasco, 160 km/h en Cerroja y 157 km/h en Matxitxako, y la boya de Donostia registró olas de más de 8 m de altura significativa. Causó 21 muertos en Europa. Mapa: presión a nivel del mar (isobaras cada 4 hPa) y viento medio a 10 m del reanálisis ERA5${hasHs ? ', y altura significativa del oleaje del modelo WAVEWATCH III (NOAA)' : ''}. Pulsa en el mapa para ver la evolución en un punto.`),
         H.h('div', { class: 'grid2' }, H.h('div', {}, H.h('div', { class: 'viz framed' }, cvE), leg),
           H.h('div', {}, segE, tE, playE, H.h('div', { class: 'readouts', style: { marginTop: '10px' } }, roE.p, roE.w, roE.b, roE.h), H.h('div', { class: 'viz', style: { marginTop: '10px' } }, cvE2))),
-        H.h('p', { class: 'small' }, `Fuentes: ERA5 (Copernicus/ECMWF) vía Google Earth Engine, rejilla de 0,5°; datos de rachas y oleaje de Météo-France, Euskalmet (informe climatológico de noviembre de 2023) y Puertos del Estado. Las rachas son mucho mayores que el viento medio que da el reanálisis.`)));
+        H.html(`<p class="small">Fuentes: ERA5 (Copernicus/ECMWF) vía Google Earth Engine, rejilla de 0,5°${hasHs ? '; oleaje: NOAA WAVEWATCH III (modelo global, 0,5°) vía ERDDAP de PacIOOS' : ''}; datos de rachas y oleaje de Météo-France, Euskalmet (informe climatológico de noviembre de 2023) y Puertos del Estado. Las rachas son mucho mayores que el viento medio que da el reanálisis.${hasHs ? ` ${hsNote()}` : ''}</p>`)));
       updE();
     }
 

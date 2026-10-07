@@ -65,6 +65,15 @@ H.tab({
     if (NV && NV.gauges) NV.gauges.forEach((g, i) => gSel.append(H.h('option', { value: i }, `${g.name} (desde ${g.y0})`)));
     gSel.onchange = () => { sB.g = +gSel.value; updB(); };
     const fit = (xs, ys) => { const n = xs.length, mx = xs.reduce((a, b) => a + b, 0) / n, my = ys.reduce((a, b) => a + b, 0) / n; let sxy = 0, sxx = 0; for (let i = 0; i < n; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sxx += (xs[i] - mx) ** 2; } return sxy / sxx; };
+    // ajuste por mínimos cuadrados de y = a + b (x − x0) + c (x − x0)² → [a, b, c] (x0 = media de x)
+    const fit2 = (xs, ys) => {
+      const n = xs.length, x0 = xs.reduce((a, b) => a + b, 0) / n; const S = Array(5).fill(0), T = [0, 0, 0];
+      for (let i = 0; i < n; i++) { const d = xs[i] - x0; let pw = 1; for (let k = 0; k < 5; k++) { S[k] += pw; if (k < 3) T[k] += pw * ys[i]; pw *= d; } }
+      const M = [[S[0], S[1], S[2], T[0]], [S[1], S[2], S[3], T[1]], [S[2], S[3], S[4], T[2]]];
+      for (let c = 0; c < 3; c++) { for (let r = c + 1; r < 3; r++) { const f = M[r][c] / M[c][c]; for (let k = c; k < 4; k++) M[r][k] -= f * M[c][k]; } }
+      const z = [0, 0, 0]; for (let r = 2; r >= 0; r--) { let s = M[r][3]; for (let k = r + 1; k < 3; k++) s -= M[r][k] * z[k]; z[r] = s / M[r][r]; }
+      z.x0 = x0; return z;
+    };
     const updB = () => {
       gSel.style.display = sB.v === 'gauge' ? '' : 'none';
       if (sB.v === 'inst') {
@@ -77,7 +86,11 @@ H.tab({
         const tmax = alt ? alt.pts[alt.pts.length - 1][0] : 2014;
         chB.draw({ xMin: 1880, xMax: Math.ceil(tmax / 10) * 10, yMin: -22, yMax: 14, xLabel: 'Año', yLabel: 'cm respecto a 1993', xTicks: [1880, 1900, 1920, 1940, 1960, 1980, 2000, 2020].map((v) => ({ v })), yTicks: [-20, -15, -10, -5, 0, 5, 10].map((v) => ({ v })), series,
           after: (ctx, X, Y, w) => { ctx.font = '11px system-ui'; ctx.textAlign = 'left'; ctx.fillStyle = '#1f6f8b'; ctx.fillText('reconstrucción con mareógrafos (CSIRO)', X(1885), Y(11)); ctx.fillStyle = '#b4531d'; ctx.fillText('altimetría por satélite (NOAA)', X(1885), Y(8)); void w; } });
-        if (alt) { const p = alt.pts, xs = p.map((q) => q[0]), ys = p.map((q) => q[1] * 10); const r = fit(xs, ys); const r2 = fit(xs.filter((x) => x >= xs[xs.length - 1] - 10), ys.filter((_, i) => xs[i] >= xs[xs.length - 1] - 10)); txt.push(`Altimetría: subida media de <b>${H.f(r, 1)} mm/año</b> desde 1993 y de <b>${H.f(r2, 1)} mm/año</b> en los últimos diez años: el ritmo se acelera.`); }
+        if (alt) {
+          const p = alt.pts, xs = p.map((q) => q[0]), ys = p.map((q) => q[1] * 10); const r = fit(xs, ys); const r2 = fit(xs.filter((x) => x >= xs[xs.length - 1] - 10), ys.filter((_, i) => xs[i] >= xs[xs.length - 1] - 10));
+          const q = fit2(xs, ys), tl = xs[xs.length - 1], rNow = q[1] + 2 * q[2] * (tl - q.x0);
+          txt.push(`Altimetría (${Math.round(xs[0])}-${Math.floor(tl)}): subida media de <b>${H.f(r, 1)} mm/año</b> y de <b>${H.f(r2, 1)} mm/año</b> en los últimos diez años. Si se ajusta una parábola, la aceleración es de ${H.f(2 * q[2], 3)} mm/año² y el ritmo al final de la serie, de unos <b>${H.f(rNow, 1)} mm/año</b>: la subida se acelera.`);
+        }
         if (NV && NV.csiro) { const c = NV.csiro; const i1 = c.y.indexOf(1900), i2 = c.y.indexOf(1990); txt.push(`Mareógrafos (CSIRO): ${H.f((c.v[c.v.length - 1] - c.v[0]) / 10)} cm entre ${c.y[0]} y ${c.y[c.y.length - 1]}; ${H.f(fit(c.y.slice(i1, i2), c.v.slice(i1, i2)), 1)} mm/año entre 1900 y 1990.`); }
         info.innerHTML = `<p class="small">${txt.join(' ')} Según el IPCC (2021), el nivel medio subió 20 cm entre 1901 y 2018, a 1,3 mm/año hasta 1971 y a 3,7 mm/año entre 2006 y 2018. Un 40 % se debe a la dilatación térmica del agua y el resto a la fusión de glaciares y de los mantos de hielo de Groenlandia y la Antártida. Fuentes: ${[NV && NV.csiro && NV.csiro.src, NV && (NV.star ? NV.star.src : NV.noaa && NV.noaa.src)].filter(Boolean).join('; ')}.</p>`;
       } else if (sB.v === 'paleo') {

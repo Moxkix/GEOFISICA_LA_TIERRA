@@ -121,18 +121,38 @@ H.tab({
       };
       const sel = H.h('select', { 'aria-label': 'Mes' }, ...K.map((k, i) => H.h('option', { value: i }, NAMES[k] || k)));
       sel.onchange = () => { sD.k = +sel.value; upd(); };
-      const cvO = H.h('canvas'); const chO = H.chart(cvO, 0.3);
+      const narrow = window.innerWidth < 640; const cvO = H.h('canvas'); const chO = H.chart(cvO, narrow ? 0.62 : 0.3);
       const E = typeof ENSO !== 'undefined' && ENSO ? ENSO : null;
+      // resumen del último dato del ONI: trimestres seguidos por encima/debajo de ±0,5 y episodios anteriores comparables
+      const oniNow = (E) => {
+        const MES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        const n = E.v.length, t = E.t[n - 1], v = E.v[n - 1], m = Math.round((t - Math.floor(t) - 1 / 24) * 12);
+        const when = `${MES[(m + 11) % 12]}-${MES[(m + 1) % 12]} de ${Math.floor(t)}`;
+        const sg = v >= 0.5 ? 1 : v <= -0.5 ? -1 : 0;
+        if (!sg) return `Último dato: <b>${H.fs(v, 2)} °C</b> en ${when}: condiciones neutras.`;
+        let k = 0; while (k < n && E.v[n - 1 - k] * sg >= 0.5) k++;
+        const cat = (a) => (a >= 2 ? 'muy fuerte' : a >= 1.5 ? 'fuerte' : a >= 1 ? 'moderado' : 'débil');
+        // episodios anteriores (tramos de al menos 5 trimestres por encima de +0,5 o por debajo de −0,5) con su pico
+        const eps = []; let i = 0;
+        while (i < n - k) { if (E.v[i] * sg >= 0.5) { let j = i, pk = i; while (j < n - k && E.v[j] * sg >= 0.5) { if (E.v[j] * sg > E.v[pk] * sg) pk = j; j++; } if (j - i >= 5) { const tm = E.t[pk], mm = Math.round((tm - Math.floor(tm) - 1 / 24) * 12), y = Math.floor(tm) - (mm < 6 ? 1 : 0); eps.push({ y, v: E.v[pk] }); } i = j; } else i++; }
+        const same = eps.filter((e) => cat(Math.abs(e.v)) === cat(Math.abs(v)) || Math.abs(e.v) >= Math.abs(v));
+        const nm = sg > 0 ? 'El Niño' : 'La Niña';
+        const lst = same.map((e) => `${e.y}-${String((e.y + 1) % 100).padStart(2, '0')} (${H.fs(e.v, 1)} °C)`);
+        const lstTxt = lst.length > 1 ? lst.slice(0, -1).join(', ') + ' y ' + lst[lst.length - 1] : lst[0];
+        return `Último dato: <b>${H.fs(v, 2)} °C</b> en ${when}, ${k === 1 ? 'el primer trimestre' : `el ${k}.º trimestre seguido`} ${sg > 0 ? 'por encima de +0,5' : 'por debajo de −0,5'} °C: ${k >= 5 ? `hay un episodio de ${nm} en curso` : `son condiciones de ${nm} (para que cuente como episodio en la serie histórica hacen falta cinco trimestres seguidos)`}, con una intensidad propia de un ${nm} <b>${cat(Math.abs(v))}</b>${lst.length ? `, como ${lst.length === 1 ? 'el' : 'los'} de ${lstTxt}` : ''}. NOAA CPC actualiza el índice cada mes.`;
+      };
       el.append(H.h('div', { class: 'card', id: 'nino' }, H.h('h3', {}, 'El Niño y La Niña'),
         H.html(`<p class="sub">Normalmente los alisios empujan el agua cálida superficial hacia el oeste del Pacífico ecuatorial (Indonesia), donde el nivel del mar está unos 40 cm más alto y la termoclina más honda, mientras en Perú aflora agua fría. Cada dos a siete años los alisios se debilitan, el agua cálida refluye hacia el este y la superficie del Pacífico central y oriental se calienta: es El Niño, que se acopla con un cambio de la presión entre ambos lados del océano (la Oscilación del Sur). La Niña es la fase opuesta, con alisios más fuertes y el Pacífico oriental más frío. El fenómeno altera las lluvias de medio mundo (sequías en Indonesia y Australia, inundaciones en Perú y Ecuador) y eleva la temperatura media de la Tierra el año siguiente. Mira también el <a href="#vertical">corte del ecuador</a> en la pestaña de la estructura vertical.</p>`),
         H.h('div', { class: 'row' }, sel), H.h('div', { class: 'viz framed', style: { marginTop: '8px' } }, cvD), T3.legend(anCol, -4, 4, [-4, -2, 0, 2, 4], (v) => H.fs(v) + (v === 4 ? ' °C' : '')),
         H.h('div', { class: 'readouts', style: { marginTop: '10px' } }, ro.n34, ro.gl),
         E ? H.h('div', { class: 'viz', style: { marginTop: '10px' } }, cvO) : null,
-        H.h('p', { class: 'small' }, `Anomalías mensuales de la temperatura del mar respecto a 1991-2020 (NOAA OISST v2.1).${E ? ' Abajo, el índice ONI de NOAA CPC: media móvil de tres meses de la anomalía en Niño 3.4; El Niño cuando supera +0,5 °C durante al menos cinco trimestres seguidos, La Niña por debajo de −0,5 °C.' : ''}`)));
+        H.h('p', { class: 'small' }, `Anomalías mensuales de la temperatura del mar respecto a 1991-2020 (NOAA OISST v2.1).${E ? ' Abajo, el índice ONI de NOAA CPC: media móvil de tres meses de la anomalía en Niño 3.4; El Niño cuando supera +0,5 °C durante al menos cinco trimestres seguidos, La Niña por debajo de −0,5 °C.' : ''}`),
+        E ? H.html(`<p class="small">${oniNow(E)}</p>`) : null));
       if (E) {
         const pts = E.t.map((t, i) => [t, E.v[i]]);
-        chO.draw({ xMin: E.t[0], xMax: E.t[E.t.length - 1], yMin: -2.5, yMax: 3, yLabel: 'ONI (°C)', xTicks: Array.from({ length: 20 }, (_, i) => 1950 + i * 5).filter((y) => y >= E.t[0] && y <= E.t[E.t.length - 1]).map((v) => ({ v, label: String(v) })), yTicks: [-2, -1, 0, 1, 2, 3].map((v) => ({ v })),
-          series: [{ pts, color: '#1c2836', width: 1.2 }], hlines: [{ y: 0.5, color: '#b4531d' }, { y: -0.5, color: '#1f6f8b' }],
+        chO.draw({ xMin: E.t[0], xMax: E.t[E.t.length - 1], yMin: -2.5, yMax: 3, yLabel: 'ONI (°C)', xTicks: Array.from({ length: 20 }, (_, i) => 1950 + i * (narrow ? 10 : 5)).filter((y) => y >= E.t[0] && y <= E.t[E.t.length - 1]).map((v) => ({ v, label: String(v) })), yTicks: [-2, -1, 0, 1, 2, 3].map((v) => ({ v })),
+          series: [{ pts, color: '#1c2836', width: 1.2 }], hlines: [{ y: 0.5, color: '#b4531d' }, { y: -0.5, color: '#1f6f8b' }], pad: { t: 22 },
+          markers: [{ x: pts[pts.length - 1][0], y: pts[pts.length - 1][1], color: '#b02020', r: 3.5, label: `${H.fs(pts[pts.length - 1][1], 2)} (${Math.floor(pts[pts.length - 1][0])})`, align: 'right' }],
           after: (ctx, X, Y) => { for (let i = 1; i < pts.length; i++) { const [t, v] = pts[i]; if (v >= 0.5 || v <= -0.5) { ctx.fillStyle = v > 0 ? 'rgba(180,83,29,.55)' : 'rgba(31,111,139,.55)'; ctx.fillRect(X(pts[i - 1][0]), Math.min(Y(v), Y(0)), Math.max(1, X(t) - X(pts[i - 1][0])), Math.abs(Y(v) - Y(0))); } } } });
       }
       upd();
