@@ -1614,7 +1614,7 @@ H.tab({
     const DOM = { w: 3200e3, h: 1800e3 }; // metros representados en el lienzo
     const f = () => 2 * OM * Math.sin(s.lat * H.D2R) * s.hemi;
     const apg = () => s.G * 100 / 100e3 / RHO; // m/s²: G hPa por 100 km → Pa/m / densidad
-    const reset = () => { s.t = 0; s.x = 250e3; s.y = DOM.h * (s.lat < 3 ? 0.5 : s.hemi > 0 ? 0.9 : 0.1); s.u = 0; s.v = 0; s.path = [[s.x, s.y, 0]]; };
+    const reset = () => { s.t = 0; s.x = 250e3; s.y = DOM.h * (s.lat < 3 ? 0.5 : s.hemi > 0 ? 0.88 : 0.12); s.u = 0; s.v = 0; s.path = [[s.x, s.y, 0]]; };
     const step = (dt) => {
       const k = K[s.fric], ff = f(), a = apg();
       // Runge-Kutta 2 sobre (u, v)
@@ -1623,8 +1623,10 @@ H.tab({
       s.x += um * dt; s.y += vm * dt; s.u += ax2 * dt; s.v += ay2 * dt; s.t += dt;
     };
     const cv = H.h('canvas');
-    const cs = H.autoCanvas(cv, (w) => Math.min(w * 0.56, 430), (ctx, w, h) => {
-      const kx = w / DOM.w, X = (x) => x * kx, Y = (y) => h - y * h / DOM.h;
+    // longitud (px) de la flecha del gradiente, que sirve de escala para las demás, y margen para que no se salgan del dibujo
+    const L0 = (w) => Math.min(60, 0.13 * w), MGpx = (w) => L0(w) + 24;
+    const cs = H.autoCanvas(cv, (w) => w * DOM.h / DOM.w, (ctx, w, h) => {
+      const kx = w / DOM.w, X = (x) => x * kx, Y = (y) => h - y * kx; // misma escala en los dos ejes
       ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
       // fondo: de altas (izquierda) a bajas presiones (derecha)
       const gr = ctx.createLinearGradient(0, 0, w, 0); gr.addColorStop(0, 'rgba(228,150,96,.18)'); gr.addColorStop(1, 'rgba(96,140,200,.18)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, w, h);
@@ -1638,11 +1640,13 @@ H.tab({
       // trayectoria con marcas cada 6 h
       ctx.strokeStyle = '#1c2836'; ctx.lineWidth = 2.5; ctx.beginPath(); s.path.forEach(([x, y], i) => (i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y)))); ctx.stroke();
       ctx.fillStyle = '#1c2836'; ctx.font = '10px system-ui'; ctx.textAlign = 'left';
-      let pk = 0; for (const [x, y, t] of s.path) { const k6 = Math.floor(t / 21600); if (k6 > pk) { pk = k6; ctx.beginPath(); ctx.arc(X(x), Y(y), 3, 0, 7); ctx.fill(); ctx.fillText(H.f(k6 * 6) + ' h', X(x) + 5, Y(y) - 5); } }
+      let pk = 0; for (const [x, y, t] of s.path) { const k6 = Math.floor(t / 21600); if (k6 > pk) { pk = k6; ctx.beginPath(); ctx.arc(X(x), Y(y), 3, 0, 7); ctx.fill(); if (Math.hypot(X(x) - X(s.x), Y(y) - Y(s.y)) > 75) ctx.fillText(H.f(k6 * 6) + ' h', X(x) + 5, Y(y) - 5); } }
+      // orientación: el norte, arriba
+      ctx.save(); ctx.strokeStyle = '#1c2836'; ctx.fillStyle = '#1c2836'; ctx.lineWidth = 1.6; const nx = w - 22, ny = 34; ctx.beginPath(); ctx.moveTo(nx, ny + 26); ctx.lineTo(nx, ny + 6); ctx.stroke(); ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(nx - 5, ny + 9); ctx.lineTo(nx + 5, ny + 9); ctx.fill(); ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.fillText('N', nx, ny + 38); ctx.restore();
       // fuerzas en la posición actual (escaladas)
       const k = K[s.fric], ff = f(), a = apg(), x0 = X(s.x), y0 = Y(s.y);
-      const sc = 60 / Math.max(a, 1e-6);
-      const vec = (ax, ay, col, lab) => { const L = Math.hypot(ax, ay) * sc; if (L < 3) return; const ex = x0 + ax * sc, ey = y0 - ay * sc; ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(ex, ey); ctx.stroke(); const an = Math.atan2(ey - y0, ex - x0); ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex - 9 * Math.cos(an - 0.4), ey - 9 * Math.sin(an - 0.4)); ctx.lineTo(ex - 9 * Math.cos(an + 0.4), ey - 9 * Math.sin(an + 0.4)); ctx.fill(); ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'left'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.strokeText(lab, ex + 4, ey - 4); ctx.fillText(lab, ex + 4, ey - 4); };
+      const sc = L0(w) / Math.max(a, 1e-6);
+      const vec = (ax, ay, col, lab) => { const L = Math.hypot(ax, ay) * sc; if (L < 3) return; const ex = x0 + ax * sc, ey = y0 - ay * sc; ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(ex, ey); ctx.stroke(); const an = Math.atan2(ey - y0, ex - x0); ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex - 9 * Math.cos(an - 0.4), ey - 9 * Math.sin(an - 0.4)); ctx.lineTo(ex - 9 * Math.cos(an + 0.4), ey - 9 * Math.sin(an + 0.4)); ctx.fill(); ctx.font = 'bold 11px system-ui'; const tw = ctx.measureText(lab).width, right = ex + 4 + tw > w - 4; ctx.textAlign = right ? 'right' : 'left'; const lx = right ? ex : ex + 4, ly = H.clamp(right ? ey + 17 : ey - 4, 30, h - 4); /* si no cabe a la derecha, debajo de la punta */ ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.strokeText(lab, lx, ly); ctx.fillText(lab, lx, ly); };
       vec(a, 0, '#b4531d', 'gradiente');
       vec(ff * s.v, -ff * s.u, '#1f6f8b', 'Coriolis');
       if (k) vec(-k * s.u, -k * s.v, '#6b6b6b', 'rozamiento');
@@ -1669,7 +1673,10 @@ H.tab({
     const loop = () => {
       for (let i = 0; i < 20; i++) { step(90); if (i % 4 === 3) s.path.push([s.x, s.y, s.t]); }
       upd();
-      if (s.x > DOM.w - 30e3 || s.x < 0 || s.y < 0 || s.y > DOM.h || s.t > 72 * 3600) { s.run = false; runB.textContent = '▶ Soltar el aire'; return; }
+      const W = cs.w || 800, mgm = MGpx(W) / (W / DOM.w); // margen en metros
+      // se detiene cuando la partícula se acerca a un borde hacia el que se mueve
+      const edge = (s.x > DOM.w - mgm && s.u > 0) || s.x < 0 || (s.y < 0.7 * mgm && s.v < 0) || (s.y > DOM.h - 1.3 * mgm && s.v > 0); // arriba, más margen: allí están los rótulos de las isobaras
+      if (edge || s.t > 72 * 3600) { s.run = false; runB.textContent = '▶ Soltar el aire'; return; }
       raf = requestAnimationFrame(loop);
     };
     const runB = H.h('button', { class: 'btn acc sm', type: 'button' }, '▶ Soltar el aire');
@@ -1682,12 +1689,12 @@ H.tab({
     const presets = H.h('div', { class: 'chipbar', style: { marginTop: '10px' } });
     [['Ecuador, sin rozamiento', 0, 'none'], ['Latitudes medias, atmósfera libre', 45, 'none'], ['Latitudes medias, sobre tierra', 45, 'land'], ['Polo, sobre el mar', 89, 'sea']].forEach(([l, la, fr]) => { const b = H.h('button', { class: 'chip', type: 'button' }, l); b.onclick = () => { s.lat = la; s.fric = fr; latS.set(la); fricSeg.set(fr); restart(); runB.click(); }; presets.append(b); });
     el.append(H.h('div', { class: 'card' }, H.h('h3', {}, 'Laboratorio: las fuerzas que mueven el aire'),
-      H.h('p', { class: 'sub' }, 'Las isobaras son rectas, como en la fig. 3.4. Suelta una partícula de aire en reposo junto a las altas presiones y observa su trayectoria y las fuerzas que actúan sobre ella: el gradiente (naranja), Coriolis (azul) y, cerca del suelo, el rozamiento (gris).'),
+      H.h('p', { class: 'sub' }, 'Las isobaras son rectas, como en la fig. 3.4. Suelta una partícula de aire en reposo junto a las altas presiones y observa su trayectoria y las fuerzas que actúan sobre ella: el gradiente (naranja), Coriolis (azul) y, cerca del suelo, el rozamiento (gris). El mapa abarca 3.200 × 1.800 km, con el norte arriba; la latitud elegida se aplica a todo él.'),
       H.h('div', { class: 'grid2' }, H.h('div', { class: 'viz framed' }, cv),
         H.h('div', {}, gS, latS, hemiSeg, H.h('div', { style: { height: '8px' } }), fricSeg,
           H.h('div', { class: 'row', style: { justifyContent: 'flex-start', marginTop: '10px' } }, H.h('span', { style: { flex: 'none' } }, runB)), presets,
           H.h('div', { class: 'readouts', style: { marginTop: '12px' } }, ro.v, ro.ang, ro.vg, ro.f, ro.bb, ro.t))),
-      H.html(`<p class="small">Viento geostrófico: <span class="formula">V<sub>g</sub> = (1/ρ f) · Δp/Δn</span>, con <i>f</i> = 2Ω sen φ. En la atmósfera libre el aire oscila alrededor de esa velocidad y termina soplando paralelo a las isobaras. El rozamiento lo frena, Coriolis (proporcional a la velocidad) se debilita y el gradiente consigue desviarlo hacia las bajas: unos 10–20° sobre el mar y 25–45° sobre tierra. En el ecuador <i>f</i> = 0: el aire va directo hacia las bajas presiones. Ver también <a href="${H.T1}#coriolis">Tema 1 · Efecto de Coriolis</a>.</p>`)));
+      H.html(`<p class="small">Viento geostrófico: <span class="formula">V<sub>g</sub> = (1/ρ f) · Δp/Δn</span>, con <i>f</i> = 2Ω sen φ. En la atmósfera libre el aire oscila alrededor de esa velocidad (oscilación inercial, con un periodo de 12 h / sen φ) y, en promedio, sopla paralelo a las isobaras; en la atmósfera real esa oscilación se va amortiguando. El rozamiento lo frena, Coriolis (proporcional a la velocidad) se debilita y el gradiente consigue desviarlo hacia las bajas: unos 10–20° sobre el mar y 25–45° sobre tierra. En el ecuador <i>f</i> = 0: el aire va directo hacia las bajas presiones. Ver también <a href="${H.T1}#coriolis">Tema 1 · Efecto de Coriolis</a>.</p>`)));
     reset(); upd();
 
     /* ================= B · convergencia y divergencia ================= */
