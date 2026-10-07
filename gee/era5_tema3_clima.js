@@ -21,7 +21,7 @@ var GLOBE = ee.Geometry.Rectangle([-180, -90, 180, 90], null, false);
 
 var era5 = ee.ImageCollection('ECMWF/ERA5/MONTHLY')
   .filter(ee.Filter.calendarRange(START, END, 'year'));
-print('Proyección nativa de ERA5 mensual:', era5.first().projection());
+print('Proyección nativa de ERA5 mensual:', era5.first().select('mean_sea_level_pressure').projection());
 
 var pad = function (m) { return m < 10 ? '0' + m : '' + m; };
 var P = [], U = [], V = [], R = [];

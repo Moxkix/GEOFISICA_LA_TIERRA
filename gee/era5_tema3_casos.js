@@ -23,13 +23,14 @@ var SL = ee.ImageCollection('ECMWF/ERA5/HOURLY');
 var PL = ee.ImageCollection('ECMWF/ERA5/HOURLY_PRESSURE_LEVELS');
 var LEV = [1000, 975, 950, 925, 900, 875, 850, 825, 800, 775, 750, 700, 650, 600, 550, 500];
 
-// Rejilla nativa de ERA5 (si la consulta no devuelve 0,25°, se usa la rejilla estándar)
-function grid(col, day) {
-  var p = ee.Image(col.filterDate(day, ee.Date(day).advance(1, 'day')).first()).projection().getInfo();
+// Rejilla nativa de ERA5, leída de una sola banda (no todas las bandas comparten proyección).
+// Si no es la de 0,25° en EPSG:4326, se usa la rejilla estándar.
+function grid(col, day, band) {
+  var p = ee.Image(col.filterDate(day, ee.Date(day).advance(1, 'day')).first()).select(band).projection().getInfo();
   var t = p.transform;
-  if (!t || Math.abs(t[0] - 0.25) > 1e-6) t = [0.25, 0, -180, 0, -0.25, 90];
-  print('Rejilla usada', p.crs, t);
-  return {crs: p.crs || 'EPSG:4326', crsTransform: t};
+  if (p.crs !== 'EPSG:4326' || !t || Math.abs(t[0] - 0.25) > 1e-6) t = [0.25, 0, -180, 0, -0.25, 90];
+  print('Rejilla usada (' + band + ')', p.crs, t);
+  return {crs: 'EPSG:4326', crsTransform: t};
 }
 function hourImg(col, iso) {
   return ee.Image(col.filterDate(ee.Date(iso), ee.Date(iso).advance(1, 'hour')).first());
@@ -83,7 +84,7 @@ function exp(img, name, region, g) {
 // ===================== A) DANA, 29-10-2024 =====================
 var DANA = ['2024-10-28T12:00:00', '2024-10-29T00:00:00', '2024-10-29T06:00:00', '2024-10-29T12:00:00', '2024-10-29T18:00:00', '2024-10-30T00:00:00'];
 var regDana = ee.Geometry.Rectangle([-20, 26, 12, 50], null, false);
-var gSL = grid(SL, '2024-10-29'), gPL = grid(PL, '2024-10-29');
+var gSL = grid(SL, '2024-10-29', 'mean_sea_level_pressure'), gPL = grid(PL, '2024-10-29', 'temperature_500hPa');
 var danaSup = ee.Image.cat(DANA.map(surf));
 var danaPre = ee.Image.cat([
   precip('2024-10-29T00:00:00', 24, 'r24'),
@@ -98,7 +99,7 @@ exp(danaAlt, 'dana_altura', regDana, gPL);
 var VS = [];
 for (var h = 0; h <= 60; h += 3) VS.push(new Date(Date.UTC(2026, 1, 23, 12 + h)).toISOString().slice(0, 19));
 var regVS = ee.Geometry.Rectangle([-25, 36, 10, 58], null, false);
-var gSL2 = grid(SL, '2026-02-24'), gPL2 = grid(PL, '2026-02-24');
+var gSL2 = grid(SL, '2026-02-24', 'mean_sea_level_pressure'), gPL2 = grid(PL, '2026-02-24', 'temperature_500hPa');
 var vsSup = ee.Image.cat(VS.map(function (iso) {
   var i = hourImg(SL, iso), k = tag(iso);
   return ee.Image.cat([surf(iso),
