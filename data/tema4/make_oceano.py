@@ -6,7 +6,8 @@ Todas las rejillas son globales de 1° (360 × 180), con NaN en tierra; se usan 
   oisst_hielo_1deg.tif          → ice (12 meses, % de concentración; días sin hielo = 0 %)
   oisst_anomalias_1deg.tif      → anom (5 meses señalados, °C respecto a 1991-2020; rejilla de 2°)
   modis_clorofila_05deg.tif     → chl (4 estaciones, DEF, MAM, JJA y SON; log10 de mg/m³)
-  hycom_superficie_1deg.tif     → sss (12 meses, salinidad práctica), u y v (12 meses, m/s)
+  hycom_salinidad_1deg.tif      → sss (12 meses, salinidad práctica)
+  hycom_corrientes_1deg.tif     → u y v (12 meses, m/s)   (o hycom_superficie_1deg.tif, con las tres, de la versión anterior)
   merra2_evap_prec_nativa.tif   → e y p (12 meses, mm/día; de la rejilla de 0,625° × 0,5° de MERRA-2 a 1°)
 
 Uso:  python3 data/tema4/make_oceano.py carpeta_con_los_tif [salida.json]
@@ -80,12 +81,16 @@ def main(a):
         out['chl'] = pack(chl, lo=-2, step=0.04); check('chl', out['chl'], chl)
         src['chl'] = 'NASA OBPG, MODIS-Aqua L3 (clorofila a), medias 2003-2022'
 
-    f = d / 'hycom_superficie_1deg.tif'
-    if f.exists():
-        arr, geo = read_tif(f)
-        sss = [g1(arr[m] * 0.001 + 20, geo) for m in range(12)]
-        u = [g1(arr[12 + m] * 0.001, geo) for m in range(12)]
-        v = [g1(arr[24 + m] * 0.001, geo) for m in range(12)]
+    # HYCOM: dos archivos en la rejilla nativa agrupada (≈1°) o, en la versión anterior del script, uno solo
+    fs, fc, f1 = d / 'hycom_salinidad_1deg.tif', d / 'hycom_corrientes_1deg.tif', d / 'hycom_superficie_1deg.tif'
+    if (fs.exists() and fc.exists()) or f1.exists():
+        if fs.exists() and fc.exists():
+            (a_s, g_s), (a_c, g_c) = read_tif(fs), read_tif(fc)
+        else:
+            a_s, g_s = read_tif(f1); a_c, g_c = a_s[12:], g_s
+        sss = [g1(a_s[m] * 0.001 + 20, g_s) for m in range(12)]
+        u = [g1(a_c[m] * 0.001, g_c) for m in range(12)]
+        v = [g1(a_c[12 + m] * 0.001, g_c) for m in range(12)]
         out['sss'] = pack([np.clip(s, 28, 41) for s in sss], lo=28, hi=41); check('sss', out['sss'], [np.clip(s, 28, 41) for s in sss])
         out['u'] = pack([np.clip(x, -1.6, 1.6) for x in u], lo=-1.6, hi=1.6); check('u', out['u'], [np.clip(x, -1.6, 1.6) for x in u])
         out['v'] = pack([np.clip(x, -1.6, 1.6) for x in v], lo=-1.6, hi=1.6); check('v', out['v'], [np.clip(x, -1.6, 1.6) for x in v])

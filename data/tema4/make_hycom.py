@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Convierte las exportaciones de gee/tema4_hycom.js en data/tema4/perfiles.json (variable PERFILES del hub).
-(La salinidad y las corrientes de superficie, hycom_superficie_1deg.tif, las procesa make_oceano.py.)
+(La salinidad y las corrientes de superficie, hycom_salinidad_1deg.tif y hycom_corrientes_1deg.tif, las procesa make_oceano.py.)
+Las rejillas de los mapas son las de HYCOM agrupadas (≈5°) y los cortes vienen en la resolución nativa (0,08°):
+aquí se pasan a celdas de 5° y a tramos de 1° (Atlántico, ecuador) o 0,1° (Gibraltar) por coordenadas.
 
   hycom_perfiles_5deg.tif   → prof: temperatura y salinidad en 19 profundidades, febrero y agosto, rejilla de 5°
   hycom_atlantico_25W.tif   → atl: corte norte-sur a 25° O (80° S – 70° N, cada 1°), 40 profundidades, media anual
@@ -11,7 +13,7 @@ Valores de HYCOM en bruto: temperatura y salinidad = bruto × 0,001 + 20.
 
 Uso:  python3 data/tema4/make_hycom.py carpeta_con_los_tif [salida.json]
 """
-import json, pathlib, sys
+import json, pathlib, sys, warnings
 import numpy as np
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from gt4 import read_tif, cell_mean, pack, unpack, size_kb
@@ -34,16 +36,24 @@ def report(name, e, ref):
 
 
 def section(arr, geo, axis, n_levels, start, step, count):
-    """Extrae un corte (perfil × profundidades) de una imagen de una fila o una columna."""
+    """Corte (bandas × puntos) de una imagen estrecha: se promedian las columnas (corte norte-sur, axis='lat') o las
+    filas (corte oeste-este, axis='lon') y luego los píxeles cuyo centro cae en cada tramo de `step` grados
+    centrado en start + i·step. Sirve tanto para la resolución nativa de HYCOM como para rejillas más gruesas."""
     x0, y0, dx, dy = geo
+    tgt = start + np.arange(count) * step
     out = []
     for k in range(arr.shape[0]):
         b = arr[k]
-        v = b[:, 0] if axis == 'lat' else b[0, :]
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', RuntimeWarning)  # columnas o filas sin datos (tierra) → NaN
+            v = np.nanmean(b, axis=1) if axis == 'lat' else np.nanmean(b, axis=0)
         coord = (y0 - (np.arange(len(v)) + 0.5) * dy) if axis == 'lat' else (x0 + (np.arange(len(v)) + 0.5) * dx)
-        tgt = start + np.arange(count) * step
-        idx = [int(np.argmin(np.abs(coord - t))) for t in tgt]
-        out.append(np.array([v[i] if abs(coord[i] - t) < abs(step) * 0.6 else np.nan for i, t in zip(idx, tgt)]))
+        row = np.full(count, np.nan)
+        for i, t in enumerate(tgt):
+            m = (np.abs(coord - t) <= abs(step) / 2 + 1e-9) & np.isfinite(v)
+            if m.any():
+                row[i] = v[m].mean()
+        out.append(row)
     return np.stack(out)  # bandas × puntos
 
 
