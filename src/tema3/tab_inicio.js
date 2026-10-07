@@ -73,7 +73,7 @@ H.tab({
           <div class="ro bl"><div class="k">Precipitación anual</div><div class="v">${H.f(p[12])} <small>mm</small></div></div>
           <div class="ro hl"><div class="k">Régimen</div><div class="v">${reg.name} <small>· máx. ${H.MES3[iMx]}</small></div></div>
         </div>
-        <p class="small">Precipitación de ${T3.stLabel(st)}, a ${H.f(d)} km (normales OMM 1991–2020).${alt != null ? ' Altitud del modelo digital SRTM.' : ''}</p>`;
+        <p class="small">Precipitación de ${T3.stLabel(st)}, a ${H.f(d)} km (normales OMM 1991–2020).${alt != null ? ' Altitud del núcleo de población (modelo digital SRTM).' : ''}</p>`;
       const row = H.h('div', { class: 'row', style: { justifyContent: 'flex-start' } });
       const b1 = H.h('button', { class: 'btn acc sm', type: 'button', style: { flex: 'none' } }, H.place.def ? 'Elegir mi municipio' : 'Cambiar municipio'); b1.onclick = H.openPlacePicker;
       const b2 = H.h('button', { class: 'btn ghost sm', type: 'button', style: { flex: 'none' } }, 'Ver su climograma →'); b2.onclick = () => H.go('regimenes');
