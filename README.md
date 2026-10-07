@@ -6,7 +6,7 @@ Ver en línea: https://moxkix.github.io/GEOFISICA_LA_TIERRA/
 
 Interactivos de apoyo a la tutoría de **Geografía General I (Geografía Física)**, Grado en Geografía e Historia, UNED.
 
-La portada (`index.html`) enlaza un hub por tema. Cada hub es un único archivo `index.html` autocontenido (HTML + CSS + JavaScript sin dependencias ni llamadas externas) que funciona sin conexión; solo la geolocalización del navegador requiere permiso y HTTPS. El municipio elegido por el alumno se recuerda de un tema a otro.
+La portada (`index.html`) enlaza un hub por tema. Cada hub es un único archivo `index.html` autocontenido (HTML + CSS + JavaScript sin dependencias ni llamadas externas) que funciona sin conexión; solo la geolocalización del navegador requiere permiso y HTTPS. El municipio elegido se recuerda de un tema a otro.
 
 ## Autoría y licencia
 © 2026 **Iñaki Moro**, profesor-tutor de la UNED, Centro Asociado de Vitoria-Gasteiz. Material de apoyo a la tutoría, **no oficial**: no procede del equipo docente de la asignatura ni de la UNED.
