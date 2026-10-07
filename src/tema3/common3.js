@@ -133,7 +133,8 @@ const T3 = (() => {
       ctx.stroke(); ctx.setLineDash([]);
       if (o.label !== false && cand.length) {
         cand.sort((u, v) => u[2] - v[2]);
-        const ok = cand.find(([x, y]) => x > 22 && x < P.w - 22 && y > 10 && y < P.h - 10 && labels.every(([[lx, ly]]) => Math.abs(lx - x) > 38 || Math.abs(ly - y) > 16));
+        const avoid = o.avoid || []; // recuadros [x, y, semiancho, semialto] que las etiquetas no deben tapar
+        const ok = cand.find(([x, y]) => x > 22 && x < P.w - 22 && y > 10 && y < P.h - 10 && labels.every(([[lx, ly]]) => Math.abs(lx - x) > 38 || Math.abs(ly - y) > 16) && avoid.every(([ax, ay, hw, hh]) => Math.abs(ax - x) > hw + 19 || Math.abs(ay - y) > hh + 7));
         if (ok) labels.push([[ok[0], ok[1]], L]);
       }
     });

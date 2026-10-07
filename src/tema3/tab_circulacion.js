@@ -17,17 +17,34 @@ H.tab({
       ['A', 37, -35, 'Azores'], ['A', 33, -145, 'Hawái'], ['A', 49, 100, 'Siberia'], ['A', 50, -105, 'Norteamérica'], ['A', -28, -12, 'Santa Elena'], ['A', -32, -95, 'Pacífico sur'], ['A', -31, 75, 'Mascareñas'], ['A', -28, 130, 'Australia'], ['A', -30, 20, 'Sudáfrica'], ['A', -25, -55, 'Sudamérica'],
       ['B', 62, -30, 'Islandia'], ['B', 52, -175, 'Aleutianas'], ['B', 28, 68, 'baja asiática'], ['B', 32, -112, 'baja norteamericana'], ['B', 22, 5, 'baja sahariana'], ['B', -62, 0, 'bajas subpolares'], ['B', -15, 135, 'baja australiana'], ['B', -15, 25, 'baja africana'], ['B', -12, -60, 'baja sudamericana'],
     ];
-    const extrema = (g) => {
+    // Recuadros donde la presión «a nivel del mar» es una extrapolación sobre terreno muy alto (Tíbet, Altiplano,
+    // Rocosas centrales, meseta mexicana): no se marcan centros de acción
+    const EXC = [[26, 40, 72, 106], [-30, -8, -76, -62], [33, 46, -111, -102], [18, 28, -106, -98]];
+    const exCache = {};
+    const extrema = (g, m) => {
+      if (exCache[m]) return exCache[m];
       const out = [], R = 5; // ±10° en la rejilla de 2°
       for (let j = 0; j < g.ny; j++) {
         const lat = g.latAt(j); if (Math.abs(lat) > 68) continue;
         for (let i = 0; i < g.nx; i++) {
-          const v = g.get(i, j); let mx = true, mn = true;
-          for (let dj = -R; dj <= R && (mx || mn); dj++) for (let di = -R; di <= R; di++) { if (!di && !dj) continue; const jj = j + dj; if (jj < 0 || jj >= g.ny) continue; const w = g.get((i + di + g.nx) % g.nx, jj); if (w >= v) mx = false; if (w <= v) mn = false; }
-          if (mx && v >= 1017) out.push(['A', lat, g.lonAt(i), v]); else if (mn && v <= 1009) out.push(['B', lat, g.lonAt(i), v]);
+          const lon = g.lonAt(i); if (EXC.some(([a, b, c, d]) => lat >= a && lat <= b && lon >= c && lon <= d)) continue;
+          const v = g.get(i, j), me = j * g.nx + i; let mx = true, mn = true;
+          for (let dj = -R; dj <= R && (mx || mn); dj++) for (let di = -R; di <= R; di++) {
+            if (!di && !dj) continue; const jj = j + dj; if (jj < 0 || jj >= g.ny) continue;
+            const ii = (i + di + g.nx) % g.nx, w = g.get(ii, jj), first = jj * g.nx + ii < me; // los empates se resuelven por orden
+            if (w > v || (w === v && first)) mx = false; if (w < v || (w === v && first)) mn = false;
+          }
+          if (mx && v >= 1017) out.push(['A', lat, lon, v]); else if (mn && v <= 1009) out.push(['B', lat, lon, v]);
         }
       }
-      return out.map(([k, la, lo, v]) => { let best = null, bd = 26; for (const c of CENT) { if (c[0] !== k) continue; const d = Math.hypot(la - c[1], ((lo - c[2] + 540) % 360 - 180) * Math.cos(la * H.D2R)); if (d < bd) { bd = d; best = c[3]; } } return [k, la, lo, v, best]; });
+      // cada nombre del manual se asigna solo al centro más cercano, y a menos de 15° (corregidos por la latitud)
+      const names = out.map(() => null);
+      for (const c of CENT) {
+        let bi = -1, bd = 15;
+        out.forEach(([k, la, lo], i) => { if (k !== c[0]) return; const d = Math.hypot(la - c[1], ((lo - c[2] + 540) % 360 - 180) * Math.cos(((la + c[1]) / 2) * H.D2R)); if (d < bd) { bd = d; bi = i; } });
+        if (bi >= 0 && !names[bi]) names[bi] = c[3];
+      }
+      return (exCache[m] = out.map((e, i) => [...e, names[i]]));
     };
     const itcz = (m) => { // latitud donde el viento meridiano pasa de sur (v>0) a norte (v<0)
       const pts = [];
@@ -49,10 +66,12 @@ H.tab({
       ctx.setLineDash([3, 4]); ctx.strokeStyle = 'rgba(28,40,54,.3)'; for (const la of [0, 30, -30, 60, -60]) { ctx.beginPath(); ctx.moveTo(0, P.Y(la)); ctx.lineTo(w, P.Y(la)); ctx.stroke(); } ctx.setLineDash([]);
       if (!G) return;
       const levels = []; for (let L = 980; L <= 1044; L += 4) levels.push(L);
-      T3.contour(ctx, T3.refine(G.p[s.m], 2), levels, P, { color: 'rgba(28,40,54,.65)', width: 0.9, fmt: (L) => H.f(L) });
+      const ext = s.lab ? extrema(G.p[s.m], s.m) : [];
+      const avoid = ext.map(([k, la, lo, v, nm]) => [P.X(lo), P.Y(la) + (nm ? 7 : 0), nm ? Math.max(12, nm.length * 3.2) : 12, nm ? 19 : 12]);
+      T3.contour(ctx, T3.refine(G.p[s.m], 2), levels, P, { color: 'rgba(28,40,54,.65)', width: 0.9, fmt: (L) => H.f(L), avoid });
       if (s.arr) T3.arrows(ctx, G.u[s.m], G.v[s.m], P, { step: 8, scale: 1.4, base: 5, maxLen: 20, color: 'rgba(28,40,54,.8)', min: 1 });
       if (s.itcz) { const pts = itcz(s.m); ctx.strokeStyle = '#b0393a'; ctx.lineWidth = 2.5; ctx.setLineDash([7, 4]); ctx.beginPath(); let f = true; for (const [lo, la] of pts) { if (la == null) { f = true; continue; } const x = P.X(lo), y = P.Y(la); f ? ctx.moveTo(x, y) : ctx.lineTo(x, y); f = false; } ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth = 1; const q = pts.find((p) => p[0] >= -150 && p[1] != null); if (q) { ctx.font = 'bold 11px system-ui'; ctx.fillStyle = '#b0393a'; ctx.textAlign = 'left'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.strokeText('ZCIT', P.X(q[0]), P.Y(q[1]) - 7); ctx.fillText('ZCIT', P.X(q[0]), P.Y(q[1]) - 7); } }
-      if (s.lab) for (const [k, la, lo, v, nm] of extrema(G.p[s.m])) { const x = P.X(lo), y = P.Y(la); ctx.font = 'bold 18px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.strokeText(k, x, y); ctx.fillStyle = k === 'A' ? '#b4531d' : '#1f6f8b'; ctx.fillText(k, x, y); if (nm) { ctx.font = 'bold 10px system-ui'; ctx.lineWidth = 3; ctx.strokeText(nm, x, y + 15); ctx.fillStyle = '#1c2836'; ctx.fillText(nm, x, y + 15); } }
+      for (const [k, la, lo, v, nm] of ext) { const y = P.Y(la); ctx.font = 'bold 10px system-ui'; const hw = nm ? ctx.measureText(nm).width / 2 + 3 : 10, x = H.clamp(P.X(lo), hw, w - hw); ctx.font = 'bold 18px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.strokeText(k, x, y); ctx.fillStyle = k === 'A' ? '#b4531d' : '#1f6f8b'; ctx.fillText(k, x, y); if (nm) { ctx.font = 'bold 10px system-ui'; ctx.lineWidth = 3; ctx.strokeText(nm, x, y + 15); ctx.fillStyle = '#1c2836'; ctx.fillText(nm, x, y + 15); } }
       if (s.pick) { ctx.strokeStyle = '#1c2836'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(P.X(s.pick[1]), P.Y(s.pick[0]), 6, 0, 7); ctx.stroke(); }
     });
     const ro = { pos: H.ro('Posición'), p: H.ro('Presión media a nivel del mar', 'hl'), w: H.ro('Viento medio a 10 m', 'bl') };
@@ -82,14 +101,14 @@ H.tab({
       const pp = [], po = [], uu = [];
       for (let lat = -80; lat <= 80; lat += 2) { let a = 0, n = 0, o = 0, no = 0, u = 0; for (let lon = -179; lon < 180; lon += 2) { const v = G.p[s.m].at(lat, lon); a += v; n++; if (H.land(lat, lon) < 0.3) { o += v; no++; } u += G.u[s.m].at(lat, lon); } pp.push([lat, a / n]); po.push([lat, no > 10 ? o / no : null]); uu.push([lat, u / n * 3.6]); }
       const xT = [-80, -60, -30, 0, 30, 60, 80].map((v) => ({ v, label: v === 0 ? '0°' : Math.abs(v) + '°' + (v < 0 ? 'S' : 'N') }));
-      zp.draw({ xMin: -80, xMax: 80, yMin: 995, yMax: 1025, xTicks: xT, yTicks: [1000, 1005, 1010, 1015, 1020, 1025].map((v) => ({ v, label: H.f(v) })), yLabel: 'hPa', hlines: [{ y: 1013.25, color: '#8a96a3', label: '1.013,25' }], series: [{ pts: po, color: '#1f6f8b', width: 2 }, { pts: pp, color: '#1c2836', width: 2.5 }],
-        after: (ctx, X, Y) => { ctx.font = '10.5px system-ui'; ctx.fillStyle = '#5a6878'; ctx.textAlign = 'center'; [[0, 'bajas ecuatoriales', 1007], [30, 'altas subtropicales', 1022], [-30, 'altas subtropicales', 1022], [-62, 'bajas subpolares', 997], [60, 'bajas subpolares', 1004]].forEach(([x, t, y]) => ctx.fillText(t, X(x), Y(y))); } });
+      zp.draw({ xMin: -80, xMax: 80, yMin: 978, yMax: 1026, xTicks: xT, yTicks: [980, 990, 1000, 1010, 1020].map((v) => ({ v, label: H.f(v) })), yLabel: 'hPa', hlines: [{ y: 1013.25, color: '#8a96a3', label: '1.013,25' }], series: [{ pts: po, color: '#1f6f8b', width: 2 }, { pts: pp, color: '#1c2836', width: 2.5 }],
+        after: (ctx, X, Y) => { ctx.font = '10.5px system-ui'; ctx.fillStyle = '#5a6878'; ctx.textAlign = 'center'; [[0, 'bajas ecuatoriales', 1006], [30, 'altas subtropicales', 1023], [-30, 'altas subtropicales', 1023], [-44, 'bajas subpolares →', 984], [60, 'bajas subpolares', 1004]].forEach(([x, t, y]) => ctx.fillText(t, X(x), Y(y))); } });
       zu.draw({ xMin: -80, xMax: 80, yMin: -25, yMax: 35, xTicks: xT, yTicks: [-20, -10, 0, 10, 20, 30].map((v) => ({ v, label: v })), yLabel: 'km/h', hlines: [{ y: 0, color: '#1c2836', dash: [] }], series: [{ pts: uu, color: '#b4531d', width: 2.5, fill: 'rgba(180,83,29,.12)' }],
-        after: (ctx, X, Y) => { ctx.font = '10.5px system-ui'; ctx.fillStyle = '#5a6878'; ctx.textAlign = 'center'; [[15, 'alisios (del este)', -18], [-15, 'alisios (del este)', -18], [47, 'vientos del oeste', 26], [-50, 'vientos del oeste', 30], [-72, 'polares del este', -12]].forEach(([x, t, y]) => ctx.fillText(t, X(x), Y(y))); } });
+        after: (ctx, X, Y) => { ctx.font = '10.5px system-ui'; ctx.fillStyle = '#5a6878'; ctx.textAlign = 'center'; [[15, 'alisios (del este)', -18], [-15, 'alisios (del este)', -18], [47, 'vientos del oeste', 26], [-50, 'vientos del oeste', 30], [-66, 'polares del este', -21]].forEach(([x, t, y]) => ctx.fillText(t, X(x), Y(y))); } });
     };
     if (G) {
       el.append(H.h('div', { class: 'card' }, H.h('h3', {}, 'El esquema zonal, paralelo a paralelo'),
-        H.h('p', { class: 'sub' }, 'Medias de cada paralelo para el mes elegido. Arriba, la presión (negro: todo el paralelo; azul: solo océanos). Abajo, el viento del oeste (positivo) o del este (negativo) a 10 m.'),
+        H.h('p', { class: 'sub' }, 'Medias de cada paralelo para el mes elegido. Primer gráfico: la presión (negro: todo el paralelo; azul: solo océanos). Segundo: el viento del oeste (positivo) o del este (negativo) a 10 m.'),
         H.h('div', { class: 'grid2 even' }, H.h('div', { class: 'viz' }, zp.st.canvas), H.h('div', { class: 'viz' }, zu.st.canvas))));
       drawZ();
     }

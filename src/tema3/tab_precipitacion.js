@@ -78,7 +78,7 @@ H.tab({
     cv.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
     cv.style.cursor = 'crosshair';
     const legend = H.h('div');
-    const updLeg = () => { legend.innerHTML = ''; legend.append(T3.legend(T3.rColor, 0, 4000, [0, 250, 500, 1000, 2000, 3000, 4000], (v) => H.f(s.m < 0 ? v : v / 12) + (v === 4000 ? (s.m < 0 ? ' mm/año' : ' mm/mes') : ''), 420)); };
+    const updLeg = () => { legend.innerHTML = ''; legend.append(T3.legend(T3.rColor, 0, 4000, [0, 500, 1000, 2000, 3000, 4000], (v) => H.f(s.m < 0 ? v : v / 12), 420), H.h('div', { class: 'small', style: { color: 'var(--muted)' } }, s.m < 0 ? 'mm al año' : 'mm al mes')); };
     const mS = H.slider('Periodo', -1, 11, 1, s.m, (v) => (v < 0 ? 'año completo' : H.MESES[v]), (v) => { s.m = v; updLeg(); cs.redraw(); if (s.pick) pick(...s.pick); drawZ(); });
     const chk = (k, l) => { const c = H.h('input', { type: 'checkbox', checked: s[k] }); c.onchange = () => { s[k] = c.checked; cs.redraw(); }; return H.h('label', { class: 'chk' }, c, l); };
     const mapCard = H.h('div', { class: 'card' }, H.h('h3', {}, 'Mapa mundial de isoyetas'));
@@ -96,7 +96,7 @@ H.tab({
     const drawZ = () => {
       if (!G) return;
       const g = s.m < 0 ? G.ann : G.mon[s.m], f = s.m < 0 ? 1 : 12, all = [], land = [], sea = [];
-      for (let j = 0; j < g.ny; j++) { let a = 0, n = 0, l = 0, nl = 0, o = 0, no = 0; const lat = g.latAt(j); for (let i = 0; i < g.nx; i++) { const v = g.get(i, j) * f, lo = g.lonAt(i), ld = H.land(lat, lo) > 0.5; a += v; n++; if (ld) { l += v; nl++; } else { o += v; no++; } } all.push([lat, a / n]); land.push([lat, nl > 3 ? l / nl : null]); sea.push([lat, no > 3 ? o / no : null]); }
+      for (let j = 0; j < g.ny; j++) { let a = 0, n = 0, l = 0, nl = 0, o = 0, no = 0; const lat = g.latAt(j); for (let i = 0; i < g.nx; i++) { const v = g.get(i, j) * f, lo = g.lonAt(i), ld = H.land(lat, lo) > 0.5; a += v; n++; if (ld) { l += v; nl++; } else { o += v; no++; } } all.push([lat, a / n]); land.push([lat, nl >= 8 ? l / nl : null]); sea.push([lat, no >= 8 ? o / no : null]); /* al menos 16° de longitud de tierra (o mar) en el paralelo */ }
       const mx = Math.max(...all.map((p) => p[1]), ...sea.filter((p) => p[1] != null).map((p) => p[1]));
       zc.draw({ xMin: -90, xMax: 90, yMin: 0, yMax: Math.ceil(mx / 500) * 500, xTicks: [-90, -60, -30, 0, 30, 60, 90].map((v) => ({ v, label: v === 0 ? '0°' : Math.abs(v) + '°' + (v < 0 ? 'S' : 'N') })), yTicks: [0, 500, 1000, 1500, 2000, 2500, 3000].filter((v) => v <= mx + 500).map((v) => ({ v, label: H.f(v) })), yLabel: s.m < 0 ? 'mm al año' : 'mm (anualizados)',
         hlines: [{ y: G.mean, color: '#1c2836', label: `media mundial ${H.f(G.mean)} mm` }],
@@ -126,7 +126,7 @@ H.tab({
     el.append(H.h('div', { class: 'card' }, H.h('h3', {}, 'El ciclo hidrológico en cifras'),
       H.h('p', { class: 'sub' }, 'Flujos anuales medios en miles de km³ (Trenberth y otros, 2007). Sobre los océanos se evapora más de lo que llueve; sobre los continentes, al revés. La diferencia vuelve al mar por los ríos.'),
       H.h('div', { class: 'viz wide-svg', style: { maxWidth: '760px', margin: '0 auto' }, html: svg }),
-      H.html(`<p class="small">En total caen unos ${H.f(486)} mil km³ al año: repartidos sobre toda la Tierra (510 millones de km²) equivalen a unos ${H.f(486e3 / 510e6 * 1e6)} mm. ${G ? `ERA5 da ${H.f(G.mean)} mm para 1991–2020.` : ''} Las estimaciones actuales van de unos 950 a 1.050 mm al año (2,6–2,9 mm diarios), es decir, unos <b>16 millones de toneladas de agua por segundo</b>.</p>`)));
+      H.html(`<p class="small">En total caen unos ${H.f(486)} mil km³ al año: repartidos sobre toda la Tierra (510 millones de km²) equivalen a unos ${H.f(486e3 / 510e6 * 1e6)} mm. Las estimaciones actuales basadas en observaciones van de unos 950 a 1.050 mm al año (2,6–2,9 mm diarios), es decir, unos <b>16 millones de toneladas de agua por segundo</b>.${G ? ` ERA5 da ${H.f(G.mean)} mm para 1991–2020, algo por encima: los reanálisis tienden a exagerar la lluvia sobre los océanos tropicales.` : ''}</p>`)));
 
     /* ================= D · ejercicio 2: corte de África occidental ================= */
     const TR = ['65344', '65330', '61099', '61052', '61043', '61024', '61017'].map((id) => T3.byId(id));

@@ -89,7 +89,7 @@
       ro.bu.v.innerHTML = `${T3.fT(sg.T[k])} <small>HR ${H.f(T3.hr(sg.T[k], sg.Td[k]))} %</small>`;
       ro.d.v.innerHTML = `${T3.fT(sg.T[k] + T3.DALR * 0.85)} <small>(+${H.f(T3.DALR * 0.85, 1)} °C por compresión)</small>`;
       const t8 = S.field('t8', st.i).at(42.4, -3.7), p0 = S.field('p', st.i).at(42.4, -3.7), z8 = 287.05 * (t8 + 273.15 + 6) / 9.80665 * Math.log(p0 / 850);
-      ro.t8.v.innerHTML = `${T3.fT(t8)} <small>a ≈ ${H.f(z8)} m; bajado al nivel del mar: ${T3.fT(t8 + T3.DALR * z8 / 1000)}</small>`;
+      ro.t8.v.innerHTML = `${T3.fT(t8)} <small>a ≈ ${H.f(z8)} m; bajado al nivel del mar: ${T3.fT(t8 + T3.DALR * z8 / 1000)}${VSUR.srcAlt && VSUR.srcAlt !== 'ERA5' ? ' (' + VSUR.srcAlt.split(' ')[0] + ')' : ''}</small>`;
       cs.redraw();
     };
     const sl = H.slider('Hora', 0, S.n - 1, 1, st.i, (v) => S.label(v), (v) => { st.i = v; upd(); });
@@ -149,6 +149,7 @@
       tw(ctx); ctx.fillText('500 hPa: isohipsas (m) · temperatura · chorro', 8, 8);
     });
     const ro = { z: H.ro('Isohipsa mínima de 500 hPa', 'bl'), t: H.ro('Temperatura en el núcleo a 500 hPa'), p: H.ro('Presión mínima en superficie (región)'), r: H.ro('Precipitación del día 29 (ERA5)', 'hl') };
+    ro.r.classList.add('wide');
     const upd = () => {
       const z = S.field('z5', st.i), t = S.field('t5', st.i), p = S.field('p', st.i); let zm = 1e9, zi = 0; for (let k = 0; k < z.data.length; k++) if (z.data[k] < zm) { zm = z.data[k]; zi = k; }
       const la = z.latAt(Math.floor(zi / z.nx)), lo = z.lonAt(zi % z.nx);
@@ -161,7 +162,8 @@
     const sl = H.slider('Hora', 0, S.n - 1, 1, st.i, (v) => S.label(v), (v) => { st.i = v; upd(); });
     card.append(sl, H.h('div', { class: 'grid2 even' }, H.h('div', { class: 'viz framed' }, sfc.cv), H.h('div', { class: 'viz framed' }, alt.cv)),
       H.h('div', { class: 'readouts', style: { marginTop: '10px' } }, ro.z, ro.t, ro.p, ro.r),
-      H.html('<p class="small">Compara los dos mapas: en superficie apenas hay una borrasca débil y el viento del este empuja aire mediterráneo hacia la costa; a 500 hPa, en cambio, hay una baja cerrada y muy fría (isohipsas bajas en el centro) desgajada de la circulación del oeste. Es el caso en que el manual dice que «no siempre existe correspondencia» entre superficie y altura. En azul, a la izquierda, la precipitación de las 6 horas anteriores (ERA5). El reanálisis, con celdas de unos 25 km, se queda muy corto frente a los valores locales observados.</p>'), H.h('div', { class: 'small' }, 'Temperatura a 500 hPa:'), T3.legend(T3.t5Color, -32, -4, [-30, -25, -20, -15, -10, -5], (v) => v + ' °C', 320));
+      H.html('<p class="small">Compara los dos mapas: en superficie apenas hay una borrasca débil y el viento del este empuja aire mediterráneo hacia la costa; a 500 hPa, en cambio, hay una baja cerrada y muy fría (isohipsas bajas en el centro) desgajada de la circulación del oeste. Es el caso en que el manual dice que «no siempre existe correspondencia» entre superficie y altura. En azul, a la izquierda, la precipitación de las 6 horas anteriores (ERA5). El reanálisis, con celdas de unos 25 km, se queda muy corto frente a los valores locales observados.</p>'),
+      H.html(`<p class="small">Fuentes: presión en superficie y precipitación, ERA5 (Copernicus/ECMWF); niveles de 850, 500 y 250 hPa, ${DANA.srcAlt && DANA.srcAlt !== 'ERA5' ? DANA.srcAlt + ', porque Google Earth Engine no tiene esas horas de ERA5 en niveles de presión' : 'ERA5 (la altura de 500 hPa se calcula sumando el espesor 1000–500 hPa a la de 1000 hPa)'}.</p>`), H.h('div', { class: 'small' }, 'Temperatura a 500 hPa:'), T3.legend(T3.t5Color, -32, -4, [-30, -25, -20, -15, -10, -5], (v) => v + ' °C', 320));
     upd();
   };
 })();
