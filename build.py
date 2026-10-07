@@ -8,6 +8,22 @@ ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0
         "fill='%23cfe0ea' stroke='%231c2836' stroke-width='2'/%3E%3Cpath d='M2 16h28M16 2c-6 7-6 21 0 28M16 2c6 7 6 21 0 28' fill='none' "
         "stroke='%231c2836' stroke-width='1.5'/%3E%3C/svg%3E")
 KICKER = 'Geografía General I · Geografía Física · UNED'
+REPO = 'https://github.com/Moxkix/GEOFISICA_LA_TIERRA'
+SITE = 'https://moxkix.github.io/GEOFISICA_LA_TIERRA/'
+CC = 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es'
+META = (f'<meta name="author" content="Iñaki Moro">\n<link rel="license" href="{CC}">\n'
+        '<meta name="copyright" content="© 2026 Iñaki Moro · contenidos CC BY-NC-SA 4.0 · código MIT">')
+
+def site_foot(copernicus, cls='site-foot', extra=''):
+    """Pie común: autoría, carácter no oficial, licencias, aviso de Copernicus (si se usan datos de ERA5), uso de IA y cita."""
+    cop = ('Contiene información modificada del Servicio de Cambio Climático de Copernicus (2026): reanálisis ERA5. '
+           'Ni la Comisión Europea ni el ECMWF son responsables del uso que se haga de esa información. ') if copernicus else ''
+    return f"""<footer class="{cls}">{extra}
+<p><b>Autoría:</b> Iñaki Moro, profesor-tutor de la UNED, Centro Asociado de Vitoria-Gasteiz (2026). Material de apoyo a la tutoría, <b>no oficial</b>: no procede del equipo docente de la asignatura ni de la UNED.</p>
+<p><b>Licencia:</b> los contenidos (textos, ilustraciones y diseño de los interactivos) se publican con licencia <a rel="license noopener" href="{CC}" target="_blank">CC BY-NC-SA 4.0</a>: se pueden compartir y adaptar citando la autoría, sin fines comerciales y con la misma licencia. El código, con <a href="{REPO}/blob/main/LICENSE" target="_blank" rel="noopener">licencia MIT</a>. Los datos de terceros conservan sus licencias (fuentes en la pestaña Inicio de cada tema y en el <a href="{REPO}#datos-y-licencias" target="_blank" rel="noopener">README</a>).</p>
+<p>{cop}Elaborado con ayuda de herramientas de inteligencia artificial (Claude, de Anthropic), bajo la dirección y supervisión del autor.</p>
+<p><b>Cómo citar:</b> Moro, I. (2026). <i>Interactivos de Geografía General I (Geografía Física)</i>. UNED, Centro Asociado de Vitoria-Gasteiz. <a href="{SITE}">{SITE}</a></p>
+</footer>"""
 
 def data_js(names):
     out = []
@@ -19,7 +35,7 @@ def data_js(names):
             out.append(f"const {var}=null;")
     return '\n'.join(out) + '\n'
 
-def page(title, desc, header_title, body_js, home='../index.html'):
+def page(title, desc, header_title, body_js, home='../index.html', copernicus=False):
     return f"""<!doctype html>
 <html lang="es">
 <head>
@@ -28,6 +44,7 @@ def page(title, desc, header_title, body_js, home='../index.html'):
 <title>{title}</title>
 <meta name="description" content="{desc}">
 <link rel="icon" href="{ICON}">
+{META}
 <style>{CSS}</style>
 </head>
 <body>
@@ -39,6 +56,7 @@ def page(title, desc, header_title, body_js, home='../index.html'):
   <nav class="tabs" role="tablist" aria-label="Apartados del tema"></nav>
 </header>
 <main></main>
+{site_foot(copernicus)}
 <script>
 {body_js}
 </script>
@@ -56,6 +74,7 @@ TEMAS = {
                'tab_coriolis.js', 'tab_estaciones.js', 'tab_proyecciones.js', 'tab_escala.js', 'tab_relieve.js', 'tab_cuestionario.js'],
     ),
     'tema2': dict(
+        copernicus=True,
         title='Tema 2 · La temperatura',
         desc='Interactivos del Tema 2 de Geografía General I (Geografía Física, UNED): la atmósfera, la insolación terrestre y la temperatura.',
         header='Tema 2 · Elementos y factores climáticos I. La temperatura',
@@ -64,6 +83,7 @@ TEMAS = {
                'tab_diario.js', 'tab_anual.js', 'tab_isotermas.js', 'tab_cuestionario.js'],
     ),
     'tema3': dict(
+        copernicus=True,
         title='Tema 3 · La presión y la humedad',
         desc='Interactivos del Tema 3 de Geografía General I (Geografía Física, UNED): presión atmosférica, vientos y circulación general, humedad y precipitación.',
         header='Tema 3 · Elementos y factores climáticos II. La presión y la humedad atmosféricas',
@@ -73,6 +93,7 @@ TEMAS = {
                'tab_adiabatico.js', 'tab_frentes.js', 'tab_precipitacion.js', 'tab_regimenes.js', 'tab_cuestionario.js'],
     ),
     'tema4': dict(
+        copernicus=True,
         title='Tema 4 · Los océanos',
         desc='Interactivos del Tema 4 de Geografía General I (Geografía Física, UNED): las aguas marinas, sus movimientos (mareas, olas, corrientes, circulación abisal, nivel del mar) y la relación entre océano y atmósfera.',
         header='Tema 4 · Los océanos',
@@ -89,13 +110,14 @@ TEMAS = {
 for key, t in TEMAS.items():
     src = R / 'src' / key
     js = data_js(t['data']) + CORE + '\n' + '\n'.join((src / f).read_text() for f in t['files'] if (src / f).exists()) + '\nH.start();\n'
-    html = page(t['title'], t['desc'], t['header'], js)
+    html = page(t['title'], t['desc'], t['header'], js, copernicus=t.get('copernicus', False))
     out = R / key / 'index.html'
     out.parent.mkdir(exist_ok=True)
     out.write_text(html)
     print(f'{key}/index.html', round(len(html.encode()) / 1024), 'KB')
 
 # ---------- portada común ----------
-portada = (R / 'src/portada.html').read_text().replace('/*CSS*/', CSS).replace('ICON_HREF', ICON)
+portada = (R / 'src/portada.html').read_text().replace('/*CSS*/', CSS).replace('ICON_HREF', ICON).replace('<!--META-->', META)
+portada = portada.replace('<!--PIE-->', site_foot(True, 'portada-foot', '\n<p>Cada tema es un único archivo HTML autocontenido que funciona sin conexión (salvo la geolocalización) y se puede guardar en el propio dispositivo.</p>'))
 (R / 'index.html').write_text(portada)
 print('index.html (portada)', round(len(portada.encode()) / 1024), 'KB')

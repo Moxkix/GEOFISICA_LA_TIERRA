@@ -8,6 +8,16 @@ Interactivos de apoyo a la tutoría de **Geografía General I (Geografía Físic
 
 La portada (`index.html`) enlaza un hub por tema. Cada hub es un único archivo `index.html` autocontenido (HTML + CSS + JavaScript sin dependencias ni llamadas externas) que funciona sin conexión; solo la geolocalización del navegador requiere permiso y HTTPS. El municipio elegido por el alumno se recuerda de un tema a otro.
 
+## Autoría y licencia
+© 2026 **Iñaki Moro**, profesor-tutor de la UNED, Centro Asociado de Vitoria-Gasteiz. Material de apoyo a la tutoría, **no oficial**: no procede del equipo docente de la asignatura ni de la UNED.
+
+- **Contenidos** (textos, ilustraciones, figuras, cuestionarios y diseño de los interactivos): [Creative Commons Reconocimiento-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es). Texto completo en [`LICENSE-CONTENIDOS.txt`](LICENSE-CONTENIDOS.txt).
+- **Código** (JavaScript, CSS y scripts de Python y de Google Earth Engine): [licencia MIT](LICENSE).
+- **Datos de terceros**: conservan sus propias licencias y condiciones de cita (apartado *Datos y licencias*).
+- Elaborado con ayuda de herramientas de inteligencia artificial (Claude, de Anthropic), bajo la dirección y supervisión del autor.
+
+**Cómo citar:** Moro, I. (2026). *Interactivos de Geografía General I (Geografía Física)*. UNED, Centro Asociado de Vitoria-Gasteiz. https://moxkix.github.io/GEOFISICA_LA_TIERRA/
+
 ## Tema 1 · La Tierra planeta. Movimientos y representación (`tema1/`)
 1. Forma y dimensiones (Eratóstenes; esfera, elipsoide y geoide con un corte por meridianos; el geoide en 3D con exageración variable y la altura del geoide en el municipio; la Luna)
 2. Esfericidad e insolación (haz de rayos; mapa de insolación; distancia frente a inclinación)
@@ -45,6 +55,7 @@ Los contenidos del factor cósmico (insolación, estaciones) y el efecto de Cori
 Cada pestaña incluye autoevaluación y, cuando procede, las correcciones respecto al texto de la Unidad Didáctica. La pestaña Inicio de cada tema las reúne en una tabla.
 
 ## Datos y licencias
+- Reanálisis ERA5 (temas 2, 3 y 4): contiene información modificada del Servicio de Cambio Climático de Copernicus (2026). Ni la Comisión Europea ni el ECMWF son responsables del uso que se haga de esa información ni de los datos que contiene.
 - Líneas de costa: Natural Earth 1:110m (dominio público), vía el paquete `world-atlas`.
 - Municipios (8.132, con coordenadas): paquete `spanish-cities-info` (licencia ISC), verificado con el INE.
 - Normales climatológicas 1991–2020 (temperatura media, máxima y mínima mensual): OMM, distribuidas por NOAA NCEI (accesión 0253808, v6.6); 83 estaciones españolas y 91 del resto del mundo (`data/tema2/`).
