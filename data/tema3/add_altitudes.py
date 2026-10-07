@@ -2,9 +2,9 @@
 """Añade a data/mun.json la altitud (m) de cada municipio exportada por gee/altitud_municipios.js.
 Cada municipio pasa de [nombre, provincia, lat, lon] a [nombre, provincia, lat, lon, altitud].
 
-Para cada municipio se usa la altitud del punto con más superficie construida residencial cerca del centroide
-(columna alt), siempre que ese punto caiga dentro del término municipal (polígonos de es-atlas, IGN); si no, o si
-no hay superficie construida, la altitud del centroide (alt0).
+El script de GEE da tres candidatos a núcleo de población (columnas m1/alt1/lon1/lat1, m2…, m3…): se toma la altitud
+del primero que tiene población o edificación y cae dentro del término municipal (polígonos de es-atlas, IGN); si
+ninguno, la del centroide (alt0). También admite la versión anterior de la tabla (b/alt/lon/lat).
 
 Uso:  python3 data/tema3/add_altitudes.py altitud_municipios.csv es-atlas/package/es/municipalities.json
 """
@@ -34,26 +34,31 @@ def main(a):
     polys = topo_polygons(a[1])
     num = lambda x: float(x) if x not in (None, '') else None
     rows = {int(float(r['i'])): r for r in csv.DictReader(open(a[0], newline='', encoding='utf-8'))}
-    n_town = n_cent = n_none = 0
+    stats = {'1': 0, '2': 0, '3': 0, 'centroide': 0, 'sin dato': 0}
     report = []
     for i, m in enumerate(d['m']):
         r = rows.get(i, {})
-        alt0, alt, b, lon, lat = (num(r.get(k)) for k in ('alt0', 'alt', 'b', 'lon', 'lat'))
+        alt0 = num(r.get('alt0'))
+        cands = [(k, num(r.get('m' + k)), num(r.get('alt' + k)), num(r.get('lon' + k)), num(r.get('lat' + k))) for k in ('1', '2', '3')]
+        if 'b' in r:  # tabla de la versión anterior
+            cands = [('1', num(r.get('b')), num(r.get('alt')), num(r.get('lon')), num(r.get('lat')))]
         v = None
-        if alt is not None and b and b > 0 and lon is not None and ine[i] in polys and inside(polys[ine[i]], lon, lat):
-            v = alt; n_town += 1
-        elif alt0 is not None:
-            v = alt0; n_cent += 1
-        else:
-            n_none += 1
+        for k, w, a_, lo, la in cands:
+            if a_ is not None and w and w > 0 and lo is not None and ine[i] in polys and inside(polys[ine[i]], lo, la):
+                v = a_; stats[k] += 1; break
+        if v is None:
+            if alt0 is not None:
+                v = alt0; stats['centroide'] += 1
+            else:
+                stats['sin dato'] += 1
         del m[4:]
         m.append(None if v is None else max(0, round(v)))
         if alt0 is not None and v is not None and abs(v - alt0) > 400:
             report.append((m[0], round(alt0), round(v)))
     MUN.write_text(json.dumps(d, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
-    print(f'Altitud del núcleo: {n_town}; del centroide (punto fuera del término o sin edificios): {n_cent}; sin dato: {n_none}')
+    print('Altitud tomada del candidato:', ', '.join(f'{k}: {v}' for k, v in stats.items()))
     print(f'{len(report)} municipios cambian más de 400 m respecto al centroide, p. ej.:', ', '.join(f'{n} {a0}→{v}' for n, a0, v in report[:12]))
-    for n in ('Madrid', 'Bilbao', 'Ávila', 'Soria', 'Cuenca', 'Cáceres', 'Teruel', 'Granada', 'Espot', 'Trevélez', 'Benasque', 'Lorca', 'Navacerrada'):
+    for n in ('Madrid', 'Bilbao', 'Ávila', 'Soria', 'Cuenca', 'Cáceres', 'Teruel', 'Granada', 'Murcia', 'Badajoz', 'Espot', 'Trevélez', 'Benasque', 'Lorca', 'Navacerrada', 'Adeje'):
         m = next((m for m in d['m'] if m[0] == n), None)
         if m:
             print(f'  {n}: {m[4]} m')
