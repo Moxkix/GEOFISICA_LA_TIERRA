@@ -5,7 +5,8 @@
                                en pulgadas, del indicador de la EPA (github.com/datasets/sea-level-rise)
   slr_sla_gbl_free_ref_90.csv  nivel medio global por altimetría, NOAA STAR (TOPEX/Poseidon, Jason-1/2/3, Sentinel-6MF)
   rlr_annual.zip               medias anuales de los mareógrafos (PSMSL, «revised local reference»)
-  spratt2016.txt               nivel del mar de los últimos 800.000 años (Spratt y Lisiecki, 2016; NOAA Paleoclimatología)
+  spratt2016-noaa.txt          nivel del mar de los últimos 800.000 años (Spratt y Lisiecki, 2016; NOAA Paleoclimatología;
+                               también vale spratt2016.txt)
 
 Uso:  python3 data/tema4/make_nivel.py carpeta [salida.json]
 """
@@ -93,18 +94,29 @@ def main(a):
         out['gauges'] = g
         out['gsrc'] = 'PSMSL, medias anuales «revised local reference» (Holgate y otros, 2013)'
 
-    f = d / 'spratt2016.txt'
-    if f.exists():
-        ages, sl = [], []
+    # Spratt y Lisiecki (2016): spratt2016-noaa.txt (plantilla de NOAA, con cabecera y columnas con nombre) o spratt2016.txt
+    f = next((d / n for n in ('spratt2016-noaa.txt', 'spratt2016.txt') if (d / n).exists()), None)
+    if f:
+        ages, sl, col = [], [], 1
         for line in f.read_text(errors='replace').splitlines():
-            p = line.split()
-            if len(p) >= 2 and re.match(r'^\d+(\.\d+)?$', p[0]):
+            if line.startswith('#'):
+                continue
+            p = line.replace(',', ' ').split()
+            if p and not re.match(r'^-?\d', p[0]):  # cabecera: la serie larga (0-800 ka) si existe
+                names = [x.lower() for x in p]
+                for want in ('sealev_longpc1', 'sealev_shortpc1'):
+                    if want in names:
+                        col = names.index(want); break
+                continue
+            if len(p) > col:
                 try:
-                    ages.append(float(p[0])); sl.append(float(p[1]))
+                    a_, v_ = float(p[0]), float(p[col])
                 except ValueError:
-                    pass
+                    continue
+                if v_ == v_:
+                    ages.append(a_); sl.append(v_)
         out['paleo'] = {'ka': ages, 'v': [round(x, 1) for x in sl], 'src': 'Spratt y Lisiecki (2016), primera componente principal (NOAA Paleoclimatología)'}
-        print(f'  paleo: {len(ages)} puntos, mínimo {min(sl):.0f} m')
+        print(f'  paleo ({f.name}, columna {col}): {len(ages)} puntos de {min(ages):.0f} a {max(ages):.0f} ka, mínimo {min(sl):.0f} m')
 
     out_path.write_text(json.dumps(out, separators=(',', ':'), ensure_ascii=False))
     print(f'{out_path}: {out_path.stat().st_size / 1024:.0f} KB; partes: {list(out)}')
