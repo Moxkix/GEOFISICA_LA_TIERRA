@@ -4,7 +4,7 @@ H.CORRECCIONES = [
   ['Salinidad media (1.1)', '36 por mil', '34,7 (unos 35 g de sales por kilo); hoy se expresa sin unidades', 'salinidad'],
   ['Cloruro sódico (1.1)', '23 ‰', 'Unos 27 g por kilo de agua de mar (el 78 % de las sales)', 'salinidad'],
   ['Mar Rojo (1.1)', 'Salinidad de 43 ‰', '40-41 en superficie en su mitad norte; 42-43 solo en los golfos de Suez y Áqaba', 'salinidad'],
-  ['Hielo marino (1.1)', 'Puede llegar hasta los 65° de latitud', 'En invierno llega a unos 44° N (mar de Ojotsk) y a 55-60° S', 'salinidad'],
+  ['Hielo marino (1.1)', 'Puede llegar hasta los 65° de latitud', 'En invierno llega a 37-40° N en el golfo de Bohai (China), a 44° N en Hokkaido y a 55-60° S', 'salinidad'],
   ['Densidad máxima (1.2)', 'El agua marina es más densa a −2 °C y luego se dilata', 'Con salinidad mayor de 24,7 no tiene máximo de densidad: se hace más densa hasta congelarse (−1,9 °C)', 'densidad'],
   ['Calor latente (1.2)', 'Mantiene la temperatura cerca del punto de «licuefacción»', 'Cerca del punto de congelación o de fusión; la licuefacción es el paso de gas a líquido', 'densidad'],
   ['Evaporación (1.2)', 'Se produce cuando el aire está 0,3 °C más frío que el agua', 'Depende de la humedad del aire respecto a la saturación junto al mar y del viento', 'densidad'],

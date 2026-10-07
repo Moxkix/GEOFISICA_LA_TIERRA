@@ -121,17 +121,18 @@ H.tab({
     /* ================= E · hielo marino ================= */
     if (!ice) el.append(H.h('div', { class: 'card' }, H.h('h3', {}, 'El hielo marino'), H.html('<p>El hielo marino del Ártico ocupa en marzo unos 15 millones de km² y en septiembre unos 5-6 (media 1991-2020); el antártico, unos 18 millones en septiembre y apenas 3 en febrero. En invierno llega al mar de Ojotsk y a Hokkaido (unos 44° N), al golfo de San Lorenzo (47° N) y, en el hemisferio sur, a unos 55-60° S. Desde 1979, el mínimo de septiembre del Ártico ha perdido en torno al 40 % de su extensión (récord: 3,4 millones de km² en 2012); el hielo antártico batió su mínimo en febrero de 2023 (1,8 millones de km²). Fuente: NSIDC.</p>')));
     if (ice) {
-      const ext = (g, nh) => { let a = 0; for (let j = 0; j < g.ny; j++) { const lat = g.latAt(j); if ((lat > 0) !== nh) continue; const c = Math.cos(lat * H.D2R) * 111.32 * 111.32; for (let i = 0; i < g.nx; i++) { const v = g.data[j * g.nx + i]; if (v >= 15) a += c; } } return a / 1e6; };
-      const edge = (g, nh) => { let best = nh ? 90 : -90; for (let j = 0; j < g.ny; j++) { const lat = g.latAt(j); if ((lat > 0) !== nh) continue; for (let i = 0; i < g.nx; i++) if (g.data[j * g.nx + i] >= 15) { if (nh ? lat < best : lat > best) best = lat; } } return best; };
+      const lakes = (lat, lon) => lat > 41 && lat < 49.5 && lon > -93 && lon < -75; // Grandes Lagos (no son mar)
+      const area = (g, nh) => { let a = 0; for (let j = 0; j < g.ny; j++) { const lat = g.latAt(j); if ((lat > 0) !== nh) continue; const c = Math.cos(lat * H.D2R) * 111.32 * 111.32; for (let i = 0; i < g.nx; i++) { const v = g.data[j * g.nx + i]; if (v === v && !lakes(lat, g.lonAt(i))) a += c * v / 100; } } return a / 1e6; };
+      const edge = (g, nh) => { let best = nh ? 90 : -90; for (let j = 0; j < g.ny; j++) { const lat = g.latAt(j); if ((lat > 0) !== nh) continue; for (let i = 0; i < g.nx; i++) if (g.data[j * g.nx + i] >= 15 && !lakes(lat, g.lonAt(i))) { if (nh ? lat < best : lat > best) best = lat; } } return best; };
       el.append(H.h('div', { class: 'card' }, H.h('h3', {}, 'El hielo marino'),
         H.html(`<div class="readouts">
-          <div class="ro bl"><div class="k">Ártico en marzo (máximo)</div><div class="v">${H.f(ext(ice[2], true), 1)} <small>millones de km²</small></div></div>
-          <div class="ro"><div class="k">Ártico en septiembre (mínimo)</div><div class="v">${H.f(ext(ice[8], true), 1)} <small>millones de km²</small></div></div>
-          <div class="ro bl"><div class="k">Antártico en septiembre (máximo)</div><div class="v">${H.f(ext(ice[8], false), 1)} <small>millones de km²</small></div></div>
-          <div class="ro"><div class="k">Antártico en febrero (mínimo)</div><div class="v">${H.f(ext(ice[1], false), 1)} <small>millones de km²</small></div></div>
-          <div class="ro hl"><div class="k">Latitud más baja con hielo, hemisferio norte</div><div class="v">${H.f(edge(ice[2], true) - 0.5, 0)}° <small>N (marzo)</small></div></div>
+          <div class="ro bl"><div class="k">Ártico en marzo (máximo)</div><div class="v">${H.f(area(ice[2], true), 1)} <small>millones de km² de hielo</small></div></div>
+          <div class="ro"><div class="k">Ártico en septiembre (mínimo)</div><div class="v">${H.f(area(ice[8], true), 1)} <small>millones de km²</small></div></div>
+          <div class="ro bl"><div class="k">Antártico en septiembre (máximo)</div><div class="v">${H.f(area(ice[8], false), 1)} <small>millones de km²</small></div></div>
+          <div class="ro"><div class="k">Antártico en febrero (mínimo)</div><div class="v">${H.f(area(ice[1], false), 1)} <small>millones de km²</small></div></div>
+          <div class="ro hl"><div class="k">Latitud más baja con hielo, hemisferio norte</div><div class="v">${H.f(edge(ice[1], true) - 0.5, 0)}° <small>N (febrero)</small></div></div>
           <div class="ro hl"><div class="k">Latitud más baja con hielo, hemisferio sur</div><div class="v">${H.f(-edge(ice[8], false) - 0.5, 0)}° <small>S (septiembre)</small></div></div></div>
-          <p class="small" style="margin-top:10px">Extensión: superficie de las celdas de 1° con al menos un 15 % de hielo en la media 1991-2020 de OISST (aproximada). En invierno el hielo llega al mar de Ojotsk y a Hokkaido (unos 44° N), al golfo de San Lorenzo (47° N) y, en el hemisferio sur, a unos 55-60° S. Desde 1979, el mínimo de septiembre del Ártico ha perdido en torno al 40 % de su extensión (récord: 3,4 millones de km² en 2012); el hielo antártico batió su mínimo en febrero de 2023 (1,8 millones de km², NSIDC).</p>`)));
+          <p class="small" style="margin-top:10px">Superficie cubierta por el hielo (suma de la concentración de cada celda de 1° por su superficie) en la media 1991-2020 de OISST, sin los Grandes Lagos; la rejilla de 1° exagera algo los valores en los bordes del hielo. El NSIDC, con celdas de 25 km, da para 1991-2020 una extensión media (superficie con al menos un 15 % de hielo) de unos 15 millones de km² en marzo y 5-6 en septiembre en el Ártico, y de 18,5 en septiembre y 3 en febrero en el Antártico. En invierno el hielo llega al golfo de Bohai, en China (37-40° N), a Hokkaido (44° N) y al golfo de San Lorenzo (47° N); en el hemisferio sur, a unos 55-60° S. Desde 1979, el mínimo de septiembre del Ártico ha perdido en torno al 40 % de su extensión (récord: 3,4 millones de km² en 2012); el hielo antártico batió su mínimo en febrero de 2023 (1,8 millones de km², NSIDC).</p>`)));
     }
 
     el.append(H.fix('Composición y salinidad', [
@@ -139,7 +140,7 @@ H.tab({
       'La salinidad media del océano es de 34,7 (se redondea a 35), no de 36 por mil. Hoy se expresa en la escala práctica, sin unidades.',
       'El cloruro sódico equivale a unos 27 g por kilo de agua de mar (el 78 % de las sales), no a 23 ‰.',
       'La salinidad superficial del mar Rojo llega a 40-41 en su mitad norte; los valores de 42-43 solo se dan en los golfos de Suez y Áqaba y en salinas costeras.',
-      'El hielo marino no se limita a los 65° de latitud: en invierno alcanza unos 44° N en el mar de Ojotsk y unos 55-60° S alrededor de la Antártida.',
+      'El hielo marino no se limita a los 65° de latitud: en invierno alcanza unos 37-40° N en el golfo de Bohai (China), 44° N en Hokkaido y unos 55-60° S alrededor de la Antártida.',
     ]));
     el.append(H.selfCheck([
       { q: '¿Por qué la salinidad superficial tiene dos máximos, hacia los 20-25° N y S?', opts: ['Porque allí el agua está más caliente', 'Porque bajo los anticiclones subtropicales la evaporación supera a la precipitación', 'Porque allí desembocan pocos ríos', 'Porque allí se forma hielo'], a: 1, ex: ' El balance evaporación − precipitación es máximo en los subtrópicos; en el ecuador llueve mucho y la salinidad baja un poco.' },
