@@ -28,7 +28,10 @@
 
 var TC = ee.ImageCollection('IDAHO_EPSCOR/TERRACLIMATE');
 var nat = ee.Image(TC.first()).select('tmmx').projection().getInfo();
-print('Proyección nativa de TerraClimate:', nat.crs, nat.transform);
+print('Proyección nativa de TerraClimate:', nat);
+// TerraClimate describe su proyección con un WKT (sin código EPSG): es una rejilla de latitud y longitud sobre WGS84,
+// así que se usa EPSG:4326 con la misma transformación (origen y tamaño de píxel nativos).
+var CRS = nat.crs || 'EPSG:4326';
 
 var pad = function (m) { return m < 10 ? '0' + m : '' + m; };
 // rejilla con el origen y la orientación nativos y celdas de un número entero de píxeles (12 × 1/24° = 0,5°)
@@ -60,20 +63,20 @@ var Z = ee.Image('NOAA/NGDC/ETOPO1').select('ice_surface').rename('Z');
 var VIT = ee.Geometry.Point([-2.67, 42.85]);
 print('Vitoria-Gasteiz, julio 1991-2020 (T en décimas de °C, P en décimas de mm):',
   n91.T.select('T91_07').addBands(n91.P.select('P91_07')).reduceRegion({reducer: ee.Reducer.first(), geometry: VIT,
-    crs: nat.crs, crsTransform: nat.transform}));
+    crs: CRS, crsTransform: nat.transform}));
 
 // Media de los píxeles de cada celda de 0,5° (las medias de la colección pierden la proyección: se le devuelve la nativa)
 function agg(img) {
-  return img.setDefaultProjection({crs: nat.crs, crsTransform: nat.transform})
+  return img.setDefaultProjection({crs: CRS, crsTransform: nat.transform})
     .reduceResolution({reducer: ee.Reducer.mean(), maxPixels: 256})
-    .reproject({crs: nat.crs, crsTransform: G05});
+    .reproject({crs: CRS, crsTransform: G05});
 }
-var Z05 = Z.reduceResolution({reducer: ee.Reducer.mean(), maxPixels: 1024}).reproject({crs: nat.crs, crsTransform: G05});
-var Znat = Z.reduceResolution({reducer: ee.Reducer.mean(), maxPixels: 64}).reproject({crs: nat.crs, crsTransform: nat.transform});
+var Z05 = Z.reduceResolution({reducer: ee.Reducer.mean(), maxPixels: 1024}).reproject({crs: CRS, crsTransform: G05});
+var Znat = Z.reduceResolution({reducer: ee.Reducer.mean(), maxPixels: 64}).reproject({crs: CRS, crsTransform: nat.transform});
 
 function exp(img, name, tr, region) {
   Export.image.toDrive({image: img.round().clamp(-32767, 32767).unmask(-32768).toInt16(), description: name, folder: 'GEE_tema5',
-    fileNamePrefix: name, region: region, crs: nat.crs, crsTransform: tr, fileFormat: 'GeoTIFF', maxPixels: 1e10});
+    fileNamePrefix: name, region: region, crs: CRS, crsTransform: tr, fileFormat: 'GeoTIFF', maxPixels: 1e10});
 }
 var MUNDO = ee.Geometry.Rectangle([-180, -60, 180, 84], null, false); // TerraClimate no cubre la Antártida
 var PENIN = ee.Geometry.Rectangle([-9.5, 35.1, 4.5, 43.9], null, false); // península, Baleares, Ceuta y Melilla
