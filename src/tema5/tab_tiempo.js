@@ -58,14 +58,14 @@ H.tab({
     if (LG && LG.map) {
       const M = LG.map, gm = T4.grid(M.d, M);
       const mc = H.h('div', { class: 'card' });
-      const col = T4.ramp([[-25, [40, 30, 110]], [-15, [60, 90, 180]], [-8, [110, 160, 215]], [-4, [190, 220, 235]], [-1, [245, 245, 240]], [1, [250, 230, 210]]]);
+      const col = T4.ramp([[-40, [30, 20, 80]], [-25, [50, 60, 150]], [-15, [70, 120, 195]], [-8, [130, 180, 225]], [-4, [200, 226, 238]], [-1, [245, 245, 240]], [1, [250, 230, 210]]]);
       const mcv = H.h('canvas');
       const mp = T4.map(mcv, { bbox: [-180, 180, -78, 82], grid: 30, land: (lat, lon) => col(gm.at(lat, lon)) || T4.LAND, color: (lat, lon) => { const c = col(gm.at(lat, lon)); return c ? H.mix(c, [255, 255, 255], 0.35) : null; } });
       T4.hover(mcv, mp, (lat, lon) => { const v = gm.at(lat, lon); return v === v ? `${T4.ll(lat, lon, 0)} · ${H.fs(v, 1)} °C` : null; });
       mc.append(H.h('h3', {}, `El Último Máximo Glaciar, hace unos ${H.f(M.ka || 21)}.000 años`),
         H.h('p', { class: 'sub' }, `Diferencia de la temperatura media anual del aire en superficie entre el Último Máximo Glaciar (${M.lab || '19.000-23.000 años'}) y la época preindustrial, según la reanálisis de Osman y otros (2021). Sustituye la fig. 5.3, que reproduce la reconstrucción CLIMAP de 1976.`),
-        H.h('div', { class: 'viz framed' }, mcv), T3.legend(col, -25, 1, [-25, -20, -15, -10, -5, 0], (v) => H.fs(v) + ' °C'),
-        H.html('<p class="hint">El enfriamiento fue máximo sobre los grandes mantos de hielo de Norteamérica y Escandinavia (más de 20 °C) y mucho menor en los trópicos (2-4 °C), aunque mayor que el que daba CLIMAP. El nivel del mar estaba unos 125 m más bajo (Tema 4, «Nivel del mar»).</p>'));
+        H.h('div', { class: 'viz framed' }, mcv), T3.legend(col, -40, 1, [-40, -30, -20, -10, -5, 0], (v) => H.fs(v) + ' °C'),
+        H.html(`<p class="hint">El enfriamiento fue máximo sobre los mantos de hielo de Norteamérica y Escandinavia (de 25 a más de 40 °C, también porque la superficie del hielo estaba a 2-3 km de altura) y mucho menor en los trópicos (unos 4 °C), aunque mayor que el que daba CLIMAP. En la península ibérica, unos 7 °C. En el conjunto del planeta, ${H.f(LG.gmst.dLGM, 1)} °C. El nivel del mar estaba unos 125 m más bajo (Tema 4, «Nivel del mar»).</p>`));
       el.append(mc);
     }
 
@@ -96,7 +96,7 @@ H.tab({
     /* ================= D · cronología ================= */
     const cr = H.h('div', { class: 'card' });
     const ROWS = [
-      ['Hace 26.000-19.000 años', 'Último Máximo Glaciar', 'Mantos de hielo de 3-4 km de espesor sobre Norteamérica y el norte de Europa; temperatura global unos 6 °C más baja que en la era preindustrial (Tierney y otros, 2020); nivel del mar 120-130 m más bajo.'],
+      ['Hace 26.000-19.000 años', 'Último Máximo Glaciar', 'Mantos de hielo de 3-4 km de espesor sobre Norteamérica y el norte de Europa; temperatura global 6-7 °C más baja que en la era preindustrial (Tierney y otros, 2020; Osman y otros, 2021); nivel del mar 120-130 m más bajo.'],
       ['19.000-11.700', 'Deglaciación', 'Calentamiento irregular: el Bølling-Allerød (14.700-12.900) y el frío brusco del Dryas Reciente (12.900-11.700), cuando el norte de Europa volvió casi a condiciones glaciares.'],
       ['Desde 11.700', 'Holoceno', 'Interglaciar actual. Entre 14.500 y 5.000 años el monzón africano llegaba al Sahara («Sahara verde»).'],
       ['Hace 8.200 años', 'Evento 8,2 ka', 'Enfriamiento de unos 150 años en el Atlántico Norte tras el vaciado del lago glaciar Agassiz.'],
@@ -111,10 +111,10 @@ H.tab({
     el.append(cr);
 
     el.append(H.fix('fig. 5.3 y cronología del apartado 1.2.2', [
-      'El Último Máximo Glaciar se sitúa hace unos 21.000 años de calendario (entre 26.000 y 19.000); los «18.000 años» de la fig. 5.3 son años de radiocarbono, la escala que usaba CLIMAP (1976). CLIMAP subestimó el enfriamiento de los mares tropicales: el enfriamiento global fue de unos 6 °C.',
+      'El Último Máximo Glaciar se sitúa hace unos 21.000 años de calendario (entre 26.000 y 19.000); los «18.000 años» de la fig. 5.3 son años de radiocarbono, la escala que usaba CLIMAP (1976). CLIMAP subestimó el enfriamiento de los mares tropicales: el enfriamiento global fue de 6-7 °C.',
       'La tabla de cronología tiene filas descolocadas («Islandia: hielo en el Nilo», «México: Mar Negro helado», «África: recesión glacial (período vikingo)»…) y se detiene en 1960 con un «descenso de la temperatura a escala mundial». Desde entonces la temperatura global ha subido más de 1 °C.']));
     el.append(H.selfCheck([
-      { q: 'Durante el Último Máximo Glaciar, la temperatura media global era…', opts: ['Unos 0,5 °C más baja que hoy', 'Unos 6 °C más baja que en la era preindustrial', 'Unos 20 °C más baja en todo el planeta', 'Igual que hoy'], a: 1, ex: 'Con más de 20 °C menos sobre los mantos de hielo y 2-4 °C menos en los trópicos.' },
+      { q: 'Durante el Último Máximo Glaciar, la temperatura media global era…', opts: ['Unos 0,5 °C más baja que hoy', 'Unos 6-7 °C más baja que en la era preindustrial', 'Unos 20 °C más baja en todo el planeta', 'Igual que hoy'], a: 1, ex: 'Con más de 25 °C menos sobre los mantos de hielo y unos 4 °C menos en los trópicos.' },
       { q: 'La normal climatológica vigente es…', opts: ['1961-1990', '1971-2000', '1991-2020', '2001-2030'], a: 2, ex: 'La OMM la actualiza cada diez años; los climogramas del manual usan 1961-1990 y 1971-2000.' },
       { q: 'El Holoceno comenzó hace…', opts: ['2.000 años', '11.700 años', '21.000 años', '2,6 millones de años'], a: 1, ex: 'Al terminar el Dryas Reciente.' },
       { q: 'La media de la temperatura global de 2015-2024 respecto a 1850-1900 es de unos…', opts: ['+0,2 °C', '+1,3 °C', '+3 °C', '−0,5 °C'], a: 1, ex: 'Según HadCRUT5; 2024 superó por primera vez 1,5 °C en un año natural.' },

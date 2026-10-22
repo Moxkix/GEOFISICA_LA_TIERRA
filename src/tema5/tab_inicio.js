@@ -7,7 +7,7 @@ H.CORRECCIONES = [
   ['Ejemplos del apartado 1.3', 'Sevilla y Tananarive, 18,5 °C; Aberdeen y Chicago, 832 mm', 'Con las normales 1991-2020: Sevilla 19,3 °C y Antananarivo 19,6 °C; Aberdeen 833 mm, pero Chicago 962 mm', 'clasificar'],
   ['Climogramas', 'Series 1961-1990 y 1971-2000', 'La normal vigente es 1991-2020, unos 0,5 °C más cálida en el conjunto del planeta', 'tiempo'],
   ['Cronología (p. 15)', 'Filas descolocadas («Islandia: hielo en el Nilo»…); termina en 1960 con un «descenso de la temperatura a escala mundial»', 'Cronología rehecha; desde 1975 la temperatura global sube unos 0,2 °C por década', 'tiempo'],
-  ['Fig. 5.3', 'El clima hace 18.000 años (CLIMAP, 1976)', 'Último Máximo Glaciar hace unos 21.000 años de calendario (18.000 de radiocarbono), unos 6 °C más frío que la era preindustrial', 'tiempo'],
+  ['Fig. 5.3', 'El clima hace 18.000 años (CLIMAP, 1976)', 'Último Máximo Glaciar hace unos 21.000 años de calendario (18.000 de radiocarbono), 6-7 °C más frío que la era preindustrial', 'tiempo'],
   ['Cuadro 5.2', 'Desiertos templados: amplitudes diarias «hasta 90 °C»', 'Lo habitual son 15-25 °C; la que ronda los 30-40 °C es la amplitud anual', 'secos'],
   ['Cuadro 5.2', 'Desiertos costeros: «vegetación bastante densa»', 'Atacama y el Namib están entre los desiertos más pobres en vegetación, salvo las formaciones de niebla', 'secos'],
   ['Desiertos templados (2.1.1)', '«No existen en el hemisferio Sur»', 'La Patagonia (BSk y BWk), a sotavento de los Andes, entre 40° y 50° S', 'secos'],

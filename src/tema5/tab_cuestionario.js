@@ -34,7 +34,7 @@ H.tab({
       ['espana', 'El tipo de clima más frecuente entre los municipios españoles es…', ['Cfb', 'Csa', 'BWh', 'Dfb'], 1, 'Domina en la mitad sur, el valle del Ebro y el Mediterráneo.'],
       ['espana', 'Entre 1961-1990 y 1991-2020 muchos municipios han pasado de Csb a Csa porque…', ['Llueve más en verano', 'El mes más cálido ha superado los 22 °C', 'Ha bajado la temperatura', 'Ha cambiado la clasificación'], 1, 'Es la huella del calentamiento de los veranos.'],
       ['tiempo', 'El Último Máximo Glaciar fue hace unos…', ['2.000 años', '21.000 años', '200.000 años', '2,6 millones de años'], 1, 'Los «18.000 años» del manual son años de radiocarbono.'],
-      ['tiempo', 'Durante el Último Máximo Glaciar la temperatura global era unos…', ['0,5 °C más baja', '6 °C más baja que en la era preindustrial', '20 °C más baja en todo el planeta', 'Igual que hoy'], 1, 'Con mucho más frío sobre los mantos de hielo que en los trópicos.'],
+      ['tiempo', 'Durante el Último Máximo Glaciar la temperatura global era unos…', ['0,5 °C más baja', '6-7 °C más baja que en la era preindustrial', '20 °C más baja en todo el planeta', 'Igual que hoy'], 1, 'Con mucho más frío sobre los mantos de hielo que en los trópicos.'],
       ['tiempo', 'La normal 1991-2020 es, en el conjunto del planeta, unos…', ['0,5 °C más cálida que la de 1961-1990', '2 °C más cálida', 'Igual', 'Más fría'], 0, 'Según HadCRUT5.'],
     ];
     const box = H.h('div');

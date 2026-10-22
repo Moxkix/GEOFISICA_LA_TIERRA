@@ -60,7 +60,7 @@ def main(a):
     out = np.array([np.interp(-LAT, -lat, rows[:, i]) for i in range(180)]).T
     print(f'  ΔT del LGM: de {out.min():.1f} a {out.max():.1f} °C; media ponderada {np.average(out, weights=np.cos(np.radians(LAT))[:, None] * np.ones((1, 180))):.1f} °C')
     res = {'gmst': {'age': [int(x) for x in age], 'p5': [round(float(x), 2) for x in p5], 'p50': [round(float(x), 2) for x in p50], 'p95': [round(float(x), 2) for x in p95], 'dLGM': round(dLGM, 1), 'off': 0},
-           'map': {'nx': 180, 'ny': 90, 'lon0': -180, 'lat0': 90, 'res': 2, 'ka': 21, 'lab': '19.000-23.000 años', 'd': pack(out, 'lin', lo=-30, hi=6, step=0.15)},
+           'map': {'nx': 180, 'ny': 90, 'lon0': -180, 'lat0': 90, 'res': 2, 'ka': 21, 'lab': '19.000-23.000 años', 'd': pack(out, 'lin', lo=-45, hi=6, step=0.2)},
            'src': 'Last Glacial Maximum Reanalysis (Osman y otros, 2021), NOAA NCEI Paleoclimatology'}
     f = R / 'lgmr.json'; f.write_text(json.dumps(res, separators=(',', ':')))
     print(f'→ {f} ({f.stat().st_size / 1024:.0f} KB; mapa {size_kb(res["map"]["d"]):.0f} KB)')
