@@ -62,6 +62,14 @@ W.update({'65344': ('Cotonú', 'Benín', 'tro'), '65330': ('Parakou', 'Benín', 
  '61043': ('Tahoua', 'Níger', 'tro'), '61024': ('Agadez', 'Níger', 'des'), '61017': ('Bilma', 'Níger', 'des'),
  '64456': ('Makoua', 'República del Congo', 'ecu'), '43003': ('Bombay (Santacruz)', 'India', 'mzn'),
  '42515': ('Cherrapunji (1.313 m)', 'India', 'mzn')})
+# estaciones añadidas en el Tema 5 (climogramas del manual y transecto euroasiático de la fig. 6.14)
+W.update({'67085': ('Antananarivo (1.310 m)', 'Madagascar', 'mon'), '3091': ('Aberdeen', 'Reino Unido', 'oce'), '37055010': ('Arauca', 'Colombia', 'tro'),
+ '78663': ('San Salvador (Ilopango, 624 m)', 'El Salvador', 'tro'), '48097': ('Rangún', 'Myanmar', 'mzn'), '7650': ('Marsella (Marignane)', 'Francia', 'med'),
+ '7480': ('Lyon', 'Francia', 'oce'), '11120': ('Innsbruck (578 m)', 'Austria', 'con'), '2978': ('Helsinki', 'Finlandia', 'con'),
+ '72231': ('Nueva Orleans', 'Estados Unidos', 'sbt'), '10410': ('Essen', 'Alemania', 'oce'), '11723': ('Brno', 'Chequia', 'con'),
+ '28434': ('Krasnoufimsk (región de Ekaterimburgo)', 'Rusia', 'con'), '30777': ('Sretensk (región de Chitá)', 'Rusia', 'con'),
+ '41030': ('La Meca', 'Arabia Saudí', 'des'), '51644': ('Kuqa (1.084 m)', 'China', 'des'), '72488': ('Reno (1.344 m)', 'Estados Unidos', 'des'),
+ '11343': ('Sonnblick (3.109 m)', 'Austria', 'pol'), '47817': ('Nagasaki', 'Japón', 'sbt'), '83967': ('Porto Alegre', 'Brasil', 'sbt')})
 FIX = {'8430': (38.002, -1.171)}  # coordenadas erróneas en el fichero OMM; valores de la estación AEMET 7178I (Murcia)
 def vecx(s):
     if not s: return None

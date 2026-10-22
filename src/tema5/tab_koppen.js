@@ -80,14 +80,15 @@ H.tab({
 
     /* ================= reto: ¿qué clima es? ================= */
     const quiz = H.h('div', { class: 'card' });
-    quiz.append(H.h('h3', {}, 'Reto: ¿qué clima es?'), H.h('p', { class: 'sub' }, 'Un climograma real sin nombre. Clasifícalo con el procedimiento de arriba (mirando los meses más cálido y más frío, el más seco del verano y del invierno…) y elige su tipo.'));
+    quiz.append(H.h('h3', {}, 'Reto: ¿qué clima es?'), H.h('p', { class: 'sub' }, 'Un climograma real sin nombre, casi siempre de una de las ciudades de los climogramas del manual (con datos de 1991-2020). Clasifícalo con el procedimiento de arriba (meses más cálido y más frío, el más seco del verano y del invierno…) y elige su tipo.'));
     const qcv = H.h('canvas'), qcl = T3.climo(qcv, (w) => Math.min(w * 0.6, 300));
     const qtbl = H.h('div', { style: { overflowX: 'auto', marginTop: '6px' } });
     const qopts = H.h('div', { class: 'opts' }), qfb = H.h('div', { class: 'fb' }), qscore = H.h('span', { class: 'badge' }, '0 / 0');
     let qs = null, ok = 0, n = 0;
     const qnext = H.h('button', { class: 'btn sm', type: 'button' }, 'Otro climograma');
     const newQ = () => {
-      const pool = T5.ST.filter((s) => !s.es || Math.random() < 0.15);
+      const MAN = ['41030', '51644', '72488', '21205791', '47817', '83967', '7650', '7480', '11120', '2978', '44292', '48097', '82331', '82191', '48698', '37055010', '78663', '4250', '67085', '3091', '72530', '8391', '11343', '72231'];
+      const pool = Math.random() < 0.6 ? T5.ST.filter((s) => MAN.includes(s.id)) : T5.ST.filter((s) => !s.es || Math.random() < 0.15);
       qs = pool[Math.floor(Math.random() * pool.length)];
       const t = T5.type(qs), all = [...new Set(T5.ST.map((s) => T5.type(s)))];
       const near = all.filter((x) => x !== t).sort((a, b) => ((b[0] === t[0]) - (a[0] === t[0])) || Math.random() - 0.5).slice(0, 3);

@@ -4,7 +4,7 @@ H.CORRECCIONES = [
   ['Umbral de aridez (cuadro 5.1)', 'e = 20t + 490 − 7·PPW es la «evapotranspiración potencial»', 'La fórmula es correcta (con PPW entre 30 y 70 %), pero e es un umbral empírico, no la ETP: en Riad e ≈ 540 mm y la ETP supera los 2.000 mm', 'secos'],
   ['Climas secos (cuadro 5.1)', 'Solo BS y BW', 'Falta la tercera letra: h (temperatura media anual ≥ 18 °C) y k (menor): BWh, BWk, BSh, BSk', 'koppen'],
   ['Grupos G y H (pp. 9 y 30)', 'Climas de montaña (G) y de alta montaña, a más de 3.000 m (H)', 'No forman parte de Köppen-Geiger: las montañas se clasifican con sus propios datos; «H» solo aparece en la leyenda del mapa de Geiger y Pohl', 'montana'],
-  ['Ejemplos del apartado 1.3', 'Sevilla y Tananarive, 18,5 °C; Aberdeen y Chicago, 832 mm', 'Con las normales 1991-2020, Sevilla tiene 19,3 °C y Chicago 962 mm', 'clasificar'],
+  ['Ejemplos del apartado 1.3', 'Sevilla y Tananarive, 18,5 °C; Aberdeen y Chicago, 832 mm', 'Con las normales 1991-2020: Sevilla 19,3 °C y Antananarivo 19,6 °C; Aberdeen 833 mm, pero Chicago 962 mm', 'clasificar'],
   ['Climogramas', 'Series 1961-1990 y 1971-2000', 'La normal vigente es 1991-2020, unos 0,5 °C más cálida en el conjunto del planeta', 'tiempo'],
   ['Cronología (p. 15)', 'Filas descolocadas («Islandia: hielo en el Nilo»…); termina en 1960 con un «descenso de la temperatura a escala mundial»', 'Cronología rehecha; desde 1975 la temperatura global sube unos 0,2 °C por década', 'tiempo'],
   ['Fig. 5.3', 'El clima hace 18.000 años (CLIMAP, 1976)', 'Último Máximo Glaciar hace unos 21.000 años de calendario (18.000 de radiocarbono), unos 6 °C más frío que la era preindustrial', 'tiempo'],

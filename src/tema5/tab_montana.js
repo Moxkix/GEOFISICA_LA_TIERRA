@@ -82,7 +82,7 @@ H.tab({
     upd();
 
     /* ================= B · montaña y llano: datos reales ================= */
-    const PAIRS = [['8215', '8222', 'Navacerrada y Madrid'], ['60010', '60020', 'Izaña y Santa Cruz de Tenerife'], ['60010', '60015', 'Izaña y Tenerife Norte']];
+    const PAIRS = [['8215', '8222', 'Navacerrada y Madrid'], ['11343', '11120', 'Sonnblick e Innsbruck'], ['60010', '60020', 'Izaña y Santa Cruz de Tenerife'], ['60010', '60015', 'Izaña y Tenerife Norte']];
     const R = { a: T5.byId('8215'), b: T5.byId('8222') };
     const rCard = H.h('div', { class: 'card' });
     rCard.append(H.h('h3', {}, 'Montaña y llano con datos reales'), H.h('p', { class: 'sub' }, 'La actividad del manual: comparar una estación de montaña con otra próxima y más baja. El gráfico muestra el gradiente térmico real de cada mes (cuántos grados baja la temperatura cada 100 m) entre las dos estaciones.'));

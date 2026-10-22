@@ -38,12 +38,12 @@ H.tab({
     /* ================= B · mismos números, climas distintos ================= */
     const twCard = H.h('div', { class: 'card' });
     twCard.append(H.h('h3', {}, 'Mismos números, climas distintos'),
-      H.h('p', { class: 'sub' }, 'Las medias y los totales anuales no bastan para clasificar un clima: hay que mirar cómo se reparten a lo largo del año. Elige una estación y busca otra, a más de 2.000 km, con casi la misma temperatura media anual (o la misma precipitación anual) pero de otro grupo climático.'));
+      H.h('p', { class: 'sub' }, 'Las medias y los totales anuales no bastan para clasificar un clima: hay que mirar cómo se reparten a lo largo del año. Elige una estación y busca otra, a más de 2.000 km, con casi la misma temperatura media anual (o la misma precipitación anual) pero con otro régimen: otro grupo o, dentro del mismo grupo, otra segunda letra de Köppen.'));
     let mode = 'T', A = T5.byId('8391'), twins = [], ti = 0;
     const annual = (s) => ({ t: s.ta.slice(0, 12).reduce((a, b) => a + b, 0) / 12, p: s.pr.slice(0, 12).reduce((a, b) => a + b, 0) });
     const findTwins = () => {
-      const a = annual(A), ga = T5.type(A)[0];
-      twins = T5.ST.filter((b) => b !== A && T5.type(b)[0] !== ga && H.haversine(A.lat, A.lon, b.lat, b.lon) > 2000)
+      const a = annual(A), ga = T5.type(A).slice(0, 2);
+      twins = T5.ST.filter((b) => b !== A && T5.type(b).slice(0, 2) !== ga && H.haversine(A.lat, A.lon, b.lat, b.lon) > 2000)
         .map((b) => { const x = annual(b); return [b, mode === 'T' ? Math.abs(x.t - a.t) : Math.abs(Math.log(x.p / a.p))]; })
         .sort((x, y) => x[1] - y[1]).slice(0, 6).map((x) => x[0]);
       ti = 0;
@@ -63,14 +63,14 @@ H.tab({
       roA.innerHTML = ro(A); roB.innerHTML = ro(B);
       const a = annual(A), b = annual(B);
       verdict.innerHTML = mode === 'T'
-        ? `<b>${T5.stLabel(A)}</b> y <b>${T5.stLabel(B)}</b> tienen casi la misma temperatura media anual (${T5.fT(a.t)} y ${T5.fT(b.t)}), pero ${Math.abs(T2.amp(A) - T2.amp(B)) > 5 ? `una amplitud anual muy distinta (${H.f(T2.amp(A), 1)} y ${H.f(T2.amp(B), 1)} °C) y ` : ''}${Math.abs(a.p - b.p) > 200 ? `muy distinta precipitación (${H.f(a.p)} y ${H.f(b.p)} mm)` : 'distinto reparto de la lluvia'}: Köppen las sitúa en grupos diferentes (${T5.chip(T5.type(A))} y ${T5.chip(T5.type(B))}).`
+        ? `<b>${T5.stLabel(A)}</b> y <b>${T5.stLabel(B)}</b> tienen casi la misma temperatura media anual (${T5.fT(a.t)} y ${T5.fT(b.t)}), pero ${Math.abs(T2.amp(A) - T2.amp(B)) > 5 ? `una amplitud anual muy distinta (${H.f(T2.amp(A), 1)} y ${H.f(T2.amp(B), 1)} °C) y ` : ''}${Math.abs(a.p - b.p) > 200 ? `muy distinta precipitación (${H.f(a.p)} y ${H.f(b.p)} mm)` : 'distinto reparto de la lluvia'}: Köppen les asigna tipos diferentes (${T5.chip(T5.type(A))} y ${T5.chip(T5.type(B))}).`
         : `<b>${T5.stLabel(A)}</b> y <b>${T5.stLabel(B)}</b> reciben casi la misma lluvia al año (${H.f(a.p)} y ${H.f(b.p)} mm), pero ${Math.abs(a.t - b.t) > 4 ? `con temperaturas muy distintas (${T5.fT(a.t)} y ${T5.fT(b.t)} de media), lo que cambia la evaporación, y ` : ''}repartida de otro modo a lo largo del año: ${T5.chip(T5.type(A))} frente a ${T5.chip(T5.type(B))}.`;
       selA.set(A.id);
     };
     findTwins();
     twCard.append(H.h('div', { class: 'row', style: { marginBottom: '10px' } }, H.h('div', { style: { flex: '1 1 260px' } }, H.h('label', { class: 'small' }, 'Estación'), selA), H.h('div', { style: { flex: '2 1 300px' } }, segM), H.h('div', { style: { flex: 'none' } }, next)),
       H.h('div', { class: 'vs' }, H.h('div', {}, H.h('div', { class: 'viz framed' }, cvA), roA), H.h('div', {}, H.h('div', { class: 'viz framed' }, cvB), roB)), verdict,
-      H.fix('apartado 1.3', ['Con las normales 1991-2020 los ejemplos del manual dejan de cuadrar: Sevilla (aeropuerto) tiene 19,3 °C de media, no 18,5; Chicago recibe 962 mm, no 832. Por eso aquí se buscan las parejas con los datos actuales.']));
+      H.fix('apartado 1.3', ['Con las normales 1991-2020 los ejemplos del manual cambian: Sevilla (aeropuerto) tiene 19,3 °C de media y Antananarivo 19,6 °C (no 18,5 ambas), pero siguen formando pareja: Csa frente a Cwa. Aberdeen recibe 833 mm, como dice el manual, pero Chicago ya recibe 962 mm. Por eso aquí se buscan las parejas con los datos actuales.']));
     T5.onOpt(() => { findTwins(); updTw(); });
     updTw();
 
