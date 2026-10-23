@@ -25,7 +25,12 @@ const H = (() => {
     return e;
   };
   /* plantilla HTML -> nodo */
-  H.html = (s) => { const t = document.createElement('template'); t.innerHTML = s.trim(); return t.content.firstElementChild; };
+  /* de una cadena HTML a un elemento; si hay varios elementos raíz, se envuelven en un div que no altera la maquetación */
+  H.html = (s) => {
+    const t = document.createElement('template'); t.innerHTML = s.trim();
+    if (t.content.children.length <= 1) return t.content.firstElementChild;
+    const d = document.createElement('div'); d.style.display = 'contents'; d.append(t.content); return d;
+  };
 
   /* ---------- formato (es-ES) ---------- */
   H.f = (x, d = 0) => Number(x).toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: true });

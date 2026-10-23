@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ensambla los HTML autocontenidos: portada (index.html), tema1/, tema2/, tema3/ y tema4/."""
+"""Ensambla los HTML autocontenidos: portada (index.html) y un hub por tema (tema1/ … tema6/)."""
 import json, pathlib
 R = pathlib.Path(__file__).parent
 CSS = (R / 'src/common/style.css').read_text()
@@ -115,6 +115,18 @@ TEMAS = {
               ('HADCRUT', 'data/tema5/hadcrut.json'), ('LGMR', 'data/tema5/lgmr.json')],
         files=['_config.js', '../tema2/common2.js', '../tema3/common3.js', '../tema4/common4.js', 'koppen.js', 'common5.js', 'tab_inicio.js', 'tab_clasificar.js',
                'tab_koppen.js', 'tab_mapa.js', 'tab_espana.js', 'tab_secos.js', 'tab_montana.js', 'tab_tiempo.js', 'tab_cuestionario.js'],
+    ),
+    'tema6': dict(
+        copernicus=True,
+        title='Tema 6 · Los climas zonales',
+        desc='Interactivos del Tema 6 de Geografía General I (Geografía Física, UNED): los climas intertropicales, templados y polares, sus causas y sus paisajes, con datos de 1991-2020.',
+        header='Tema 6 · La diversidad climática II. Los climas zonales: intertropicales, templados y polares',
+        data=[('LAND', 'data/land2.json'), ('MUN', 'data/mun.json'), ('ST', 'data/tema2/stations.json'), ('COAST', 'data/tema3/coast_eu.json'),
+              ('KMUNDO', 'data/tema5/koppen_mundo.json'), ('KES', 'data/tema5/koppen_espana.json'), ('VIENTOS', 'data/tema4/vientos.json'),
+              ('POLAR', 'data/tema6/polar.json'), ('BIOMAS', 'data/tema6/biomas.json')],
+        files=['_config.js', '../tema2/common2.js', '../tema3/common3.js', '../tema4/common4.js', '../tema5/koppen.js', '../tema5/common5.js', 'common6.js',
+               'tab_inicio.js', 'tab_mosaico.js', 'tab_intertropicales.js', 'tab_subtropicales.js', 'tab_oceanico.js', 'tab_polares.js',
+               'tab_vegetacion.js', 'tab_identifica.js', 'tab_cuestionario.js'],
     ),
 }
 

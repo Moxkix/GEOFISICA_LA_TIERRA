@@ -261,7 +261,7 @@ const T3 = (() => {
         ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#1f6f8b'; ctx.fillText(H.f(pv), P.l - 4, y);
         if (u <= 100) { ctx.textAlign = 'left'; ctx.fillStyle = '#b0393a'; ctx.fillText(u / 2 + '°', w - P.r + 4, y); }
       }
-      if (tmin < 0) for (let v = -10; v >= tmin; v -= 10) { ctx.textAlign = 'left'; ctx.fillStyle = '#b0393a'; ctx.fillText(v + '°', w - P.r + 4, Yv(v * 2)); }
+      if (tmin < 0) for (let v = -10; v >= tmin; v -= 10) { ctx.textAlign = 'left'; ctx.fillStyle = '#b0393a'; ctx.fillText(String(v).replace('-', '−') + '°', w - P.r + 4, Yv(v * 2)); }
       if (comp) { ctx.strokeStyle = 'rgba(31,111,139,.6)'; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(P.l, Yv(100)); ctx.lineTo(w - P.r, Yv(100)); ctx.stroke(); ctx.setLineDash([]); if (!o.small) { ctx.fillStyle = '#1f6f8b'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText('por encima de 100 mm, escala reducida', P.l + 4, Yv(100) - 2); } }
       // barras
       s.pr.slice(0, 12).forEach((v, i) => {
@@ -276,7 +276,9 @@ const T3 = (() => {
       ctx.fillStyle = '#5a6878'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
       const ml = o.small ? 'EFMAMJJASOND'.split('') : H.MES3;
       ml.forEach((m, i) => ctx.fillText(m, P.l + (i + 0.5) * pw, Yv(ylo) + 4));
-      if (o.title) { ctx.font = 'bold 12px system-ui'; ctx.fillStyle = '#1c2836'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(o.title, P.l, 4); ctx.font = '10.5px system-ui'; ctx.fillStyle = '#5a6878'; ctx.textAlign = 'right'; ctx.fillText(o.sub || '', w - P.r, 5); }
+      // marcas sobre el eje de meses (p. ej., pasos del Sol por el cenit): {m: mes fraccionario 0-12, label}
+      if (o.marks) for (const mk of o.marks) { const x = P.l + mk.m * pw, y = P.t + 2; ctx.fillStyle = mk.color || '#d08a00'; ctx.beginPath(); ctx.arc(x, y + 5, 4.5, 0, 7); ctx.fill(); ctx.strokeStyle = mk.color || '#d08a00'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(x, y + 10); ctx.lineTo(x, Yv(ylo)); ctx.stroke(); ctx.setLineDash([]); if (mk.label && !o.small) { ctx.font = '9.5px system-ui'; ctx.textAlign = x > w - P.r - 40 ? 'right' : 'left'; ctx.textBaseline = 'middle'; ctx.fillText(mk.label, x + (x > w - P.r - 40 ? -7 : 7), y + 5); } }
+      if (o.title) { ctx.font = 'bold 12px system-ui'; ctx.fillStyle = '#1c2836'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(o.title, P.l, 4); const tw = ctx.measureText(o.title).width; ctx.font = '10.5px system-ui'; ctx.fillStyle = '#5a6878'; ctx.textAlign = 'right'; if (o.sub && P.l + tw + 12 + ctx.measureText(o.sub).width <= w - P.r) ctx.fillText(o.sub, w - P.r, 5); }
     });
     c.draw = (s, o = {}) => { c.s = s; c.o = o; st.redraw(); };
     c.st = st;
