@@ -87,7 +87,7 @@ H.tab({
         <p class="small">Los tipos más extensos: ${top.map(([t, v]) => `${T5.chip(t)} ${pc(v)}`).join(' · ')}</p></div>
         <div><h4>Cambios entre 1961-1990 y 1991-2020</h4><p>Ha cambiado de tipo el <b>${pc(chg)}</b> de la superficie clasificada.</p>
         <table class="t mini"><tbody>${trs.map(([k, v]) => `<tr><td>${k.split(' → ').map((x) => T5.chip(x)).join(' → ')}</td><td class="num">${pc(v)}</td></tr>`).join('')}</tbody></table>
-        <p class="small">Casi todos los cambios reflejan el calentamiento: veranos más largos (Dfc → Dfb) o más cálidos (Cfb → Cfa), tundras que pasan a bosque boreal (ET → Dfc), inviernos que dejan de bajar del umbral C/D (Dfb → Cfb) o de −38 °C (Dfd → Dfc). En los trópicos, Af → Am y Am → Aw indican una estación seca más marcada. En regiones con pocas estaciones, parte del cambio puede deberse a los datos de 1961-1990.</p></div></div>
+        <p class="small">Casi todos los cambios reflejan el calentamiento: veranos más largos (Dfc → Dfb) o más cálidos (Cfb → Cfa), climas de tundra que pasan a los de bosque boreal (ET → Dfc), inviernos que dejan de bajar del umbral C/D (Dfb → Cfb) o de −38 °C (Dfd → Dfc). En los trópicos, Af → Am y Am → Aw indican una estación seca más marcada. En regiones con pocas estaciones, parte del cambio puede deberse a los datos de 1961-1990.</p></div></div>
         <p class="small">Superficie de tierra firme entre 60° S y 84° N (sin la Antártida, que TerraClimate no cubre y que es casi toda EF).</p>`;
     };
     st.append(H.h('h3', {}, '¿Cuánta superficie ocupa cada clima?'), stOut);
@@ -97,7 +97,7 @@ H.tab({
     el.append(card, sel, st, H.fix('fig. 6.1', ['El mapa del manual es el de Geiger y Pohl (1953), con datos de la primera mitad del siglo XX. Este se ha calculado con las normales 1991-2020, con los criterios del manual (que puedes cambiar arriba).']));
     el.append(H.selfCheck([
       { q: 'El grupo de climas que ocupa más superficie de tierra firme es…', opts: ['A, cálidos', 'B, secos', 'C, templados', 'E, polares'], a: 1, ex: 'Los climas secos cubren cerca de un tercio de las tierras emergidas (sin la Antártida).' },
-      { q: 'Los climas D apenas existen en el hemisferio sur porque…', opts: ['Allí no hay montañas', 'No hay grandes masas continentales en las latitudes en que se forman', 'El ecuador está más al sur', 'Llueve demasiado'], a: 1, ex: 'Entre 40° y 70° S casi todo es océano: solo hay D en enclaves de los Andes.' },
+      { q: 'Los climas D apenas existen en el hemisferio sur porque…', opts: ['Allí no hay montañas suficientemente altas', 'No hay continentes en las latitudes adecuadas', 'El ecuador térmico está desplazado al sur', 'Llueve demasiado para que haya inviernos fríos'], a: 1, ex: 'Entre 40° y 70° S casi todo es océano, que suaviza los inviernos: solo hay D en enclaves de los Andes.' },
       { q: 'Los climas Cs (mediterráneos) se sitúan en…', opts: ['Las fachadas orientales entre 20° y 30°', 'Las fachadas occidentales entre 30° y 45°', 'El interior de los continentes', 'Los trópicos'], a: 1, ex: 'California, Chile central, el Cabo, el suroeste de Australia y la cuenca mediterránea.' },
     ]));
   },

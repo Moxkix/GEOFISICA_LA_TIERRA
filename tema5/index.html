@@ -519,10 +519,14 @@ const H = (() => {
     qs.forEach((q, i) => {
       const fb = H.h('div', { class: 'fb' });
       const opts = H.h('div', { class: 'opts' });
-      q.opts.forEach((o, j) => {
-        const b = H.h('button', { class: 'opt', type: 'button', html: `<span class="l">${'abcd'[j]})</span><span>${o}</span>` });
+      /* opciones en orden aleatorio (distinto en cada carga y al reiniciar), para que la posición no delate la respuesta */
+      const ord = q.opts.map((_, j) => j);
+      for (let k = ord.length - 1; k > 0; k--) { const r = Math.floor(Math.random() * (k + 1)); [ord[k], ord[r]] = [ord[r], ord[k]]; }
+      ord.forEach((j, pos) => {
+        const o = q.opts[j];
+        const b = H.h('button', { class: 'opt', type: 'button', html: `<span class="l">${'abcdef'[pos]})</span><span>${o}</span>` });
         b.onclick = () => {
-          H.$$('.opt', opts).forEach((x, k) => { x.disabled = true; if (k === q.a) x.classList.add('ok'); });
+          H.$$('.opt', opts).forEach((x, k) => { x.disabled = true; if (ord[k] === q.a) x.classList.add('ok'); });
           const good = j === q.a; if (!good) b.classList.add('ko');
           done++; if (good) ok++;
           score.textContent = `${ok} / ${qs.length}`;
@@ -1612,7 +1616,7 @@ const KG = (() => {
   K.classify = (T, P, lat, opt = {}) => {
     const o = Object.assign({}, K.DEF, opt), s = K.stats(T, P, lat), steps = [];
     const neg = (s) => s.replace('-', '−');
-    const f1 = (v) => neg((Math.round(v * 10) / 10).toLocaleString('es-ES')), f0 = (v) => neg(Math.round(v).toLocaleString('es-ES'));
+    const f1 = (v) => neg((Math.round(v * 10) / 10).toLocaleString('es-ES', { useGrouping: true })), f0 = (v) => neg(Math.round(v).toLocaleString('es-ES', { useGrouping: true }));
     const fm = (v) => (Math.abs(v) < 10 ? f1(v) : f0(v)); // mm: con un decimal por debajo de 10
     const fp = (v) => (v < 0 ? `(${f1(v)})` : f1(v)); // entre paréntesis si es negativo
     const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -1824,7 +1828,7 @@ H.CORRECCIONES = [
   ['Köppen: letras s y w (p. 10)', 'Según que el invierno reciba más del 70 % o menos del 30 % de la lluvia', 's: el mes más seco del verano recibe menos de 30 mm (40 en los mapas actuales) y menos de 1/3 del más lluvioso del invierno; w: el mes más seco del invierno, menos de 1/10 del más lluvioso del verano. El 70 % solo cuenta para el umbral de aridez', 'koppen'],
   ['Umbral de aridez (cuadro 5.1)', 'e = 20t + 490 − 7·PPW es la «evapotranspiración potencial»', 'La fórmula es correcta (con PPW entre 30 y 70 %), pero e es un umbral empírico, no la ETP: en Riad e ≈ 540 mm y la ETP supera los 2.000 mm', 'secos'],
   ['Climas secos (cuadro 5.1)', 'Solo BS y BW', 'Falta la tercera letra: h (temperatura media anual ≥ 18 °C) y k (menor): BWh, BWk, BSh, BSk', 'koppen'],
-  ['Grupos G y H (pp. 9 y 30)', 'Climas de montaña (G) y de alta montaña, a más de 3.000 m (H)', 'No forman parte de Köppen-Geiger: las montañas se clasifican con sus propios datos; «H» solo aparece en la leyenda del mapa de Geiger y Pohl', 'montana'],
+  ['Grupos G y H (pp. 9 y 30)', 'Climas de montaña (G) y de alta montaña, a más de 3.000 m (H)', 'No forman parte de Köppen-Geiger: las montañas se clasifican con sus propios datos; «H» aparece en la leyenda del mapa de Geiger y Pohl y en modificaciones posteriores, como la de Trewartha', 'montana'],
   ['Ejemplos del apartado 1.3', 'Sevilla y Tananarive, 18,5 °C; Aberdeen y Chicago, 832 mm', 'Con las normales 1991-2020: Sevilla 19,3 °C y Antananarivo 19,6 °C; Aberdeen 833 mm, pero Chicago 962 mm', 'clasificar'],
   ['Climogramas', 'Series 1961-1990 y 1971-2000', 'La normal vigente es 1991-2020, unos 0,5 °C más cálida en el conjunto del planeta', 'tiempo'],
   ['Cronología (p. 15)', 'Filas descolocadas («Islandia: hielo en el Nilo»…); termina en 1960 con un «descenso de la temperatura a escala mundial»', 'Cronología rehecha; desde 1975 la temperatura global sube unos 0,2 °C por década', 'tiempo'],
@@ -2042,9 +2046,9 @@ H.tab({
       for (const [o, v, t] of kl) { ctx.beginPath(); if (o === 'v') { ctx.moveTo(X(v), P.t); ctx.lineTo(X(v), h - P.b); ctx.stroke(); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(t, X(v) + 2, h - P.b - 2); } else { ctx.moveTo(P.l, Y(v)); ctx.lineTo(w - P.r, Y(v)); ctx.stroke(); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(t, w - P.r - 2, Y(v) - 1); } }
       // ejes
       ctx.fillStyle = '#5a6878'; ctx.font = '10.5px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      for (let v = -10; v <= 40; v += 10) ctx.fillText(v + '°', X(v), h - P.b + 4);
+      for (let v = -10; v <= 40; v += 10) ctx.fillText(String(v).replace('-', '−') + '°', X(v), h - P.b + 4);
       ctx.fillText('temperatura media del mes más cálido', (P.l + w - P.r) / 2, h - 16);
-      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; for (let v = -50; v <= 30; v += 10) ctx.fillText(v + '°', P.l - 5, Y(v));
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; for (let v = -50; v <= 30; v += 10) ctx.fillText(String(v).replace('-', '−') + '°', P.l - 5, Y(v));
       ctx.save(); ctx.translate(11, (P.t + h - P.b) / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.fillText('mes más frío', 0, 0); ctx.restore();
       pts.gr = [];
       T5.ST.forEach((s) => { const tx = Math.max(...s.ta.slice(0, 12)), tn = Math.min(...s.ta.slice(0, 12)), x = X(tx), y = Y(tn), g = T5.type(s)[0]; pts.gr.push([x, y, s]); ctx.fillStyle = GCOL[g]; ctx.globalAlpha = s === sel ? 1 : 0.8; ctx.beginPath(); ctx.arc(x, y, s === sel ? 6 : 3.6, 0, 7); ctx.fill(); if (s === sel) { ctx.strokeStyle = '#1c2836'; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 1; } });
@@ -2083,11 +2087,11 @@ H.tab({
       <p class="small">Köppen es fisionómica pero no arbitraria: buscó umbrales que coincidieran con los grandes límites de la vegetación (18 °C, la palmera y la selva; 10 °C en el mes más cálido, el límite del árbol). Por eso el manual la usa como referencia.</p>`;
 
     el.append(scCard, twCard, oneCard, typesCard, H.selfCheck([
-      { q: 'El clima de un lugar se define con…', opts: ['Las observaciones de un año', 'Los valores medios de una serie larga, de al menos 30 años', 'El tiempo de un día representativo', 'Los récords absolutos'], a: 1, ex: 'La OMM actualiza cada diez años la normal climatológica de referencia: hoy, 1991-2020.' },
-      { q: 'Una clasificación genética se basa en…', opts: ['Umbrales de temperatura y precipitación', 'Las masas de aire y la circulación general que causan el clima', 'Las exigencias de los cultivos', 'El nombre de una región tipo'], a: 1, ex: 'Como la de Petterssen que reproduce la fig. 5.1.' },
-      { q: 'La clasificación de Blair, solo con la precipitación anual, falla porque…', opts: ['Usa milímetros', 'No tiene en cuenta la temperatura, que decide cuánta agua se evapora', 'Tiene demasiados tipos', 'Solo vale para España'], a: 1, ex: 'Yakutsk recibe menos de 250 mm y no es un desierto: hace tanto frío que apenas evapora.' },
+      { q: 'El clima de un lugar se define con…', opts: ['Las observaciones de un año reciente', 'Las medias de una serie de al menos 30 años', 'El tiempo de un día representativo', 'Los valores extremos registrados'], a: 1, ex: 'La OMM actualiza cada diez años la normal climatológica de referencia: hoy, 1991-2020.' },
+      { q: 'Una clasificación genética se basa en…', opts: ['Umbrales de temperatura y precipitación', 'Las masas de aire y la circulación general', 'Las exigencias de los cultivos de la zona', 'El nombre de una región que sirve de tipo'], a: 1, ex: 'Como la de Petterssen que reproduce la fig. 5.1.' },
+      { q: 'La clasificación de Blair, solo con la precipitación anual, falla porque…', opts: ['Mide la lluvia en milímetros, no en litros', 'No tiene en cuenta la temperatura', 'Distingue demasiados tipos de clima', 'Solo se puede aplicar en España'], a: 1, ex: 'La temperatura decide cuánta agua se evapora: Yakutsk recibe menos de 250 mm y no es un desierto, porque hace tanto frío que apenas evapora.' },
       { q: 'Un estudio del clima de un valle y sus laderas es de escala…', opts: ['Zonal', 'Regional', 'Local (topoclima)', 'Microclimática'], a: 2, ex: 'De 100 m a 10 km: el relieve concreto matiza la circulación regional.' },
-      { q: 'Thornthwaite clasificó los climas con fines…', opts: ['Turísticos', 'Agrícolas, a partir del balance hídrico del suelo', 'Militares', 'Genéticos'], a: 1, ex: 'Usa la evapotranspiración potencial, el déficit y el exceso de agua.' },
+      { q: 'Thornthwaite clasificó los climas con fines…', opts: ['Turísticos y de ocio', 'Agrícolas (balance hídrico)', 'Militares y de navegación', 'Genéticos (masas de aire)'], a: 1, ex: 'Usa la evapotranspiración potencial, el déficit y el exceso de agua.' },
     ]));
   },
 });
@@ -2174,7 +2178,7 @@ H.tab({
 
     /* ================= reto: ¿qué clima es? ================= */
     const quiz = H.h('div', { class: 'card' });
-    quiz.append(H.h('h3', {}, 'Reto: ¿qué clima es?'), H.h('p', { class: 'sub' }, 'Un climograma real sin nombre, casi siempre de una de las ciudades de los climogramas del manual (con datos de 1991-2020). Clasifícalo con el procedimiento de arriba (meses más cálido y más frío, el más seco del verano y del invierno…) y elige su tipo.'));
+    quiz.append(H.h('h3', {}, 'Reto: ¿qué clima es?'), H.h('p', { class: 'sub' }, 'Un climograma real sin nombre, a menudo de una de las ciudades de los climogramas del manual (con datos de 1991-2020). Clasifícalo con el procedimiento de arriba (meses más cálido y más frío, el más seco del verano y del invierno…) y elige su tipo.'));
     const qcv = H.h('canvas'), qcl = T3.climo(qcv, (w) => Math.min(w * 0.6, 300));
     const qtbl = H.h('div', { style: { overflowX: 'auto', marginTop: '6px' } });
     const qopts = H.h('div', { class: 'opts' }), qfb = H.h('div', { class: 'fb' }), qscore = H.h('span', { class: 'badge' }, '0 / 0');
@@ -2211,18 +2215,18 @@ H.tab({
 
     el.append(H.fix('recuadro de las pp. 9-10 y cuadros 5.1, 6.5 y 6.10', [
       '<b>s y w</b> no se definen por el 70 % o el 30 % de la lluvia invernal: ese reparto solo sirve para calcular el umbral de aridez del grupo B. <i>s</i>: el mes más seco del verano recibe menos de 30 mm (40 en los mapas actuales) y menos de un tercio del más lluvioso del invierno. <i>w</i>: el mes más seco del invierno recibe menos de un décimo del más lluvioso del verano. Así lo recoge, de hecho, el cuadro 6.5.',
-      'La fórmula de Patton del cuadro 5.1, <span class="formula">e = 20t + 490 − 7·PPW</span>, es correcta (con PPW entre 30 y 70), pero <b>e no es la evapotranspiración potencial</b>, sino un umbral empírico de necesidad de agua: en Riad e ≈ 540 mm, mientras que la evapotranspiración potencial real supera ampliamente los 2.000 mm.',
+      'La fórmula de Patton del cuadro 5.1, <span class="formula">e = 20t + 490 − 7·PPW</span>, es correcta (con PPW entre 30 y 70), pero <b>e no es la evapotranspiración potencial</b>, sino un umbral empírico de necesidad de agua: en Riad e ≈ 540 mm, mientras que la evapotranspiración potencial supera ampliamente los 2.000 mm.',
       'Falta la tercera letra de los climas secos: <b>h</b> (cálido, temperatura media anual ≥ 18 °C) y <b>k</b> (frío): BWh, BWk, BSh, BSk.',
-      'Las letras <b>G</b> y <b>H</b> y el tipo «<b>EB</b>» no forman parte de la clasificación de Köppen-Geiger: las montañas se clasifican con sus propios datos (Navacerrada, Izaña o Bogotá tienen tipos ordinarios). «H, climas de grandes alturas» solo aparece en la leyenda del mapa de Geiger y Pohl (fig. 6.1).',
+      'Las letras <b>G</b> y <b>H</b> y el tipo «<b>EB</b>» no forman parte de la clasificación de Köppen-Geiger: las montañas se clasifican con sus propios datos (Navacerrada, Izaña o Bogotá tienen tipos ordinarios). «H, climas de grandes alturas» aparece en la leyenda del mapa de Geiger y Pohl (fig. 6.1) y en modificaciones posteriores, como la de Trewartha.',
       'Cf no exige que el mes más seco supere 30 mm (cuadros 6.5 y 6.6): significa solo que el clima no es ni s ni w.',
       'El límite entre C y D a −3 °C es el de Köppen y del manual, y es correcto; muchos mapas actuales usan 0 °C. Cámbialo arriba, en «Criterios de la clasificación», y verás pasar Varsovia de Cfb a Dfb.']));
 
     el.append(H.selfCheck([
-      { q: 'Lo primero que se comprueba en la clasificación de Köppen es…', opts: ['Si el mes más frío llega a 18 °C (grupo A)', 'Si el mes más cálido baja de 10 °C (grupo E) y si es seco (B)', 'Si llueve más de 1.000 mm al año', 'La altitud del lugar'], a: 1, ex: 'Los grupos E y B tienen prioridad; después se reparten A, C y D según el mes más frío.' },
+      { q: 'Lo primero que se comprueba en la clasificación de Köppen es…', opts: ['Si el mes más frío llega a 18 °C, que define el grupo A', 'Si el mes más cálido baja de 10 °C (E) y si es seco (B)', 'Si la precipitación anual supera los 1.000 mm', 'La altitud del lugar, para los climas de montaña'], a: 1, ex: 'Los grupos E y B tienen prioridad; después se reparten A, C y D según el mes más frío.' },
       { q: 'Un clima con el mes más frío a 20 °C y el mes más seco con 30 mm, en un lugar con 3.000 mm al año, es…', opts: ['Af', 'Am', 'Aw', 'Cfa'], a: 1, ex: '30 mm < 60 mm, pero 30 ≥ 100 − 3.000/25 = −20 mm: la lluvia anual compensa la estación seca. Es monzónico.' },
       { q: 'En el umbral de aridez de Köppen, si la lluvia se concentra en verano el umbral…', opts: ['Baja, porque llueve cuando hace falta', 'Sube, porque esa lluvia se evapora más', 'No cambia: solo cuenta el total', 'Desaparece: ya no puede ser seco'], a: 1, ex: 'Con PPW = 30 (o menos) se suman 280 mm a 20·t; con PPW = 70 (lluvia de invierno), nada.' },
-      { q: 'La letra b significa…', opts: ['Mes más cálido ≥ 22 °C', 'Mes más cálido < 22 °C y al menos cuatro meses ≥ 10 °C', 'Invierno seco', 'Clima seco'], a: 1, ex: 'Verano templado: el de Vitoria-Gasteiz, Bilbao o Burgos.' },
-      { q: 'Con las normales 1991-2020 y los criterios del manual, Vitoria-Gasteiz (Foronda) sale…', opts: ['Cfb, oceánico', 'Csb, mediterráneo de verano templado', 'BSk, estepa fría', 'Dfb, continental húmedo'], a: 1, ex: 'Agosto (28 mm) recibe menos de 30 mm y menos de un tercio que noviembre (98 mm): verano seco. Es un caso límite: con 2 mm más en agosto sería Cfb. Compruébalo en «Introduce tus datos». La rejilla de TerraClimate, que promedia unos 4 km alrededor de la ciudad, da 41 mm en agosto y clasifica el municipio como Cfb: estación y rejilla no siempre coinciden.' },
+      { q: 'La letra b significa…', opts: ['Mes más cálido de 22 °C o más (verano caluroso)', 'Mes más cálido < 22 °C y 4 meses ≥ 10 °C', 'Invierno seco, con la lluvia concentrada en verano', 'Clima seco de estepa, entre e/2 y e'], a: 1, ex: 'Verano templado: el de Vitoria-Gasteiz, Bilbao o Burgos.' },
+      { q: 'Con las normales 1991-2020 y los criterios del manual, Vitoria-Gasteiz (Foronda) sale…', opts: ['Cfb, oceánico de verano templado', 'Csb, mediterráneo de verano templado', 'BSk, estepa fría de latitudes medias', 'Dfb, continental húmedo de verano templado'], a: 1, ex: 'Agosto (28 mm) recibe menos de 30 mm y menos de un tercio que noviembre (98 mm): verano seco. Es un caso límite: con 2 mm más en agosto sería Cfb. Compruébalo en «Introduce tus datos». La rejilla de TerraClimate, que promedia unos 4 km alrededor de la ciudad, da 41 mm en agosto y clasifica el municipio como Cfb: estación y rejilla no siempre coinciden.' },
     ]));
   },
 });
@@ -2316,7 +2320,7 @@ H.tab({
         <p class="small">Los tipos más extensos: ${top.map(([t, v]) => `${T5.chip(t)} ${pc(v)}`).join(' · ')}</p></div>
         <div><h4>Cambios entre 1961-1990 y 1991-2020</h4><p>Ha cambiado de tipo el <b>${pc(chg)}</b> de la superficie clasificada.</p>
         <table class="t mini"><tbody>${trs.map(([k, v]) => `<tr><td>${k.split(' → ').map((x) => T5.chip(x)).join(' → ')}</td><td class="num">${pc(v)}</td></tr>`).join('')}</tbody></table>
-        <p class="small">Casi todos los cambios reflejan el calentamiento: veranos más largos (Dfc → Dfb) o más cálidos (Cfb → Cfa), tundras que pasan a bosque boreal (ET → Dfc), inviernos que dejan de bajar del umbral C/D (Dfb → Cfb) o de −38 °C (Dfd → Dfc). En los trópicos, Af → Am y Am → Aw indican una estación seca más marcada. En regiones con pocas estaciones, parte del cambio puede deberse a los datos de 1961-1990.</p></div></div>
+        <p class="small">Casi todos los cambios reflejan el calentamiento: veranos más largos (Dfc → Dfb) o más cálidos (Cfb → Cfa), climas de tundra que pasan a los de bosque boreal (ET → Dfc), inviernos que dejan de bajar del umbral C/D (Dfb → Cfb) o de −38 °C (Dfd → Dfc). En los trópicos, Af → Am y Am → Aw indican una estación seca más marcada. En regiones con pocas estaciones, parte del cambio puede deberse a los datos de 1961-1990.</p></div></div>
         <p class="small">Superficie de tierra firme entre 60° S y 84° N (sin la Antártida, que TerraClimate no cubre y que es casi toda EF).</p>`;
     };
     st.append(H.h('h3', {}, '¿Cuánta superficie ocupa cada clima?'), stOut);
@@ -2326,7 +2330,7 @@ H.tab({
     el.append(card, sel, st, H.fix('fig. 6.1', ['El mapa del manual es el de Geiger y Pohl (1953), con datos de la primera mitad del siglo XX. Este se ha calculado con las normales 1991-2020, con los criterios del manual (que puedes cambiar arriba).']));
     el.append(H.selfCheck([
       { q: 'El grupo de climas que ocupa más superficie de tierra firme es…', opts: ['A, cálidos', 'B, secos', 'C, templados', 'E, polares'], a: 1, ex: 'Los climas secos cubren cerca de un tercio de las tierras emergidas (sin la Antártida).' },
-      { q: 'Los climas D apenas existen en el hemisferio sur porque…', opts: ['Allí no hay montañas', 'No hay grandes masas continentales en las latitudes en que se forman', 'El ecuador está más al sur', 'Llueve demasiado'], a: 1, ex: 'Entre 40° y 70° S casi todo es océano: solo hay D en enclaves de los Andes.' },
+      { q: 'Los climas D apenas existen en el hemisferio sur porque…', opts: ['Allí no hay montañas suficientemente altas', 'No hay continentes en las latitudes adecuadas', 'El ecuador térmico está desplazado al sur', 'Llueve demasiado para que haya inviernos fríos'], a: 1, ex: 'Entre 40° y 70° S casi todo es océano, que suaviza los inviernos: solo hay D en enclaves de los Andes.' },
       { q: 'Los climas Cs (mediterráneos) se sitúan en…', opts: ['Las fachadas orientales entre 20° y 30°', 'Las fachadas occidentales entre 30° y 45°', 'El interior de los continentes', 'Los trópicos'], a: 1, ex: 'California, Chile central, el Cabo, el suroeste de Australia y la cuenca mediterránea.' },
     ]));
   },
@@ -2442,7 +2446,7 @@ H.tab({
 
     el.append(H.info('<b>Cómo se ha calculado.</b> TerraClimate combina el atlas WorldClim (≈1 km) con las anomalías mensuales de las series de estaciones (CRU) y del reanálisis japonés JRA-55; aquí se usan sus medias de 1961-1990 y 1991-2020 en celdas de 1/24° (≈4 km). Para cada municipio se promedian las cuatro celdas más próximas y la temperatura se ajusta 0,65 °C por cada 100 m de diferencia entre la altitud del núcleo de población y la altitud media de las celdas. Por eso el tipo del municipio puede no coincidir con el color de su celda en el mapa. Las estaciones de AEMET dan valores algo distintos: TerraClimate es una estimación en rejilla, no una medida.'));
     el.append(H.selfCheck([
-      { q: 'El tipo de clima más extendido en los municipios españoles es…', opts: ['Cfb, oceánico', 'Csa, mediterráneo de verano caluroso', 'BSk, estepa fría', 'Dfb, continental húmedo'], a: 1, ex: 'Unos 3.200 de los 8.132 municipios con los criterios del manual: buena parte de la mitad sur, el valle del Ebro y el litoral mediterráneo.' },
+      { q: 'El tipo de clima más extendido en los municipios españoles es…', opts: ['Cfb, oceánico de verano templado', 'Csa, mediterráneo de verano caluroso', 'BSk, estepa fría de latitudes medias', 'Dfb, continental húmedo de verano templado'], a: 1, ex: 'Unos 3.200 de los 8.132 municipios con los criterios del manual: buena parte de la mitad sur y del litoral mediterráneo. En el valle del Ebro predominan BSk y Cfa.' },
       { q: 'El cambio de tipo más frecuente entre 1961-1990 y 1991-2020 es…', opts: ['De Csa a Cfb', 'De Csb a Csa', 'De BSk a Cfb', 'De ET a EF'], a: 1, ex: 'Más de mil municipios: su mes más cálido ha pasado a superar los 22 °C de media. Es la consecuencia más directa del calentamiento de los veranos; le sigue Cfb → Cfa.' },
       { q: 'Con las normales 1991-2020, los climas D y E aparecen en España…', opts: ['En la costa cantábrica y en los valles atlánticos', 'Solo en las cumbres del Pirineo, si el umbral es −3 °C', 'En las cumbres del Teide y de La Palma', 'En los páramos más fríos de la Meseta norte'], a: 1, ex: 'Con el umbral de 0 °C aparecen también en Sierra Nevada y en algunas cumbres del Sistema Central, la Cordillera Cantábrica y el Sistema Ibérico. En 1961-1990, con el umbral de −3 °C, también había celdas D y E en Sierra Nevada y en los Picos de Europa. Ningún municipio tiene un clima D con el umbral del manual.' },
     ]));
@@ -2484,7 +2488,7 @@ H.tab({
       pts.length = 0;
       ch.draw({
         xMin: -20, xMax: 32, yMin: 0, yMax: 1600, pad: { l: 62 },
-        xTicks: [-20, -10, 0, 10, 20, 30].map((v) => ({ v, label: v + '°' })), yTicks: [0, 250, 500, 750, 1000, 1250, 1500].map((v) => ({ v, label: H.f(v) })),
+        xTicks: [-20, -10, 0, 10, 20, 30].map((v) => ({ v, label: String(v).replace('-', '−') + '°' })), yTicks: [0, 250, 500, 750, 1000, 1250, 1500].map((v) => ({ v, label: H.f(v) })),
         xLabel: 'temperatura media anual (°C)', yLabel: 'precipitación anual (mm)',
         hlines: [{ y: 250, color: '#8a6512', label: 'isoyeta de 250 mm' }],
         series: [
@@ -2534,7 +2538,7 @@ H.tab({
       T4.hover(mcv, mp, (lat, lon) => { const v = gAI.near(lat, lon, 1); return v === v ? `${T4.ll(lat, lon, 1)} · P/ETP = ${H.f(v, 2)} · ${aiCls(v)[1]}` : null; });
       let frac = {}; { let tot = 0; for (let j = 0; j < W.ny; j++) { const c = Math.cos((W.lat0 - (j + 0.5) * W.res) * H.D2R); for (let i = 0; i < W.nx; i++) { const v = W.AI[j * W.nx + i]; if (v === v) { tot += c; const n = aiCls(v)[1]; frac[n] = (frac[n] || 0) + c; } } } for (const k in frac) frac[k] = frac[k] / tot * 100; }
       aiCard.append(H.h('h3', {}, 'El índice de aridez: precipitación frente a evapotranspiración'),
-        H.h('p', { class: 'sub' }, 'La UNEP y la UNESCO (fig. 5.4) delimitan las tierras secas con el cociente entre la precipitación anual y la evapotranspiración potencial (P/ETP). Mapa calculado con TerraClimate 1991-2020 (ETP de Penman-Monteith).'),
+        H.h('p', { class: 'sub' }, 'El PNUMA (UNEP) y la UNESCO (fig. 5.4) delimitan las tierras secas con el cociente entre la precipitación anual y la evapotranspiración potencial (P/ETP). Mapa calculado con TerraClimate 1991-2020 (ETP de Penman-Monteith).'),
         H.h('div', { class: 'viz framed' }, mcv),
         H.html(`<div class="legend">${AIC.map(([v, n, c]) => `<span><i style="background:rgb(${c});height:10px;width:14px"></i>${n} ${v < 1 ? '(< ' + H.f(v, 2) + ')' : '(≥ 0,65)'} · ${H.f(frac[n] || 0)} %</span>`).join('')}</div>`),
         H.html(`<p class="hint">Las tierras secas (P/ETP < 0,65) ocupan el ${H.f((frac['Hiperárido'] || 0) + (frac['Árido'] || 0) + (frac['Semiárido'] || 0) + (frac['Subhúmedo seco'] || 0))} % de las tierras emergidas sin la Antártida; hiperáridas, áridas y semiáridas, el ${H.f((frac['Hiperárido'] || 0) + (frac['Árido'] || 0) + (frac['Semiárido'] || 0))} %: el «tercio de la superficie terrestre» del manual.</p>`));
@@ -2553,7 +2557,7 @@ H.tab({
       sahara: 'El mayor desierto cálido: bajo la rama descendente de la célula de Hadley (el anticiclón subtropical) casi todo el año, barrido por el harmatán (un alisio continental del noreste) y con su interior a más de 1.000 km del mar. En su franja atlántica se suma la corriente fría de Canarias.',
       namib: 'Desierto costero: la corriente fría de Benguela y el afloramiento enfrían el aire desde abajo (el mar está unos 8 °C más frío que la media del océano a esa latitud), el anticiclón de Santa Elena lo estabiliza y la Gran Escarpadura africana frena la humedad que llega del este. Nieblas frecuentes y lluvia casi nula.',
       mojave: 'A sotavento de Sierra Nevada y de las sierras Transversales, que descargan la humedad de las borrascas del Pacífico; en verano lo cubre el anticiclón subtropical del Pacífico. La corriente fría de California estabiliza el aire costero, pero el Mojave está tierra adentro.',
-      atacama: 'El desierto cálido más seco del mundo: la corriente de Humboldt y el afloramiento enfrían el aire (el mar está unos 5 °C por debajo de la media de su latitud), el anticiclón del Pacífico sur lo estabiliza y los Andes cierran el paso al aire húmedo de la Amazonia. Algunas estaciones pasan años sin lluvia.',
+      atacama: 'El desierto no polar más seco del mundo: la corriente de Humboldt y el afloramiento enfrían el aire (el mar está unos 5 °C por debajo de la media de su latitud), el anticiclón del Pacífico sur lo estabiliza y los Andes cierran el paso al aire húmedo de la Amazonia. Algunas estaciones pasan años sin lluvia.',
     };
     const D = (typeof DESIERTOS !== 'undefined' && DESIERTOS) || [];
     const dCard = H.h('div', { class: 'card' });
@@ -2605,13 +2609,13 @@ H.tab({
       'Cuadro 5.2: en los desiertos de la zona templada la amplitud térmica diaria no llega «hasta 90 °C»: lo habitual son 15-25 °C (es probable una errata por 30 °C). La que ronda los 30-40 °C es la amplitud <i>anual</i>.',
       'Cuadro 5.2: los desiertos costeros (Atacama, Namib) no tienen «vegetación bastante densa»: son de los más pobres del planeta; solo las nieblas mantienen algunas formaciones dispersas (las «lomas» de Perú y Chile).',
       '2.1.1: sí hay desiertos y estepas templados en el hemisferio sur: la Patagonia (BSk y BWk), a sotavento de los Andes, entre 40° y 50° S.',
-      'El umbral e de Köppen no es la evapotranspiración potencial: compárala con el índice P/ETP de la UNEP.']));
+      'El umbral e de Köppen no es la evapotranspiración potencial: compárala con el índice P/ETP del PNUMA (UNEP).']));
     el.append(H.selfCheck([
-      { q: 'Según Köppen, un clima es seco si…', opts: ['Recibe menos de 250 mm', 'La precipitación anual no llega al umbral e, que depende de la temperatura y del reparto estacional de la lluvia', 'No llueve en verano', 'La humedad relativa baja del 50 %'], a: 1, ex: 'Por eso Yakutsk (233 mm, −8 °C) no es seco y Zaragoza (318 mm, 16 °C) sí.' },
-      { q: 'A igual temperatura, un clima es seco con más lluvia si esta cae…', opts: ['En invierno', 'En verano, porque se evapora más', 'En primavera', 'En forma de nieve'], a: 1, ex: 'El umbral sube 280 mm si el 70 % o más de la lluvia cae en verano.' },
-      { q: 'El desierto de Namib se explica sobre todo por…', opts: ['Su lejanía del mar', 'La corriente fría de Benguela y el anticiclón subtropical', 'El anticiclón siberiano', 'La altitud'], a: 1, ex: 'Es un desierto costero con nieblas: el mar frío enfría el aire desde abajo y lo estabiliza.' },
-      { q: 'El Gobi es un desierto…', opts: ['Subtropical de anticiclón', 'De latitudes medias, por la lejanía del mar, las montañas y el anticiclón invernal', 'Costero', 'Polar'], a: 1, ex: 'Con inviernos muy fríos: BWk.' },
-      { q: 'La amplitud térmica anual de los desiertos templados ronda…', opts: ['5 °C', '30-40 °C', '90 °C', '0 °C'], a: 1, ex: 'El manual da unos 32 °C; los 90 °C del cuadro 5.2 son una errata.' },
+      { q: 'Según Köppen, un clima es seco si…', opts: ['Recibe menos de 250 mm al año', 'Su lluvia anual no llega al umbral e', 'No llueve en los meses de verano', 'La humedad relativa baja del 50 %'], a: 1, ex: 'El umbral depende de la temperatura y del reparto estacional de la lluvia: por eso Yakutsk (233 mm, −8 °C) no es seco y Zaragoza (326 mm, 16 °C) sí.' },
+      { q: 'A igual temperatura, un clima es seco con más lluvia si esta cae…', opts: ['En invierno', 'En verano', 'En primavera', 'En forma de nieve'], a: 1, ex: 'En verano se evapora más: el umbral sube 280 mm si el 70 % o más de la lluvia cae en verano.' },
+      { q: 'El desierto de Namib se explica sobre todo por…', opts: ['Su lejanía del mar y la continentalidad', 'La corriente fría de Benguela y el anticiclón', 'El anticiclón térmico siberiano', 'La altitud de la meseta sudafricana'], a: 1, ex: 'Es un desierto costero con nieblas: el mar frío enfría el aire desde abajo y lo estabiliza.' },
+      { q: 'El Gobi es un desierto…', opts: ['Subtropical, de anticiclón dinámico', 'De latitudes medias, por continentalidad', 'Costero, por una corriente fría', 'Polar, por el frío extremo'], a: 1, ex: 'Lejanía del mar, montañas que lo rodean y anticiclón invernal; con inviernos muy fríos: BWk.' },
+      { q: 'La amplitud térmica anual de los desiertos templados ronda…', opts: ['Unos 5 °C', 'Unos 30-40 °C', 'Unos 90 °C', 'Unos 15 °C'], a: 1, ex: 'El manual da unos 32 °C. Los «90 °C» del cuadro 5.2 se refieren a la amplitud diaria y son una errata: lo habitual son 15-25 °C.' },
     ]));
   },
 });
@@ -2631,7 +2635,7 @@ H.tab({
     /* pisos de vegetación aproximados por la temperatura del mes más cálido (latitudes medias, fig. 5.10) */
     const BELTS = [[18, 'Basal o colino: frondosas, cultivos'], [14, 'Montano: hayas, robles, abetos'], [10, 'Subalpino: coníferas (pino negro, alerce); límite del bosque'], [0, 'Alpino: prados y matorral, sin árboles'], [-99, 'Nival: nieves perpetuas']];
     const belt = (tmax) => BELTS.find((b) => tmax >= b[0]);
-    const BASES = { ecu: { id: '82331', n: 'Ecuador (Manaos)' }, pir: { id: '8094', n: 'Pirineo (Huesca)' } };
+    const BASES = { ecu: { id: '82331', n: 'Ecuatorial (Manaos)' }, pir: { id: '8094', n: 'Pirineo (Huesca)' } };
     const S = { base: 'pir', z: 2000, lr: 0.65 };
     const card = H.h('div', { class: 'card' });
     card.append(H.h('h3', {}, 'Simulador de pisos'), H.h('p', { class: 'sub' }, 'Partimos del clima de un lugar bajo y subimos por una ladera imaginaria: cada 100 m la temperatura de todos los meses baja según el gradiente elegido. La precipitación se deja igual, para aislar el efecto de la temperatura. Las columnas muestran el tipo de Köppen a cada altitud en la montaña ecuatorial y en la elegida.'));
@@ -2641,9 +2645,9 @@ H.tab({
     };
     const ecuB = () => { const s = T5.byId(BASES.ecu.id); return { T: s.ta.slice(0, 12), P: s.pr.slice(0, 12), lat: s.lat, z0: s.elev, name: 'Montaña ecuatorial (base: Manaos)' }; };
     const at = (b, z) => b.T.map((t) => t - S.lr * (z - b.z0) / 100);
-    const seg = H.seg([['ecu', 'Ecuador (Manaos, 61 m)'], ['pir', 'Pirineo (Huesca, 541 m)'], ['mun', 'Tu municipio']], S.base, (v) => { S.base = v; upd(); });
+    const seg = H.seg([['ecu', 'Ecuatorial (Manaos, 61 m)'], ['pir', 'Pirineo (Huesca, 546 m)'], ['mun', 'Tu municipio']], S.base, (v) => { S.base = v; upd(); });
     const sz = H.slider('Altitud', 0, 6500, 50, S.z, (v) => H.f(v) + ' m', (v) => { S.z = v; upd(); });
-    const sl = H.slider('Gradiente térmico vertical', 0.4, 0.9, 0.01, S.lr, (v) => H.f(v, 2) + ' °C / 100 m', (v) => { S.lr = v; upd(); });
+    const sl = H.slider('Gradiente térmico vertical', 0.4, 0.9, 0.01, S.lr, (v) => H.f(v, 2) + ' °C/100 m', (v) => { S.lr = v; upd(); });
     const cvP = H.h('canvas'), cvC = H.h('canvas'), clC = T3.climo(cvC, (w) => Math.min(w * 0.58, 280));
     const ro = H.h('div', { class: 'readouts' });
     const profile = (ctx, x0, w, h, b, title, Y, zMax, tropical) => {
@@ -2715,7 +2719,7 @@ H.tab({
       if (dz < 100) { rRo.innerHTML = 'Elige dos estaciones con al menos 100 m de desnivel.'; chG.draw({ xMin: 0, xMax: 1, yMin: 0, yMax: 1, series: [] }); return; }
       const g = hi.ta.slice(0, 12).map((t, i) => (lo.ta[i] - t) / dz * 100), gm = (lo.ta[12] - hi.ta[12]) / dz * 100;
       chG.draw({ xMin: 0.5, xMax: 12.5, yMin: 0, yMax: Math.max(1, Math.ceil(Math.max(...g) * 10 + 1) / 10), pad: { l: 46 },
-        xTicks: H.MES3.map((m, i) => ({ v: i + 1, label: m })), yTicks: [0, 0.2, 0.4, 0.6, 0.8, 1].map((v) => ({ v, label: H.f(v, 1) })), yLabel: '°C / 100 m',
+        xTicks: H.MES3.map((m, i) => ({ v: i + 1, label: m })), yTicks: [0, 0.2, 0.4, 0.6, 0.8, 1].map((v) => ({ v, label: H.f(v, 1) })), yLabel: '°C/100 m',
         hlines: [{ y: 0.65, color: '#b4531d', label: '0,65 (valor medio)' }],
         series: [{ pts: g.map((v, i) => [i + 1, v]), color: '#1f6f8b', width: 2.5 }], markers: g.map((v, i) => ({ x: i + 1, y: v, r: 3.5, color: '#1f6f8b' })) });
       const iMx = g.indexOf(Math.max(...g)), iMn = g.indexOf(Math.min(...g));
@@ -2784,13 +2788,13 @@ H.tab({
     el.append(H.fix('apartados 1.2.2 y 2.2.2', [
       'Pisos térmicos (p. 14): el piso gélido tiene temperaturas «menores de 0 °C», no «de −0 °C».',
       'Tabla de Caldas: el piso frío es 17,5 °C > T ≥ 12 °C (falta el signo).',
-      'Köppen no distingue climas de montaña «G» ni de alta montaña «H»: Navacerrada (Csb), Izaña (Csb) o Bogotá (Cfb) reciben tipos ordinarios según sus temperaturas y precipitaciones. La «H» solo aparece en la leyenda del mapa de Geiger y Pohl.']));
+      'Köppen no distingue climas de montaña «G» ni de alta montaña «H»: Navacerrada (Csb), Izaña (Csb) o Bogotá (Cfb) reciben tipos ordinarios según sus temperaturas y precipitaciones. La «H» aparece en la leyenda del mapa de Geiger y Pohl y en modificaciones posteriores, como la de Trewartha.']));
     el.append(H.selfCheck([
       { q: 'Por término medio, la temperatura baja con la altura unos…', opts: ['0,1 °C cada 100 m', '0,65 °C cada 100 m', '1 °C cada 10 m', '6,5 °C cada 100 m'], a: 1, ex: 'Es el gradiente medio de la troposfera; en las estaciones reales varía con la estación y las inversiones.' },
-      { q: 'En una montaña ecuatorial, a 3.000 m…', opts: ['Hay inviernos muy fríos', 'La temperatura apenas cambia a lo largo del año, pero es mucho más baja que en el llano', 'Llueve menos que en el desierto', 'La solana recibe el triple que la umbría'], a: 1, ex: 'La montaña conserva los rasgos de su zona: amplitud anual mínima.' },
-      { q: 'Entre Navacerrada y Madrid el gradiente térmico es mayor…', opts: ['En invierno', 'En primavera y verano', 'Igual todo el año', 'Solo en otoño'], a: 1, ex: 'En invierno las inversiones en la meseta reducen la diferencia.' },
-      { q: 'A 65° de latitud, en invierno, la ladera orientada al polo…', opts: ['Recibe lo mismo que la solana', 'Apenas recibe sol directo durante semanas o meses', 'Recibe más que en verano', 'Recibe el doble que el llano'], a: 1, ex: 'Con el Sol tan bajo, la ladera de umbría queda en sombra todo el día.' },
-      { q: 'Por encima del mar de nubes de Tenerife (Izaña) llueve…', opts: ['Mucho más que abajo', 'Menos que en Tenerife Norte, porque la estación queda sobre la inversión del alisio', 'Igual', 'Solo nieve'], a: 1, ex: 'La precipitación no siempre aumenta con la altura: depende de dónde se condensa la humedad.' },
+      { q: 'En una montaña ecuatorial, a 3.000 m…', opts: ['Hay inviernos muy fríos y veranos templados', 'Es más fresco todo el año, con amplitud mínima', 'Llueve menos que en los desiertos cercanos', 'La solana recibe el triple que la umbría'], a: 1, ex: 'La montaña conserva los rasgos de su zona: la temperatura es mucho más baja que en el llano, pero apenas cambia a lo largo del año.' },
+      { q: 'Entre Navacerrada y Madrid el gradiente térmico es mayor…', opts: ['En invierno, por el frío', 'En primavera y verano', 'Igual todo el año', 'En otoño, con las lluvias'], a: 1, ex: 'En invierno las inversiones en la meseta reducen la diferencia.' },
+      { q: 'A 65° de latitud, en invierno, la ladera orientada al polo…', opts: ['Recibe lo mismo que la solana', 'Apenas recibe sol directo', 'Recibe más que en verano', 'Recibe el doble que el llano'], a: 1, ex: 'Con el Sol tan bajo, la ladera de umbría queda en sombra todo el día durante semanas o meses.' },
+      { q: 'Por encima del mar de nubes de Tenerife (Izaña) llueve…', opts: ['Mucho más que abajo, por el ascenso', 'Menos que en Tenerife Norte', 'Lo mismo que en la costa', 'Solo en forma de nieve'], a: 1, ex: 'La estación queda por encima de la inversión del alisio y del mar de nubes. La precipitación no siempre aumenta con la altura: depende de dónde se condensa la humedad.' },
     ]));
   },
 });
@@ -2827,7 +2831,7 @@ H.tab({
             { pts: [[1961, mean(1961, 1990)], [1990, mean(1961, 1990)]], color: '#1f6f8b', width: 3 }, { pts: [[1991, mean(1991, 2020)], [2020, mean(1991, 2020)]], color: '#b4531d', width: 3 }],
           after: (ctx, X, Y) => { ctx.font = 'bold 10.5px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = '#1f6f8b'; ctx.fillText('normal 1961-1990', X(1975.5), Y(mean(1961, 1990)) - 4); ctx.fillStyle = '#b4531d'; ctx.fillText('normal 1991-2020', X(2005.5), Y(mean(1991, 2020)) - 4); const r = hc.reduce((a, b) => (b.v > a.v ? b : a)); ctx.fillStyle = '#b0393a'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(`${r.y}: ${H.fs(r.v, 2)} °C`, X(r.y) - 8, Y(r.v));
             ctx.strokeStyle = 'rgba(176,57,58,.7)'; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(X(1850), Y(1.5)); ctx.lineTo(X(2026), Y(1.5)); ctx.stroke(); ctx.setLineDash([]);
-            ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.font = '10.5px system-ui'; ctx.fillText('1,5 °C, límite del Acuerdo de París (para medias de 20 años)', X(1852), Y(1.5) - 2); } });
+            ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.font = '10.5px system-ui'; ctx.fillText('1,5 °C, límite del Acuerdo de París (el IPCC lo evalúa con medias de 20 años)', X(1852), Y(1.5) - 2); } });
         note.innerHTML = `Temperatura media global (HadCRUT5) respecto a 1850-1900. Línea fina: cada año; gruesa: media móvil de 11 años. La normal 1991-2020 es ${H.f(mean(1991, 2020) - mean(1961, 1990), 2)} °C más cálida que la de 1961-1990; la media de 2015-2024 supera en ${H.f(mean(2015, 2024), 2)} °C la de 1850-1900, y 2024 fue el primer año natural por encima de 1,5 °C.`;
         return;
       }
@@ -2860,7 +2864,7 @@ H.tab({
       const mp = T4.map(mcv, { bbox: [-180, 180, -78, 82], grid: 30, land: (lat, lon) => col(gm.at(lat, lon)) || T4.LAND, color: (lat, lon) => { const c = col(gm.at(lat, lon)); return c ? H.mix(c, [255, 255, 255], 0.35) : null; } });
       T4.hover(mcv, mp, (lat, lon) => { const v = gm.at(lat, lon); return v === v ? `${T4.ll(lat, lon, 0)} · ${H.fs(v, 1)} °C` : null; });
       mc.append(H.h('h3', {}, `El Último Máximo Glaciar, hace unos ${H.f(M.ka || 21)}.000 años`),
-        H.h('p', { class: 'sub' }, `Diferencia de la temperatura media anual del aire en superficie entre el Último Máximo Glaciar (${M.lab || '19.000-23.000 años'}) y la época preindustrial, según la reanálisis de Osman y otros (2021). Sustituye la fig. 5.3, que reproduce la reconstrucción CLIMAP de 1976.`),
+        H.h('p', { class: 'sub' }, `Diferencia de la temperatura media anual del aire en superficie entre el Último Máximo Glaciar (${M.lab || '19.000-23.000 años'}) y la época preindustrial, según el reanálisis de Osman y otros (2021). Sustituye la fig. 5.3, que reproduce la reconstrucción CLIMAP de 1976.`),
         H.h('div', { class: 'viz framed' }, mcv), T3.legend(col, -40, 1, [-40, -30, -20, -10, 0], (v) => H.fs(v) + ' °C'),
         H.html(`<p class="hint">El enfriamiento fue máximo sobre los mantos de hielo de Norteamérica y Escandinavia (de 25 a más de 40 °C, también porque la superficie del hielo estaba a 2-3 km de altura) y mucho menor en los trópicos (unos 4 °C), aunque mayor que el que daba CLIMAP. En la península ibérica, unos 7 °C. En el conjunto del planeta, ${H.f(LG.gmst.dLGM, 1)} °C. El nivel del mar estaba unos 125 m más bajo (Tema 4, «Nivel del mar»).</p>`));
       el.append(mc);
@@ -2877,7 +2881,7 @@ H.tab({
       const p91 = c.P.reduce((a, b) => a + b, 0), p61 = c.P61.reduce((a, b) => a + b, 0);
       const t91 = KG.type(c.T, c.P, c.lat, T5.opt), t61 = KG.type(c.T61, c.P61, c.lat, T5.opt);
       const lo = Math.floor(Math.min(...c.T, ...c.T61) / 5) * 5, hi = Math.ceil(Math.max(...c.T, ...c.T61) / 5) * 5;
-      chM.draw({ xMin: 0.5, xMax: 12.5, yMin: lo, yMax: hi, pad: { l: 40 }, xTicks: H.MES3.map((m, i) => ({ v: i + 1, label: m })), yTicks: Array.from({ length: (hi - lo) / 5 + 1 }, (_, i) => ({ v: lo + i * 5, label: lo + i * 5 + '°' })),
+      chM.draw({ xMin: 0.5, xMax: 12.5, yMin: lo, yMax: hi, pad: { l: 40 }, xTicks: H.MES3.map((m, i) => ({ v: i + 1, label: m })), yTicks: Array.from({ length: (hi - lo) / 5 + 1 }, (_, i) => ({ v: lo + i * 5, label: String(lo + i * 5).replace('-', '−') + '°' })),
         series: [{ pts: c.T61.map((t, i) => [i + 1, t]), color: '#1f6f8b', width: 2.4 }, { pts: c.T.map((t, i) => [i + 1, t]), color: '#b4531d', width: 2.8 }] });
       muRo.innerHTML = `<div class="ro"><div class="k">1961-1990</div><div class="v">${T5.chip(t61)} <small>${T5.fT(c.T61.reduce((a, b) => a + b, 0) / 12)} · ${H.f(p61)} mm</small></div></div>
         <div class="ro hl"><div class="k">1991-2020</div><div class="v">${T5.chip(t91)} <small>${T5.fT(c.T.reduce((a, b) => a + b, 0) / 12)} · ${H.f(p91)} mm</small></div></div>
@@ -2897,8 +2901,8 @@ H.tab({
       ['19.000-11.700', 'Deglaciación', 'Calentamiento irregular: el Bølling-Allerød (14.700-12.900) y el frío brusco del Dryas Reciente (12.900-11.700), cuando el norte de Europa volvió casi a condiciones glaciares.'],
       ['Desde 11.700', 'Holoceno', 'Interglaciar actual. Entre 14.500 y 5.000 años el monzón africano llegaba al Sahara («Sahara verde»).'],
       ['Hace 8.200 años', 'Evento 8,2 ka', 'Enfriamiento de unos 150 años en el Atlántico Norte tras el vaciado del lago glaciar Agassiz.'],
-      ['Hace 4.200 años', 'Evento 4,2 ka', 'Sequías prolongadas de Mesopotamia al Nilo y la India; marca el comienzo del Meghalayense, el último piso del Holoceno.'],
-      ['950-1250 d. C.', 'Anomalía Climática Medieval', 'Calor en el Atlántico Norte (colonización vikinga de Groenlandia) y megasequías en el oeste de Norteamérica (la «gran sequía» de 1276-1299 del suroeste de Estados Unidos).'],
+      ['Hace 4.200 años', 'Evento 4,2 ka', 'Sequías prolongadas de Mesopotamia al Nilo y la India; marca el comienzo del Megalayense, el último piso del Holoceno.'],
+      ['950-1250 d. C.', 'Anomalía Climática Medieval', 'Calor en el Atlántico Norte (colonización vikinga de Groenlandia) y megasequías en el oeste de Norteamérica, que se prolongaron hasta la «gran sequía» de 1276-1299 del suroeste de Estados Unidos.'],
       ['1300-1850', 'Pequeña Edad del Hielo', 'Avance de los glaciares alpinos, con máximos hacia 1640, 1820 y 1850; inviernos rigurosos en Europa. No fue un frío simultáneo en todo el planeta.'],
       ['1945-1975', 'Ligero enfriamiento del hemisferio norte', 'Unas décimas de grado, atribuidas sobre todo a los aerosoles de la contaminación industrial.'],
       ['Desde 1975', 'Calentamiento actual', `Unos 0,2 °C por década. La media de 2015-2024 supera en ${hc.length ? H.f(mean(2015, 2024), 1) : '1,3'} °C la de 1850-1900; los glaciares retroceden en todo el mundo y el nivel del mar sube más de 4 mm al año.`]];
@@ -2911,7 +2915,7 @@ H.tab({
       'El Último Máximo Glaciar se sitúa hace unos 21.000 años de calendario (entre 26.000 y 19.000); los «18.000 años» de la fig. 5.3 son años de radiocarbono, la escala que usaba CLIMAP (1976). CLIMAP subestimó el enfriamiento de los mares tropicales: el enfriamiento global fue de 6-7 °C.',
       'La tabla de cronología tiene filas descolocadas («Islandia: hielo en el Nilo», «México: Mar Negro helado», «África: recesión glacial (período vikingo)»…) y se detiene en 1960 con un «descenso de la temperatura a escala mundial». Desde entonces la temperatura global ha subido más de 1 °C.']));
     el.append(H.selfCheck([
-      { q: 'Durante el Último Máximo Glaciar, la temperatura media global era…', opts: ['Unos 0,5 °C más baja que hoy', 'Unos 6-7 °C más baja que en la era preindustrial', 'Unos 20 °C más baja en todo el planeta', 'Igual que hoy'], a: 1, ex: 'Con más de 25 °C menos sobre los mantos de hielo y unos 4 °C menos en los trópicos.' },
+      { q: 'Durante el Último Máximo Glaciar, la temperatura media global era…', opts: ['Unos 0,5 °C más baja que hoy', 'Unos 6-7 °C más baja que la preindustrial', 'Unos 20 °C más baja en todo el planeta', 'Igual que la actual'], a: 1, ex: 'Con más de 25 °C menos sobre los mantos de hielo y unos 4 °C menos en los trópicos.' },
       { q: 'La normal climatológica vigente es…', opts: ['1961-1990', '1971-2000', '1991-2020', '2001-2030'], a: 2, ex: 'La OMM la actualiza cada diez años; los climogramas del manual usan 1961-1990 y 1971-2000.' },
       { q: 'El Holoceno comenzó hace…', opts: ['2.000 años', '11.700 años', '21.000 años', '2,6 millones de años'], a: 1, ex: 'Al terminar el Dryas Reciente.' },
       { q: 'La media de la temperatura global de 2015-2024 respecto a 1850-1900 es de unos…', opts: ['+0,2 °C', '+1,3 °C', '+3 °C', '−0,5 °C'], a: 1, ex: 'Según HadCRUT5; 2024 superó por primera vez 1,5 °C en un año natural.' },
@@ -2927,36 +2931,36 @@ H.tab({
       'Veinte preguntas sobre todo el tema, en orden aleatorio. Responde todas y pulsa «Corregir»: verás la puntuación, la explicación de cada pregunta y un enlace al interactivo donde repasarla.',
       'Tema 5 completo'));
     const BANK = [
-      ['clasificar', 'El clima de un lugar se define con…', ['Las observaciones de un año', 'Los valores medios de una serie larga, de al menos 30 años', 'El tiempo de un día representativo', 'Los récords absolutos'], 1, 'La normal vigente de la OMM es 1991-2020.'],
+      ['clasificar', 'El clima de un lugar se define con…', ['Las observaciones de un año reciente', 'Las medias de una serie de al menos 30 años', 'El tiempo de un día representativo', 'Los valores extremos registrados'], 1, 'La normal vigente de la OMM es 1991-2020.'],
       ['clasificar', 'Una clasificación genética se basa en…', ['Umbrales de temperatura y precipitación', 'Las masas de aire y la circulación general', 'Las exigencias de los cultivos', 'El nombre de una región tipo'], 1, 'Como la de Petterssen (fig. 5.1).'],
-      ['clasificar', 'La clasificación de Papadakis es…', ['Genética', 'Ecológica: se basa en las exigencias de los cultivos', 'Geográfica', 'Solo térmica'], 1, 'Se usó en el Mapa de Cultivos y Aprovechamientos de España.'],
+      ['clasificar', 'La clasificación de Papadakis es…', ['Genética: se basa en las masas de aire', 'Ecológica: se basa en los cultivos', 'Geográfica: usa nombres de regiones', 'Térmica: solo usa la temperatura'], 1, 'Se usó en el Mapa de Cultivos y Aprovechamientos de España.'],
       ['clasificar', 'La escala regional del clima abarca espacios de…', ['Metros', '100 m a 10 km', '200 a 2.000 km', 'Todo el planeta'], 2, 'Contrastes tierra-mar, grandes relieves, fachadas.'],
-      ['clasificar', 'Dos lugares con la misma temperatura media anual…', ['Tienen siempre el mismo clima', 'Pueden tener climas distintos por su amplitud y su régimen de lluvias', 'Están a la misma latitud', 'Tienen la misma precipitación'], 1, 'Por eso Köppen usa los valores de cada mes.'],
+      ['clasificar', 'Dos lugares con la misma temperatura media anual…', ['Tienen siempre el mismo clima', 'Pueden tener climas distintos', 'Están a la misma latitud', 'Tienen la misma precipitación'], 1, 'La amplitud térmica y el régimen de lluvias pueden ser muy distintos: por eso Köppen usa los valores de cada mes.'],
       ['koppen', 'En Köppen, el grupo A exige que…', ['Llueva más de 1.000 mm', 'El mes más frío llegue a 18 °C', 'El mes más cálido supere 30 °C', 'No haya estación seca'], 1, 'Sin invierno térmico.'],
       ['koppen', 'Un clima es E si…', ['El mes más frío baja de −3 °C', 'El mes más cálido no llega a 10 °C', 'Llueve menos de 250 mm', 'Está a más de 3.000 m'], 1, '10 °C en el mes más cálido es, aproximadamente, el límite del árbol.'],
-      ['koppen', 'La letra s significa…', ['Invierno seco', 'Verano seco: el mes más seco del verano recibe menos de 30 mm y menos de un tercio que el más lluvioso del invierno', 'Clima seco', 'Selva'], 1, 'El manual la define mal en la p. 10 (70 % de la lluvia en invierno), pero bien en el cuadro 6.5.'],
-      ['koppen', 'La letra a significa…', ['Árido', 'Mes más cálido de 22 °C o más', 'Alta montaña', 'Anual'], 1, 'Csa (Sevilla) frente a Csb (Burgos).'],
-      ['koppen', 'Am se distingue de Aw porque…', ['Tiene más amplitud térmica', 'La lluvia anual compensa la estación seca: el mes más seco recibe al menos 100 − P/25 mm', 'Es más frío', 'Está en Europa'], 1, 'Es el diagrama de la fig. 6.2.'],
+      ['koppen', 'La letra s significa…', ['Invierno seco', 'Verano seco', 'Clima seco (estepa)', 'Lluvia todo el año'], 1, 'El mes más seco del verano recibe menos de 30 mm (40 en los mapas actuales) y menos de un tercio que el más lluvioso del invierno. El manual la define mal en la p. 10 (70 % de la lluvia en invierno), pero bien en el cuadro 6.5.'],
+      ['koppen', 'La letra a significa…', ['Clima árido o seco', 'Mes más cálido ≥ 22 °C', 'Clima de alta montaña', 'Lluvia todo el año'], 1, 'Csa (Sevilla) frente a Csb (Burgos).'],
+      ['koppen', 'Am se distingue de Aw porque…', ['Tiene más amplitud térmica anual', 'Su mes más seco recibe ≥ 100 − P/25 mm', 'Es más fresco por la altitud', 'Solo existe en el sudeste asiático'], 1, 'La lluvia anual compensa la estación seca; es el diagrama de la fig. 6.2.'],
       ['koppen', 'Con los criterios del manual y las normales 1991-2020, Vitoria-Gasteiz sale…', ['Cfb', 'Csb', 'BSk', 'Dfb'], 1, 'Agosto recibe 28 mm, menos de 30 y menos de un tercio de noviembre.'],
-      ['koppen', 'El límite entre los climas C y D está en…', ['18 °C del mes más frío', '−3 °C (o 0 °C en muchos mapas actuales) del mes más frío', '10 °C del mes más cálido', '22 °C del mes más cálido'], 1, 'Con 0 °C, Varsovia pasa de Cfb a Dfb.'],
-      ['secos', 'El umbral de aridez de Köppen aumenta…', ['Con la latitud', 'Con la temperatura y cuando la lluvia cae en verano', 'Con la altitud', 'Con la humedad relativa'], 1, 'e = 20t + 490 − 7·PPW.'],
-      ['secos', 'Yakutsk recibe 233 mm al año y…', ['Es un desierto', 'No es un clima seco, porque con −8 °C de media apenas se evapora el agua', 'Es una estepa cálida', 'Es ecuatorial'], 1, 'Su umbral es de 120 mm: es Dfc.'],
-      ['secos', 'BW se distingue de BS porque…', ['Es más cálido', 'Su precipitación no llega a la mitad del umbral e', 'Tiene lluvia en verano', 'Está en el hemisferio sur'], 1, 'Desierto frente a estepa.'],
-      ['secos', 'Atacama y el Namib son desiertos…', ['De latitudes medias', 'Costeros, con corrientes frías y anticiclones subtropicales', 'Polares', 'De montaña'], 1, 'El mar está varios grados más frío que la media de su latitud.'],
-      ['secos', 'El desierto de Gobi se explica sobre todo por…', ['La corriente de Humboldt', 'La lejanía del mar, las montañas y el anticiclón siberiano', 'Los alisios', 'La altitud de los Andes'], 1, 'Es un desierto frío (BWk).'],
-      ['secos', 'El índice de aridez de la UNEP compara…', ['Temperatura y altitud', 'Precipitación y evapotranspiración potencial', 'Lluvia de verano e invierno', 'Presión y viento'], 1, 'P/ETP < 0,65 define las tierras secas.'],
+      ['koppen', 'El límite entre los climas C y D está en…', ['18 °C del mes más frío', '−3 °C del mes más frío', '10 °C del mes más cálido', '22 °C del mes más cálido'], 1, 'Es el umbral de Köppen (1936) y del manual; muchos mapas actuales usan 0 °C. Con 0 °C, Varsovia pasa de Cfb a Dfb.'],
+      ['secos', 'El umbral de aridez de Köppen aumenta…', ['Con la latitud y la distancia al mar', 'Con la temperatura y la lluvia de verano', 'Con la altitud y la presión atmosférica', 'Con la humedad relativa y la nubosidad'], 1, 'e = 20t + 490 − 7·PPW.'],
+      ['secos', 'Yakutsk recibe 233 mm al año y…', ['Es un desierto frío (BWk)', 'No es un clima seco', 'Es una estepa fría (BSk)', 'Es una estepa cálida (BSh)'], 1, 'Con −8 °C de media apenas se evapora el agua: su umbral es de unos 120 mm, y es Dfc.'],
+      ['secos', 'BW se distingue de BS porque…', ['Es más cálido que la estepa', 'Recibe menos de la mitad de e', 'Tiene la lluvia en verano', 'Está en el hemisferio sur'], 1, 'Desierto frente a estepa: el desierto no llega a la mitad del umbral de aridez.'],
+      ['secos', 'Atacama y el Namib son desiertos…', ['De latitudes medias, por continentalidad', 'Costeros, de corriente fría', 'Polares, por el frío extremo', 'De montaña, por la altitud'], 1, 'Corrientes frías y anticiclones subtropicales: el mar está varios grados más frío que la media de su latitud.'],
+      ['secos', 'El desierto de Gobi se explica sobre todo por…', ['La corriente fría de Humboldt', 'La continentalidad y el relieve', 'Los alisios del nordeste', 'La altitud de los Andes'], 1, 'La lejanía del mar, las montañas que lo rodean y el anticiclón siberiano. Es un desierto frío (BWk).'],
+      ['secos', 'El índice de aridez del PNUMA (UNEP) compara…', ['Temperatura media y altitud del lugar', 'Precipitación y evapotranspiración potencial', 'Lluvia de verano y lluvia de invierno', 'Presión atmosférica y viento dominante'], 1, 'P/ETP < 0,65 define las tierras secas.'],
       ['montana', 'La temperatura baja con la altura, por término medio, unos…', ['0,65 °C cada 100 m', '1 °C cada 10 m', '0,1 °C cada 100 m', '6,5 °C cada 100 m'], 0, 'En las estaciones reales varía con la estación del año y las inversiones.'],
-      ['montana', 'En las montañas ecuatoriales…', ['Hay inviernos largos y fríos', 'La amplitud térmica anual es mínima a cualquier altura', 'Nunca hay nieve', 'La umbría recibe el triple que la solana'], 1, 'Conservan los rasgos de su zona: los pisos se definen por la temperatura media (Caldas).'],
+      ['montana', 'En las montañas ecuatoriales…', ['Hay inviernos largos y fríos', 'La amplitud anual es mínima', 'Nunca hay nieve en las cumbres', 'La umbría recibe el triple que la solana'], 1, 'Conservan los rasgos de su zona: los pisos se definen por la temperatura media (Caldas).'],
       ['montana', 'La diferencia entre solana y umbría es mayor…', ['En el ecuador', 'En latitudes altas y en invierno', 'En verano en los trópicos', 'Igual en todas las latitudes'], 1, 'Con el Sol bajo, la umbría puede quedar en sombra semanas.'],
       ['montana', 'Según Caldas, Bogotá (2.547 m, unos 14 °C) está en el piso…', ['Cálido', 'Templado', 'Frío', 'Páramo alto'], 2, 'Piso frío: 17,5 °C > T ≥ 12 °C.'],
-      ['montana', 'Entre Navacerrada y Madrid el gradiente térmico es mayor…', ['En invierno', 'En primavera y verano', 'Igual todo el año', 'De noche'], 1, 'Como dice el cuadro 5.3.'],
+      ['montana', 'Entre Navacerrada y Madrid el gradiente térmico es mayor…', ['En invierno, por el frío', 'En primavera y verano', 'Igual todo el año', 'De noche, con calma'], 1, 'Como dice el cuadro 5.3.'],
       ['mapa', 'Los climas mediterráneos (Cs) ocupan…', ['Las fachadas orientales subtropicales', 'Las fachadas occidentales entre 30° y 45°', 'El interior de Asia', 'La zona ecuatorial'], 1, 'California, Chile, el Cabo, el suroeste de Australia y el Mediterráneo.'],
       ['mapa', 'El grupo de climas más extenso en tierra firme es…', ['A', 'B', 'C', 'E'], 1, 'Los climas secos, cerca de un tercio de las tierras emergidas.'],
-      ['espana', 'El tipo de clima más frecuente entre los municipios españoles es…', ['Cfb', 'Csa', 'BWh', 'Dfb'], 1, 'Domina en la mitad sur, el valle del Ebro y el Mediterráneo.'],
-      ['espana', 'Entre 1961-1990 y 1991-2020 muchos municipios han pasado de Csb a Csa porque…', ['Llueve más en verano', 'El mes más cálido ha superado los 22 °C', 'Ha bajado la temperatura', 'Ha cambiado la clasificación'], 1, 'Es la huella del calentamiento de los veranos.'],
+      ['espana', 'El tipo de clima más frecuente entre los municipios españoles es…', ['Cfb', 'Csa', 'BWh', 'Dfb'], 1, 'Domina en la mitad sur y en el litoral mediterráneo; en el valle del Ebro predominan BSk y Cfa.'],
+      ['espana', 'Entre 1961-1990 y 1991-2020 muchos municipios han pasado de Csb a Csa porque…', ['Ahora llueve más en verano', 'El mes más cálido supera ya 22 °C', 'Ha bajado la temperatura media', 'Ha cambiado el criterio de Köppen'], 1, 'Es la huella del calentamiento de los veranos.'],
       ['tiempo', 'El Último Máximo Glaciar fue hace unos…', ['2.000 años', '21.000 años', '200.000 años', '2,6 millones de años'], 1, 'Los «18.000 años» del manual son años de radiocarbono.'],
-      ['tiempo', 'Durante el Último Máximo Glaciar la temperatura global era unos…', ['0,5 °C más baja', '6-7 °C más baja que en la era preindustrial', '20 °C más baja en todo el planeta', 'Igual que hoy'], 1, 'Con mucho más frío sobre los mantos de hielo que en los trópicos.'],
-      ['tiempo', 'La normal 1991-2020 es, en el conjunto del planeta, unos…', ['0,5 °C más cálida que la de 1961-1990', '2 °C más cálida', 'Igual', 'Más fría'], 0, 'Según HadCRUT5.'],
+      ['tiempo', 'Durante el Último Máximo Glaciar la temperatura global era unos…', ['0,5 °C más baja que hoy', '6-7 °C más baja que la preindustrial', '20 °C más baja en todo el planeta', 'Igual que la actual'], 1, 'Con mucho más frío sobre los mantos de hielo que en los trópicos.'],
+      ['tiempo', 'La normal 1991-2020 es, en el conjunto del planeta, unos…', ['0,5 °C más cálida que 1961-1990', '2 °C más cálida que 1961-1990', 'Igual que la de 1961-1990', '0,5 °C más fría que 1961-1990'], 0, 'Según HadCRUT5.'],
     ];
     const box = H.h('div');
     let qs = [], answers = [];

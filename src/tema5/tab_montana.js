@@ -13,7 +13,7 @@ H.tab({
     /* pisos de vegetación aproximados por la temperatura del mes más cálido (latitudes medias, fig. 5.10) */
     const BELTS = [[18, 'Basal o colino: frondosas, cultivos'], [14, 'Montano: hayas, robles, abetos'], [10, 'Subalpino: coníferas (pino negro, alerce); límite del bosque'], [0, 'Alpino: prados y matorral, sin árboles'], [-99, 'Nival: nieves perpetuas']];
     const belt = (tmax) => BELTS.find((b) => tmax >= b[0]);
-    const BASES = { ecu: { id: '82331', n: 'Ecuador (Manaos)' }, pir: { id: '8094', n: 'Pirineo (Huesca)' } };
+    const BASES = { ecu: { id: '82331', n: 'Ecuatorial (Manaos)' }, pir: { id: '8094', n: 'Pirineo (Huesca)' } };
     const S = { base: 'pir', z: 2000, lr: 0.65 };
     const card = H.h('div', { class: 'card' });
     card.append(H.h('h3', {}, 'Simulador de pisos'), H.h('p', { class: 'sub' }, 'Partimos del clima de un lugar bajo y subimos por una ladera imaginaria: cada 100 m la temperatura de todos los meses baja según el gradiente elegido. La precipitación se deja igual, para aislar el efecto de la temperatura. Las columnas muestran el tipo de Köppen a cada altitud en la montaña ecuatorial y en la elegida.'));
@@ -23,9 +23,9 @@ H.tab({
     };
     const ecuB = () => { const s = T5.byId(BASES.ecu.id); return { T: s.ta.slice(0, 12), P: s.pr.slice(0, 12), lat: s.lat, z0: s.elev, name: 'Montaña ecuatorial (base: Manaos)' }; };
     const at = (b, z) => b.T.map((t) => t - S.lr * (z - b.z0) / 100);
-    const seg = H.seg([['ecu', 'Ecuador (Manaos, 61 m)'], ['pir', 'Pirineo (Huesca, 541 m)'], ['mun', 'Tu municipio']], S.base, (v) => { S.base = v; upd(); });
+    const seg = H.seg([['ecu', 'Ecuatorial (Manaos, 61 m)'], ['pir', 'Pirineo (Huesca, 546 m)'], ['mun', 'Tu municipio']], S.base, (v) => { S.base = v; upd(); });
     const sz = H.slider('Altitud', 0, 6500, 50, S.z, (v) => H.f(v) + ' m', (v) => { S.z = v; upd(); });
-    const sl = H.slider('Gradiente térmico vertical', 0.4, 0.9, 0.01, S.lr, (v) => H.f(v, 2) + ' °C / 100 m', (v) => { S.lr = v; upd(); });
+    const sl = H.slider('Gradiente térmico vertical', 0.4, 0.9, 0.01, S.lr, (v) => H.f(v, 2) + ' °C/100 m', (v) => { S.lr = v; upd(); });
     const cvP = H.h('canvas'), cvC = H.h('canvas'), clC = T3.climo(cvC, (w) => Math.min(w * 0.58, 280));
     const ro = H.h('div', { class: 'readouts' });
     const profile = (ctx, x0, w, h, b, title, Y, zMax, tropical) => {
@@ -97,7 +97,7 @@ H.tab({
       if (dz < 100) { rRo.innerHTML = 'Elige dos estaciones con al menos 100 m de desnivel.'; chG.draw({ xMin: 0, xMax: 1, yMin: 0, yMax: 1, series: [] }); return; }
       const g = hi.ta.slice(0, 12).map((t, i) => (lo.ta[i] - t) / dz * 100), gm = (lo.ta[12] - hi.ta[12]) / dz * 100;
       chG.draw({ xMin: 0.5, xMax: 12.5, yMin: 0, yMax: Math.max(1, Math.ceil(Math.max(...g) * 10 + 1) / 10), pad: { l: 46 },
-        xTicks: H.MES3.map((m, i) => ({ v: i + 1, label: m })), yTicks: [0, 0.2, 0.4, 0.6, 0.8, 1].map((v) => ({ v, label: H.f(v, 1) })), yLabel: '°C / 100 m',
+        xTicks: H.MES3.map((m, i) => ({ v: i + 1, label: m })), yTicks: [0, 0.2, 0.4, 0.6, 0.8, 1].map((v) => ({ v, label: H.f(v, 1) })), yLabel: '°C/100 m',
         hlines: [{ y: 0.65, color: '#b4531d', label: '0,65 (valor medio)' }],
         series: [{ pts: g.map((v, i) => [i + 1, v]), color: '#1f6f8b', width: 2.5 }], markers: g.map((v, i) => ({ x: i + 1, y: v, r: 3.5, color: '#1f6f8b' })) });
       const iMx = g.indexOf(Math.max(...g)), iMn = g.indexOf(Math.min(...g));
@@ -166,13 +166,13 @@ H.tab({
     el.append(H.fix('apartados 1.2.2 y 2.2.2', [
       'Pisos térmicos (p. 14): el piso gélido tiene temperaturas «menores de 0 °C», no «de −0 °C».',
       'Tabla de Caldas: el piso frío es 17,5 °C > T ≥ 12 °C (falta el signo).',
-      'Köppen no distingue climas de montaña «G» ni de alta montaña «H»: Navacerrada (Csb), Izaña (Csb) o Bogotá (Cfb) reciben tipos ordinarios según sus temperaturas y precipitaciones. La «H» solo aparece en la leyenda del mapa de Geiger y Pohl.']));
+      'Köppen no distingue climas de montaña «G» ni de alta montaña «H»: Navacerrada (Csb), Izaña (Csb) o Bogotá (Cfb) reciben tipos ordinarios según sus temperaturas y precipitaciones. La «H» aparece en la leyenda del mapa de Geiger y Pohl y en modificaciones posteriores, como la de Trewartha.']));
     el.append(H.selfCheck([
       { q: 'Por término medio, la temperatura baja con la altura unos…', opts: ['0,1 °C cada 100 m', '0,65 °C cada 100 m', '1 °C cada 10 m', '6,5 °C cada 100 m'], a: 1, ex: 'Es el gradiente medio de la troposfera; en las estaciones reales varía con la estación y las inversiones.' },
-      { q: 'En una montaña ecuatorial, a 3.000 m…', opts: ['Hay inviernos muy fríos', 'La temperatura apenas cambia a lo largo del año, pero es mucho más baja que en el llano', 'Llueve menos que en el desierto', 'La solana recibe el triple que la umbría'], a: 1, ex: 'La montaña conserva los rasgos de su zona: amplitud anual mínima.' },
-      { q: 'Entre Navacerrada y Madrid el gradiente térmico es mayor…', opts: ['En invierno', 'En primavera y verano', 'Igual todo el año', 'Solo en otoño'], a: 1, ex: 'En invierno las inversiones en la meseta reducen la diferencia.' },
-      { q: 'A 65° de latitud, en invierno, la ladera orientada al polo…', opts: ['Recibe lo mismo que la solana', 'Apenas recibe sol directo durante semanas o meses', 'Recibe más que en verano', 'Recibe el doble que el llano'], a: 1, ex: 'Con el Sol tan bajo, la ladera de umbría queda en sombra todo el día.' },
-      { q: 'Por encima del mar de nubes de Tenerife (Izaña) llueve…', opts: ['Mucho más que abajo', 'Menos que en Tenerife Norte, porque la estación queda sobre la inversión del alisio', 'Igual', 'Solo nieve'], a: 1, ex: 'La precipitación no siempre aumenta con la altura: depende de dónde se condensa la humedad.' },
+      { q: 'En una montaña ecuatorial, a 3.000 m…', opts: ['Hay inviernos muy fríos y veranos templados', 'Es más fresco todo el año, con amplitud mínima', 'Llueve menos que en los desiertos cercanos', 'La solana recibe el triple que la umbría'], a: 1, ex: 'La montaña conserva los rasgos de su zona: la temperatura es mucho más baja que en el llano, pero apenas cambia a lo largo del año.' },
+      { q: 'Entre Navacerrada y Madrid el gradiente térmico es mayor…', opts: ['En invierno, por el frío', 'En primavera y verano', 'Igual todo el año', 'En otoño, con las lluvias'], a: 1, ex: 'En invierno las inversiones en la meseta reducen la diferencia.' },
+      { q: 'A 65° de latitud, en invierno, la ladera orientada al polo…', opts: ['Recibe lo mismo que la solana', 'Apenas recibe sol directo', 'Recibe más que en verano', 'Recibe el doble que el llano'], a: 1, ex: 'Con el Sol tan bajo, la ladera de umbría queda en sombra todo el día durante semanas o meses.' },
+      { q: 'Por encima del mar de nubes de Tenerife (Izaña) llueve…', opts: ['Mucho más que abajo, por el ascenso', 'Menos que en Tenerife Norte', 'Lo mismo que en la costa', 'Solo en forma de nieve'], a: 1, ex: 'La estación queda por encima de la inversión del alisio y del mar de nubes. La precipitación no siempre aumenta con la altura: depende de dónde se condensa la humedad.' },
     ]));
   },
 });

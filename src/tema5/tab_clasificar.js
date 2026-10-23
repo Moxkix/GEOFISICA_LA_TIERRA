@@ -119,9 +119,9 @@ H.tab({
       for (const [o, v, t] of kl) { ctx.beginPath(); if (o === 'v') { ctx.moveTo(X(v), P.t); ctx.lineTo(X(v), h - P.b); ctx.stroke(); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(t, X(v) + 2, h - P.b - 2); } else { ctx.moveTo(P.l, Y(v)); ctx.lineTo(w - P.r, Y(v)); ctx.stroke(); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(t, w - P.r - 2, Y(v) - 1); } }
       // ejes
       ctx.fillStyle = '#5a6878'; ctx.font = '10.5px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      for (let v = -10; v <= 40; v += 10) ctx.fillText(v + '°', X(v), h - P.b + 4);
+      for (let v = -10; v <= 40; v += 10) ctx.fillText(String(v).replace('-', '−') + '°', X(v), h - P.b + 4);
       ctx.fillText('temperatura media del mes más cálido', (P.l + w - P.r) / 2, h - 16);
-      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; for (let v = -50; v <= 30; v += 10) ctx.fillText(v + '°', P.l - 5, Y(v));
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; for (let v = -50; v <= 30; v += 10) ctx.fillText(String(v).replace('-', '−') + '°', P.l - 5, Y(v));
       ctx.save(); ctx.translate(11, (P.t + h - P.b) / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.fillText('mes más frío', 0, 0); ctx.restore();
       pts.gr = [];
       T5.ST.forEach((s) => { const tx = Math.max(...s.ta.slice(0, 12)), tn = Math.min(...s.ta.slice(0, 12)), x = X(tx), y = Y(tn), g = T5.type(s)[0]; pts.gr.push([x, y, s]); ctx.fillStyle = GCOL[g]; ctx.globalAlpha = s === sel ? 1 : 0.8; ctx.beginPath(); ctx.arc(x, y, s === sel ? 6 : 3.6, 0, 7); ctx.fill(); if (s === sel) { ctx.strokeStyle = '#1c2836'; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 1; } });
@@ -160,11 +160,11 @@ H.tab({
       <p class="small">Köppen es fisionómica pero no arbitraria: buscó umbrales que coincidieran con los grandes límites de la vegetación (18 °C, la palmera y la selva; 10 °C en el mes más cálido, el límite del árbol). Por eso el manual la usa como referencia.</p>`;
 
     el.append(scCard, twCard, oneCard, typesCard, H.selfCheck([
-      { q: 'El clima de un lugar se define con…', opts: ['Las observaciones de un año', 'Los valores medios de una serie larga, de al menos 30 años', 'El tiempo de un día representativo', 'Los récords absolutos'], a: 1, ex: 'La OMM actualiza cada diez años la normal climatológica de referencia: hoy, 1991-2020.' },
-      { q: 'Una clasificación genética se basa en…', opts: ['Umbrales de temperatura y precipitación', 'Las masas de aire y la circulación general que causan el clima', 'Las exigencias de los cultivos', 'El nombre de una región tipo'], a: 1, ex: 'Como la de Petterssen que reproduce la fig. 5.1.' },
-      { q: 'La clasificación de Blair, solo con la precipitación anual, falla porque…', opts: ['Usa milímetros', 'No tiene en cuenta la temperatura, que decide cuánta agua se evapora', 'Tiene demasiados tipos', 'Solo vale para España'], a: 1, ex: 'Yakutsk recibe menos de 250 mm y no es un desierto: hace tanto frío que apenas evapora.' },
+      { q: 'El clima de un lugar se define con…', opts: ['Las observaciones de un año reciente', 'Las medias de una serie de al menos 30 años', 'El tiempo de un día representativo', 'Los valores extremos registrados'], a: 1, ex: 'La OMM actualiza cada diez años la normal climatológica de referencia: hoy, 1991-2020.' },
+      { q: 'Una clasificación genética se basa en…', opts: ['Umbrales de temperatura y precipitación', 'Las masas de aire y la circulación general', 'Las exigencias de los cultivos de la zona', 'El nombre de una región que sirve de tipo'], a: 1, ex: 'Como la de Petterssen que reproduce la fig. 5.1.' },
+      { q: 'La clasificación de Blair, solo con la precipitación anual, falla porque…', opts: ['Mide la lluvia en milímetros, no en litros', 'No tiene en cuenta la temperatura', 'Distingue demasiados tipos de clima', 'Solo se puede aplicar en España'], a: 1, ex: 'La temperatura decide cuánta agua se evapora: Yakutsk recibe menos de 250 mm y no es un desierto, porque hace tanto frío que apenas evapora.' },
       { q: 'Un estudio del clima de un valle y sus laderas es de escala…', opts: ['Zonal', 'Regional', 'Local (topoclima)', 'Microclimática'], a: 2, ex: 'De 100 m a 10 km: el relieve concreto matiza la circulación regional.' },
-      { q: 'Thornthwaite clasificó los climas con fines…', opts: ['Turísticos', 'Agrícolas, a partir del balance hídrico del suelo', 'Militares', 'Genéticos'], a: 1, ex: 'Usa la evapotranspiración potencial, el déficit y el exceso de agua.' },
+      { q: 'Thornthwaite clasificó los climas con fines…', opts: ['Turísticos y de ocio', 'Agrícolas (balance hídrico)', 'Militares y de navegación', 'Genéticos (masas de aire)'], a: 1, ex: 'Usa la evapotranspiración potencial, el déficit y el exceso de agua.' },
     ]));
   },
 });

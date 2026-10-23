@@ -33,7 +33,7 @@ H.tab({
       pts.length = 0;
       ch.draw({
         xMin: -20, xMax: 32, yMin: 0, yMax: 1600, pad: { l: 62 },
-        xTicks: [-20, -10, 0, 10, 20, 30].map((v) => ({ v, label: v + '°' })), yTicks: [0, 250, 500, 750, 1000, 1250, 1500].map((v) => ({ v, label: H.f(v) })),
+        xTicks: [-20, -10, 0, 10, 20, 30].map((v) => ({ v, label: String(v).replace('-', '−') + '°' })), yTicks: [0, 250, 500, 750, 1000, 1250, 1500].map((v) => ({ v, label: H.f(v) })),
         xLabel: 'temperatura media anual (°C)', yLabel: 'precipitación anual (mm)',
         hlines: [{ y: 250, color: '#8a6512', label: 'isoyeta de 250 mm' }],
         series: [
@@ -83,7 +83,7 @@ H.tab({
       T4.hover(mcv, mp, (lat, lon) => { const v = gAI.near(lat, lon, 1); return v === v ? `${T4.ll(lat, lon, 1)} · P/ETP = ${H.f(v, 2)} · ${aiCls(v)[1]}` : null; });
       let frac = {}; { let tot = 0; for (let j = 0; j < W.ny; j++) { const c = Math.cos((W.lat0 - (j + 0.5) * W.res) * H.D2R); for (let i = 0; i < W.nx; i++) { const v = W.AI[j * W.nx + i]; if (v === v) { tot += c; const n = aiCls(v)[1]; frac[n] = (frac[n] || 0) + c; } } } for (const k in frac) frac[k] = frac[k] / tot * 100; }
       aiCard.append(H.h('h3', {}, 'El índice de aridez: precipitación frente a evapotranspiración'),
-        H.h('p', { class: 'sub' }, 'La UNEP y la UNESCO (fig. 5.4) delimitan las tierras secas con el cociente entre la precipitación anual y la evapotranspiración potencial (P/ETP). Mapa calculado con TerraClimate 1991-2020 (ETP de Penman-Monteith).'),
+        H.h('p', { class: 'sub' }, 'El PNUMA (UNEP) y la UNESCO (fig. 5.4) delimitan las tierras secas con el cociente entre la precipitación anual y la evapotranspiración potencial (P/ETP). Mapa calculado con TerraClimate 1991-2020 (ETP de Penman-Monteith).'),
         H.h('div', { class: 'viz framed' }, mcv),
         H.html(`<div class="legend">${AIC.map(([v, n, c]) => `<span><i style="background:rgb(${c});height:10px;width:14px"></i>${n} ${v < 1 ? '(< ' + H.f(v, 2) + ')' : '(≥ 0,65)'} · ${H.f(frac[n] || 0)} %</span>`).join('')}</div>`),
         H.html(`<p class="hint">Las tierras secas (P/ETP < 0,65) ocupan el ${H.f((frac['Hiperárido'] || 0) + (frac['Árido'] || 0) + (frac['Semiárido'] || 0) + (frac['Subhúmedo seco'] || 0))} % de las tierras emergidas sin la Antártida; hiperáridas, áridas y semiáridas, el ${H.f((frac['Hiperárido'] || 0) + (frac['Árido'] || 0) + (frac['Semiárido'] || 0))} %: el «tercio de la superficie terrestre» del manual.</p>`));
@@ -102,7 +102,7 @@ H.tab({
       sahara: 'El mayor desierto cálido: bajo la rama descendente de la célula de Hadley (el anticiclón subtropical) casi todo el año, barrido por el harmatán (un alisio continental del noreste) y con su interior a más de 1.000 km del mar. En su franja atlántica se suma la corriente fría de Canarias.',
       namib: 'Desierto costero: la corriente fría de Benguela y el afloramiento enfrían el aire desde abajo (el mar está unos 8 °C más frío que la media del océano a esa latitud), el anticiclón de Santa Elena lo estabiliza y la Gran Escarpadura africana frena la humedad que llega del este. Nieblas frecuentes y lluvia casi nula.',
       mojave: 'A sotavento de Sierra Nevada y de las sierras Transversales, que descargan la humedad de las borrascas del Pacífico; en verano lo cubre el anticiclón subtropical del Pacífico. La corriente fría de California estabiliza el aire costero, pero el Mojave está tierra adentro.',
-      atacama: 'El desierto cálido más seco del mundo: la corriente de Humboldt y el afloramiento enfrían el aire (el mar está unos 5 °C por debajo de la media de su latitud), el anticiclón del Pacífico sur lo estabiliza y los Andes cierran el paso al aire húmedo de la Amazonia. Algunas estaciones pasan años sin lluvia.',
+      atacama: 'El desierto no polar más seco del mundo: la corriente de Humboldt y el afloramiento enfrían el aire (el mar está unos 5 °C por debajo de la media de su latitud), el anticiclón del Pacífico sur lo estabiliza y los Andes cierran el paso al aire húmedo de la Amazonia. Algunas estaciones pasan años sin lluvia.',
     };
     const D = (typeof DESIERTOS !== 'undefined' && DESIERTOS) || [];
     const dCard = H.h('div', { class: 'card' });
@@ -154,13 +154,13 @@ H.tab({
       'Cuadro 5.2: en los desiertos de la zona templada la amplitud térmica diaria no llega «hasta 90 °C»: lo habitual son 15-25 °C (es probable una errata por 30 °C). La que ronda los 30-40 °C es la amplitud <i>anual</i>.',
       'Cuadro 5.2: los desiertos costeros (Atacama, Namib) no tienen «vegetación bastante densa»: son de los más pobres del planeta; solo las nieblas mantienen algunas formaciones dispersas (las «lomas» de Perú y Chile).',
       '2.1.1: sí hay desiertos y estepas templados en el hemisferio sur: la Patagonia (BSk y BWk), a sotavento de los Andes, entre 40° y 50° S.',
-      'El umbral e de Köppen no es la evapotranspiración potencial: compárala con el índice P/ETP de la UNEP.']));
+      'El umbral e de Köppen no es la evapotranspiración potencial: compárala con el índice P/ETP del PNUMA (UNEP).']));
     el.append(H.selfCheck([
-      { q: 'Según Köppen, un clima es seco si…', opts: ['Recibe menos de 250 mm', 'La precipitación anual no llega al umbral e, que depende de la temperatura y del reparto estacional de la lluvia', 'No llueve en verano', 'La humedad relativa baja del 50 %'], a: 1, ex: 'Por eso Yakutsk (233 mm, −8 °C) no es seco y Zaragoza (318 mm, 16 °C) sí.' },
-      { q: 'A igual temperatura, un clima es seco con más lluvia si esta cae…', opts: ['En invierno', 'En verano, porque se evapora más', 'En primavera', 'En forma de nieve'], a: 1, ex: 'El umbral sube 280 mm si el 70 % o más de la lluvia cae en verano.' },
-      { q: 'El desierto de Namib se explica sobre todo por…', opts: ['Su lejanía del mar', 'La corriente fría de Benguela y el anticiclón subtropical', 'El anticiclón siberiano', 'La altitud'], a: 1, ex: 'Es un desierto costero con nieblas: el mar frío enfría el aire desde abajo y lo estabiliza.' },
-      { q: 'El Gobi es un desierto…', opts: ['Subtropical de anticiclón', 'De latitudes medias, por la lejanía del mar, las montañas y el anticiclón invernal', 'Costero', 'Polar'], a: 1, ex: 'Con inviernos muy fríos: BWk.' },
-      { q: 'La amplitud térmica anual de los desiertos templados ronda…', opts: ['5 °C', '30-40 °C', '90 °C', '0 °C'], a: 1, ex: 'El manual da unos 32 °C; los 90 °C del cuadro 5.2 son una errata.' },
+      { q: 'Según Köppen, un clima es seco si…', opts: ['Recibe menos de 250 mm al año', 'Su lluvia anual no llega al umbral e', 'No llueve en los meses de verano', 'La humedad relativa baja del 50 %'], a: 1, ex: 'El umbral depende de la temperatura y del reparto estacional de la lluvia: por eso Yakutsk (233 mm, −8 °C) no es seco y Zaragoza (326 mm, 16 °C) sí.' },
+      { q: 'A igual temperatura, un clima es seco con más lluvia si esta cae…', opts: ['En invierno', 'En verano', 'En primavera', 'En forma de nieve'], a: 1, ex: 'En verano se evapora más: el umbral sube 280 mm si el 70 % o más de la lluvia cae en verano.' },
+      { q: 'El desierto de Namib se explica sobre todo por…', opts: ['Su lejanía del mar y la continentalidad', 'La corriente fría de Benguela y el anticiclón', 'El anticiclón térmico siberiano', 'La altitud de la meseta sudafricana'], a: 1, ex: 'Es un desierto costero con nieblas: el mar frío enfría el aire desde abajo y lo estabiliza.' },
+      { q: 'El Gobi es un desierto…', opts: ['Subtropical, de anticiclón dinámico', 'De latitudes medias, por continentalidad', 'Costero, por una corriente fría', 'Polar, por el frío extremo'], a: 1, ex: 'Lejanía del mar, montañas que lo rodean y anticiclón invernal; con inviernos muy fríos: BWk.' },
+      { q: 'La amplitud térmica anual de los desiertos templados ronda…', opts: ['Unos 5 °C', 'Unos 30-40 °C', 'Unos 90 °C', 'Unos 15 °C'], a: 1, ex: 'El manual da unos 32 °C. Los «90 °C» del cuadro 5.2 se refieren a la amplitud diaria y son una errata: lo habitual son 15-25 °C.' },
     ]));
   },
 });

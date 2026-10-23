@@ -261,10 +261,14 @@ const H = (() => {
     qs.forEach((q, i) => {
       const fb = H.h('div', { class: 'fb' });
       const opts = H.h('div', { class: 'opts' });
-      q.opts.forEach((o, j) => {
-        const b = H.h('button', { class: 'opt', type: 'button', html: `<span class="l">${'abcd'[j]})</span><span>${o}</span>` });
+      /* opciones en orden aleatorio (distinto en cada carga y al reiniciar), para que la posición no delate la respuesta */
+      const ord = q.opts.map((_, j) => j);
+      for (let k = ord.length - 1; k > 0; k--) { const r = Math.floor(Math.random() * (k + 1)); [ord[k], ord[r]] = [ord[r], ord[k]]; }
+      ord.forEach((j, pos) => {
+        const o = q.opts[j];
+        const b = H.h('button', { class: 'opt', type: 'button', html: `<span class="l">${'abcdef'[pos]})</span><span>${o}</span>` });
         b.onclick = () => {
-          H.$$('.opt', opts).forEach((x, k) => { x.disabled = true; if (k === q.a) x.classList.add('ok'); });
+          H.$$('.opt', opts).forEach((x, k) => { x.disabled = true; if (ord[k] === q.a) x.classList.add('ok'); });
           const good = j === q.a; if (!good) b.classList.add('ko');
           done++; if (good) ok++;
           score.textContent = `${ok} / ${qs.length}`;

@@ -30,7 +30,7 @@ H.tab({
             { pts: [[1961, mean(1961, 1990)], [1990, mean(1961, 1990)]], color: '#1f6f8b', width: 3 }, { pts: [[1991, mean(1991, 2020)], [2020, mean(1991, 2020)]], color: '#b4531d', width: 3 }],
           after: (ctx, X, Y) => { ctx.font = 'bold 10.5px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = '#1f6f8b'; ctx.fillText('normal 1961-1990', X(1975.5), Y(mean(1961, 1990)) - 4); ctx.fillStyle = '#b4531d'; ctx.fillText('normal 1991-2020', X(2005.5), Y(mean(1991, 2020)) - 4); const r = hc.reduce((a, b) => (b.v > a.v ? b : a)); ctx.fillStyle = '#b0393a'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(`${r.y}: ${H.fs(r.v, 2)} °C`, X(r.y) - 8, Y(r.v));
             ctx.strokeStyle = 'rgba(176,57,58,.7)'; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(X(1850), Y(1.5)); ctx.lineTo(X(2026), Y(1.5)); ctx.stroke(); ctx.setLineDash([]);
-            ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.font = '10.5px system-ui'; ctx.fillText('1,5 °C, límite del Acuerdo de París (para medias de 20 años)', X(1852), Y(1.5) - 2); } });
+            ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.font = '10.5px system-ui'; ctx.fillText('1,5 °C, límite del Acuerdo de París (el IPCC lo evalúa con medias de 20 años)', X(1852), Y(1.5) - 2); } });
         note.innerHTML = `Temperatura media global (HadCRUT5) respecto a 1850-1900. Línea fina: cada año; gruesa: media móvil de 11 años. La normal 1991-2020 es ${H.f(mean(1991, 2020) - mean(1961, 1990), 2)} °C más cálida que la de 1961-1990; la media de 2015-2024 supera en ${H.f(mean(2015, 2024), 2)} °C la de 1850-1900, y 2024 fue el primer año natural por encima de 1,5 °C.`;
         return;
       }
@@ -63,7 +63,7 @@ H.tab({
       const mp = T4.map(mcv, { bbox: [-180, 180, -78, 82], grid: 30, land: (lat, lon) => col(gm.at(lat, lon)) || T4.LAND, color: (lat, lon) => { const c = col(gm.at(lat, lon)); return c ? H.mix(c, [255, 255, 255], 0.35) : null; } });
       T4.hover(mcv, mp, (lat, lon) => { const v = gm.at(lat, lon); return v === v ? `${T4.ll(lat, lon, 0)} · ${H.fs(v, 1)} °C` : null; });
       mc.append(H.h('h3', {}, `El Último Máximo Glaciar, hace unos ${H.f(M.ka || 21)}.000 años`),
-        H.h('p', { class: 'sub' }, `Diferencia de la temperatura media anual del aire en superficie entre el Último Máximo Glaciar (${M.lab || '19.000-23.000 años'}) y la época preindustrial, según la reanálisis de Osman y otros (2021). Sustituye la fig. 5.3, que reproduce la reconstrucción CLIMAP de 1976.`),
+        H.h('p', { class: 'sub' }, `Diferencia de la temperatura media anual del aire en superficie entre el Último Máximo Glaciar (${M.lab || '19.000-23.000 años'}) y la época preindustrial, según el reanálisis de Osman y otros (2021). Sustituye la fig. 5.3, que reproduce la reconstrucción CLIMAP de 1976.`),
         H.h('div', { class: 'viz framed' }, mcv), T3.legend(col, -40, 1, [-40, -30, -20, -10, 0], (v) => H.fs(v) + ' °C'),
         H.html(`<p class="hint">El enfriamiento fue máximo sobre los mantos de hielo de Norteamérica y Escandinavia (de 25 a más de 40 °C, también porque la superficie del hielo estaba a 2-3 km de altura) y mucho menor en los trópicos (unos 4 °C), aunque mayor que el que daba CLIMAP. En la península ibérica, unos 7 °C. En el conjunto del planeta, ${H.f(LG.gmst.dLGM, 1)} °C. El nivel del mar estaba unos 125 m más bajo (Tema 4, «Nivel del mar»).</p>`));
       el.append(mc);
@@ -80,7 +80,7 @@ H.tab({
       const p91 = c.P.reduce((a, b) => a + b, 0), p61 = c.P61.reduce((a, b) => a + b, 0);
       const t91 = KG.type(c.T, c.P, c.lat, T5.opt), t61 = KG.type(c.T61, c.P61, c.lat, T5.opt);
       const lo = Math.floor(Math.min(...c.T, ...c.T61) / 5) * 5, hi = Math.ceil(Math.max(...c.T, ...c.T61) / 5) * 5;
-      chM.draw({ xMin: 0.5, xMax: 12.5, yMin: lo, yMax: hi, pad: { l: 40 }, xTicks: H.MES3.map((m, i) => ({ v: i + 1, label: m })), yTicks: Array.from({ length: (hi - lo) / 5 + 1 }, (_, i) => ({ v: lo + i * 5, label: lo + i * 5 + '°' })),
+      chM.draw({ xMin: 0.5, xMax: 12.5, yMin: lo, yMax: hi, pad: { l: 40 }, xTicks: H.MES3.map((m, i) => ({ v: i + 1, label: m })), yTicks: Array.from({ length: (hi - lo) / 5 + 1 }, (_, i) => ({ v: lo + i * 5, label: String(lo + i * 5).replace('-', '−') + '°' })),
         series: [{ pts: c.T61.map((t, i) => [i + 1, t]), color: '#1f6f8b', width: 2.4 }, { pts: c.T.map((t, i) => [i + 1, t]), color: '#b4531d', width: 2.8 }] });
       muRo.innerHTML = `<div class="ro"><div class="k">1961-1990</div><div class="v">${T5.chip(t61)} <small>${T5.fT(c.T61.reduce((a, b) => a + b, 0) / 12)} · ${H.f(p61)} mm</small></div></div>
         <div class="ro hl"><div class="k">1991-2020</div><div class="v">${T5.chip(t91)} <small>${T5.fT(c.T.reduce((a, b) => a + b, 0) / 12)} · ${H.f(p91)} mm</small></div></div>
@@ -100,8 +100,8 @@ H.tab({
       ['19.000-11.700', 'Deglaciación', 'Calentamiento irregular: el Bølling-Allerød (14.700-12.900) y el frío brusco del Dryas Reciente (12.900-11.700), cuando el norte de Europa volvió casi a condiciones glaciares.'],
       ['Desde 11.700', 'Holoceno', 'Interglaciar actual. Entre 14.500 y 5.000 años el monzón africano llegaba al Sahara («Sahara verde»).'],
       ['Hace 8.200 años', 'Evento 8,2 ka', 'Enfriamiento de unos 150 años en el Atlántico Norte tras el vaciado del lago glaciar Agassiz.'],
-      ['Hace 4.200 años', 'Evento 4,2 ka', 'Sequías prolongadas de Mesopotamia al Nilo y la India; marca el comienzo del Meghalayense, el último piso del Holoceno.'],
-      ['950-1250 d. C.', 'Anomalía Climática Medieval', 'Calor en el Atlántico Norte (colonización vikinga de Groenlandia) y megasequías en el oeste de Norteamérica (la «gran sequía» de 1276-1299 del suroeste de Estados Unidos).'],
+      ['Hace 4.200 años', 'Evento 4,2 ka', 'Sequías prolongadas de Mesopotamia al Nilo y la India; marca el comienzo del Megalayense, el último piso del Holoceno.'],
+      ['950-1250 d. C.', 'Anomalía Climática Medieval', 'Calor en el Atlántico Norte (colonización vikinga de Groenlandia) y megasequías en el oeste de Norteamérica, que se prolongaron hasta la «gran sequía» de 1276-1299 del suroeste de Estados Unidos.'],
       ['1300-1850', 'Pequeña Edad del Hielo', 'Avance de los glaciares alpinos, con máximos hacia 1640, 1820 y 1850; inviernos rigurosos en Europa. No fue un frío simultáneo en todo el planeta.'],
       ['1945-1975', 'Ligero enfriamiento del hemisferio norte', 'Unas décimas de grado, atribuidas sobre todo a los aerosoles de la contaminación industrial.'],
       ['Desde 1975', 'Calentamiento actual', `Unos 0,2 °C por década. La media de 2015-2024 supera en ${hc.length ? H.f(mean(2015, 2024), 1) : '1,3'} °C la de 1850-1900; los glaciares retroceden en todo el mundo y el nivel del mar sube más de 4 mm al año.`]];
@@ -114,7 +114,7 @@ H.tab({
       'El Último Máximo Glaciar se sitúa hace unos 21.000 años de calendario (entre 26.000 y 19.000); los «18.000 años» de la fig. 5.3 son años de radiocarbono, la escala que usaba CLIMAP (1976). CLIMAP subestimó el enfriamiento de los mares tropicales: el enfriamiento global fue de 6-7 °C.',
       'La tabla de cronología tiene filas descolocadas («Islandia: hielo en el Nilo», «México: Mar Negro helado», «África: recesión glacial (período vikingo)»…) y se detiene en 1960 con un «descenso de la temperatura a escala mundial». Desde entonces la temperatura global ha subido más de 1 °C.']));
     el.append(H.selfCheck([
-      { q: 'Durante el Último Máximo Glaciar, la temperatura media global era…', opts: ['Unos 0,5 °C más baja que hoy', 'Unos 6-7 °C más baja que en la era preindustrial', 'Unos 20 °C más baja en todo el planeta', 'Igual que hoy'], a: 1, ex: 'Con más de 25 °C menos sobre los mantos de hielo y unos 4 °C menos en los trópicos.' },
+      { q: 'Durante el Último Máximo Glaciar, la temperatura media global era…', opts: ['Unos 0,5 °C más baja que hoy', 'Unos 6-7 °C más baja que la preindustrial', 'Unos 20 °C más baja en todo el planeta', 'Igual que la actual'], a: 1, ex: 'Con más de 25 °C menos sobre los mantos de hielo y unos 4 °C menos en los trópicos.' },
       { q: 'La normal climatológica vigente es…', opts: ['1961-1990', '1971-2000', '1991-2020', '2001-2030'], a: 2, ex: 'La OMM la actualiza cada diez años; los climogramas del manual usan 1961-1990 y 1971-2000.' },
       { q: 'El Holoceno comenzó hace…', opts: ['2.000 años', '11.700 años', '21.000 años', '2,6 millones de años'], a: 1, ex: 'Al terminar el Dryas Reciente.' },
       { q: 'La media de la temperatura global de 2015-2024 respecto a 1850-1900 es de unos…', opts: ['+0,2 °C', '+1,3 °C', '+3 °C', '−0,5 °C'], a: 1, ex: 'Según HadCRUT5; 2024 superó por primera vez 1,5 °C en un año natural.' },

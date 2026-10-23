@@ -98,7 +98,7 @@ const KG = (() => {
   K.classify = (T, P, lat, opt = {}) => {
     const o = Object.assign({}, K.DEF, opt), s = K.stats(T, P, lat), steps = [];
     const neg = (s) => s.replace('-', '−');
-    const f1 = (v) => neg((Math.round(v * 10) / 10).toLocaleString('es-ES')), f0 = (v) => neg(Math.round(v).toLocaleString('es-ES'));
+    const f1 = (v) => neg((Math.round(v * 10) / 10).toLocaleString('es-ES', { useGrouping: true })), f0 = (v) => neg(Math.round(v).toLocaleString('es-ES', { useGrouping: true }));
     const fm = (v) => (Math.abs(v) < 10 ? f1(v) : f0(v)); // mm: con un decimal por debajo de 10
     const fp = (v) => (v < 0 ? `(${f1(v)})` : f1(v)); // entre paréntesis si es negativo
     const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
