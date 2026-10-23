@@ -87,7 +87,7 @@ H.tab({
         <p class="small">Los tipos más extensos: ${top.map(([t, v]) => `${T5.chip(t)} ${pc(v)}`).join(' · ')}</p></div>
         <div><h4>Cambios entre 1961-1990 y 1991-2020</h4><p>Ha cambiado de tipo el <b>${pc(chg)}</b> de la superficie clasificada.</p>
         <table class="t mini"><tbody>${trs.map(([k, v]) => `<tr><td>${k.split(' → ').map((x) => T5.chip(x)).join(' → ')}</td><td class="num">${pc(v)}</td></tr>`).join('')}</tbody></table>
-        <p class="small">Los cambios más frecuentes reflejan el calentamiento: inviernos que dejan de bajar del umbral C/D, veranos que superan los 22 °C (b → a), tundras que pasan a bosque boreal. En regiones con pocas estaciones, parte del cambio puede deberse a los datos de 1961-1990.</p></div></div>
+        <p class="small">Casi todos los cambios reflejan el calentamiento: veranos más largos (Dfc → Dfb) o más cálidos (Cfb → Cfa), tundras que pasan a bosque boreal (ET → Dfc), inviernos que dejan de bajar del umbral C/D (Dfb → Cfb) o de −38 °C (Dfd → Dfc). En los trópicos, Af → Am y Am → Aw indican una estación seca más marcada. En regiones con pocas estaciones, parte del cambio puede deberse a los datos de 1961-1990.</p></div></div>
         <p class="small">Superficie de tierra firme entre 60° S y 84° N (sin la Antártida, que TerraClimate no cubre y que es casi toda EF).</p>`;
     };
     st.append(H.h('h3', {}, '¿Cuánta superficie ocupa cada clima?'), stOut);

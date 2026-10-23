@@ -65,11 +65,16 @@ def geo_meta(geo, shape):
 
 def mundo(files):
     tpz, geo = read_tif(files['TPZ']); e, _ = read_tif(files['E']); tp61, _ = read_tif(files['61'])
+    # Earth Engine añade una columna (que repite −180°) y una fila parcial al sur: se recorta a 720 × 288 celdas (84° N – 60° S)
+    nx, ny = int(round(360 / geo[2])), int(round((geo[1] + 60) / geo[3]))
+    tpz, e, tp61 = (a[:, :ny, :nx] for a in (tpz, e, tp61))
     T91, P91, Z = tpz[:12] / 10, tpz[12:24] / 10, tpz[24]
     E91, T61, P61 = e[:12] / 10, tp61[:12] / 10, tp61[12:24] / 10
     m = geo_meta(geo, T91.shape); m['res'] = round(m['res'] * 24) / 24
     lats = m['lat0'] - (np.arange(m['ny']) + 0.5) * m['res']
     land = np.isfinite(T91[0]) & np.isfinite(P91[0])
+    # celdas de mar helado al norte de Groenlandia que TerraClimate trata como tierra
+    land &= ~((lats[:, None] > 80) & (Z < 0))
     for a in (T91, P91, E91, T61, P61): a[:, ~land] = np.nan
     Z = np.where(land, Z, np.nan)
     print(f'Mundo: {m["nx"]}×{m["ny"]} celdas de {m["res"]}°, {land.sum()} de tierra; T 1991-2020 de {np.nanmin(T91):.1f} a {np.nanmax(T91):.1f} °C; P mensual máx. {np.nanmax(P91):.0f} mm')
@@ -77,7 +82,7 @@ def mundo(files):
 
 
 def build_mundo(m, lats, T91, P91, E91, T61, P61, Z, src, prueba=False):
-    eT = pack([t for t in T91], 'i16', lo=0, hi=0.1)   # décimas de °C
+    eT = pack([t for t in T91], 'lin', lo=-50, hi=51.6, step=0.4)   # pasos de 0,4 °C (la clasificación usa estos mismos valores)
     eP = pack([p for p in P91], 'lut', table=ptable())
     Tq, Pq = unpack(eT).reshape(T91.shape), unpack(eP).reshape(P91.shape)
     print(f'  cuantificación: T máx. error {np.nanmax(np.abs(Tq - T91)):.3f} °C; P máx. error relativo {np.nanmax(np.abs(Pq - P91) / np.maximum(P91, 1)) * 100:.1f} %')
@@ -86,7 +91,7 @@ def build_mundo(m, lats, T91, P91, E91, T61, P61, Z, src, prueba=False):
         AI = np.nansum(P91, axis=0) / np.nansum(E91, axis=0)
     AI = np.where(np.isfinite(T91[0]) & (np.nansum(E91, axis=0) > 0), AI, np.nan)
     out = dict(m, src=src, T=eT, P=eP, K={'91': kpack(K91), '61': kpack(K61)},
-               AI=pack(AI, 'lut', table=aitable()), Z=pack(Z, 'i16', lo=0, hi=1))
+               AI=pack(AI, 'lut', table=aitable()), Z=pack(Z, 'lin', lo=-450, hi=7170, step=30))
     if prueba: out['prueba'] = True
     # precipitación de los desiertos del Tema 5 (celda con datos más próxima)
     des = {}
@@ -156,7 +161,7 @@ def espana(files):
         cand.sort(); cand = cand[:4]
         w = np.array([1 / max(c[0], 0.05) ** 2 for c in cand]); w /= w.sum()
         J, I = [c[1] for c in cand], [c[2] for c in cand]
-        zc = float((d['Z'][J, I] * w).sum())
+        zc = float((np.maximum(d['Z'][J, I], 0) * w).sum())  # la altitud media de ETOPO incluye el fondo del mar en las celdas costeras: se toma 0
         corr = LAPSE * (zc - alt) if alt is not None else 0.0
         dz[idx] = zc - alt if alt is not None else np.nan
         for k in V:
