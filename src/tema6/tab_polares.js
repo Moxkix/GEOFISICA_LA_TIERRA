@@ -84,7 +84,7 @@ H.tab({
       '4250': 'Nuuk, en la costa suroccidental de Groenlandia: tundra oceánica, con inviernos moderados para su latitud y 874 mm de precipitación, muy lejos de los «menos de 250 mm» del cuadro 6.11.',
       '70026': 'Utqiaġvik (Barrow), en la costa ártica de Alaska: tundra con 137 mm al año, la mayor parte en verano, y un invierno de −24 °C.',
       '24266': 'Verjoyansk: el mes más cálido supera los 15 °C y hay bosque (taiga de alerces), aunque en enero ronde los −45 °C: no es un clima polar, sino subártico (Dsd).',
-      polo: 'Hielo perpetuo: ningún mes llega a 0 °C; enero, en pleno verano austral, se queda en −28 °C. La precipitación es de unas decenas de milímetros al año, y los pluviómetros no la miden bien porque el viento arrastra la nieve.',
+      polo: 'Hielo perpetuo: ningún mes llega a 0 °C; diciembre y enero, en pleno verano austral, se quedan en torno a −27 y −28 °C. La precipitación es de unas decenas de milímetros al año, y los pluviómetros no la miden bien porque el viento arrastra la nieve.',
       '87938': 'Ushuaia, a 55° S: su mes más cálido se queda por debajo de 10 °C, de modo que Köppen la clasifica como tundra aunque esté rodeada de bosque de hayas australes, un caso en el que el límite de 10 °C no coincide con el de los árboles.',
     };
     const updSel = () => {
@@ -132,7 +132,7 @@ H.tab({
       f618: 'Los dos extremos de la zona fría. Nuuk: tundra oceánica, con 15 °C de amplitud y precipitación abundante. El Polo Sur: hielo perpetuo, 33 °C de amplitud, un invierno «sin núcleo» (de abril a septiembre la temperatura apenas cambia, en torno a −58 °C) y casi sin precipitación.',
       tun: 'Las dos variedades de tundra del manual: la oceánica de Nuuk, con inviernos moderados y precipitación abundante todo el año, y la de Utqiaġvik, en la costa del océano Ártico, helado casi todo el año, con inviernos mucho más fríos, 30 °C de amplitud y precipitación escasa, de verano.',
       gro: 'Nuuk, en la costa, y una celda del centro del casquete de Groenlandia, a unos 3.200 m (TerraClimate): ningún mes llega a 0 °C. La altitud del casquete, más que la latitud, explica el hielo perpetuo, como en la Antártida. Las precipitaciones de TerraClimate sobre el hielo no son fiables: en la cumbre del casquete se acumulan unos 200-250 mm de agua al año.',
-      sur: 'En el hemisferio sur no hay continentes a 55°-65° S salvo el extremo de Sudamérica: Ushuaia (55° S) y Punta Arenas (53° S) tienen veranos muy frescos (unos 10 °C) e inviernos suaves, con poca amplitud por la influencia del océano. Ushuaia queda por debajo de 10 °C (ET) y Punta Arenas apenas por encima (Cfc).',
+      sur: 'En el hemisferio sur no hay más tierras a 50°-60° S que el extremo de Sudamérica: Ushuaia (55° S) y Punta Arenas (53° S) tienen veranos muy frescos (unos 10 °C) e inviernos suaves, con poca amplitud por la influencia del océano. Ushuaia queda por debajo de 10 °C (ET) y Punta Arenas apenas por encima (Cfc).',
     };
     const get = (id) => (id === 'polo' ? polo() : id === 'groen' ? T6.fromCell(T5.cell(72.6, -38.5), 'Centro de Groenlandia') : T6.fromSt(T5.byId(id)));
     const setF = (key) => { const [, a, b] = PAIRS[key]; fa.set(get(a)); fb.set(get(b)); fTxt.textContent = TX[key]; };
@@ -150,14 +150,14 @@ H.tab({
     const c4 = H.h('div', { class: 'card' }, H.h('h3', {}, 'Mucha luz en verano, poco calor'),
       H.h('p', { class: 'sub' }, 'Radiación solar media del día en el techo de la atmósfera a lo largo del año (Tema 1).'),
       H.h('div', { class: 'viz framed' }, sch.st.canvas),
-      H.html(`<p class="small">Hacia el solsticio de junio el polo norte recibe en el techo de la atmósfera más energía que el ecuador (${H.f(H.toaInsolation(90, sJ.decl, sJ.R))} frente a ${H.f(H.toaInsolation(0, sJ.decl, sJ.R))} W/m²), porque el Sol no se pone. Sin embargo, el Sol nunca sube de 23,4° y sus rayos atraviesan mucha atmósfera; la nieve y el hielo reflejan entre el 50 y el 90 % de lo que llega, y el calor que queda se gasta en fundir el hielo. Durante el invierno polar, en cambio, no llega nada durante semanas o meses. El resultado es la menor temperatura media del planeta.</p>`));
+      H.html(`<p class="small">Hacia el solsticio de junio el polo norte recibe en el techo de la atmósfera más energía que el ecuador (${H.f(H.toaInsolation(90, sJ.decl, sJ.R))} frente a ${H.f(H.toaInsolation(0, sJ.decl, sJ.R))} W/m²), porque el Sol no se pone. Sin embargo, el Sol nunca sube de 23,4° y sus rayos atraviesan mucha atmósfera; la nieve y el hielo reflejan entre el 30 y el 90 % de lo que llega, y el calor que queda se gasta en fundir el hielo. Durante el invierno polar, en cambio, no llega nada durante semanas o meses. El resultado es la menor temperatura media del planeta.</p>`));
 
     /* =============== 5 · taiga y tundra (ejercicio 6) =============== */
     const c5 = H.h('div', { class: 'card' }, H.h('h3', {}, 'Taiga y tundra (ejercicio 6)'),
       H.html(`<div style="overflow-x:auto"><table class="t"><thead><tr><th></th><th>Taiga (bosque boreal)</th><th>Tundra</th></tr></thead><tbody>
         <tr><td><b>Clima</b></td><td>Subártico (Dfc, Dwc, Dfd): verano corto, con 1 a 3 meses por encima de 10 °C</td><td>Polar de tundra (ET): ningún mes llega a 10 °C</td></tr>
         <tr><td><b>Vegetación</b></td><td>Bosque de coníferas de pocas especies: píceas, abetos, pinos y alerces (estos pierden la aguja en invierno), con abedules; sotobosque de musgos y líquenes</td><td>Sin árboles: musgos, líquenes, gramíneas, juncos y arbustos enanos (sauces, abedules enanos); hacia el sur, tundra arbustiva y bosque abierto de transición</td></tr>
-        <tr><td><b>Suelos</b></td><td>Podzoles ácidos y lavados; permafrost discontinuo en Siberia oriental</td><td>Permafrost continuo: solo se deshiela la capa superficial en verano; suelos encharcados y turbosos (criosoles), con formas de crioturbación</td></tr>
+        <tr><td><b>Suelos</b></td><td>Podzoles ácidos y lavados; en Siberia oriental, permafrost continuo bajo la taiga de alerces</td><td>Permafrost casi siempre continuo: solo se deshiela la capa superficial en verano; suelos encharcados y turbosos (criosoles), con formas de crioturbación</td></tr>
         <tr><td><b>Límite</b></td><td colspan="2">Coincide aproximadamente con la isoterma de 10 °C del mes más cálido: por debajo, el verano es demasiado corto y frío para que crezcan los árboles</td></tr>
       </tbody></table></div>`),
       H.openQ('¿Por qué el permafrost se extiende por el sur de Siberia oriental, bajo la taiga, y no en Escandinavia a la misma latitud?', 'Porque el invierno de Siberia oriental es mucho más frío (−30 a −40 °C, bajo el anticiclón siberiano) y con poca nieve que aísle el suelo: la helada penetra a gran profundidad y el corto verano no la deshace. En Escandinavia, la deriva noratlántica suaviza el invierno.'));
@@ -168,15 +168,15 @@ H.tab({
         'Cuadro 6.11: la tundra no siempre recibe «menos de 250 mm»: la variedad oceánica es mucho más húmeda (Nuuk, 874 mm).',
         'Cuadro 6.10: «EB, clima seco de alta montaña» no existe en Köppen-Geiger; las montañas se clasifican con sus propios datos (Tema 5).',
         'Apartado 3.2.1: el casquete antártico no es una herencia de las glaciaciones cuaternarias: se formó hace unos 34 millones de años, en el tránsito del Eoceno al Oligoceno. La idea de que no se volvería a formar con el clima actual se ha calculado para el casquete de Groenlandia.',
-        'El albedo de la nieve reciente llega al 80-90 %; el del hielo, al 50-60 %.',
+        'El albedo de la nieve reciente llega al 80-90 %; el del hielo glaciar, al 30-50 %, y el del hielo marino sin nieve, al 50-70 %.',
         'Taiga (2.4.3): el ciprés pelado (Taxodium) no es una especie de la taiga, sino de los pantanos del sureste de Estados Unidos; la conífera caducifolia de la taiga es el alerce.',
         'Pie de la fig. 6.17: la línea discontinua de la figura es el límite de los glaciares, no la isoterma de 0 °C.',
       ]),
       H.selfCheck([
         { q: 'El límite entre la tundra y la taiga coincide aproximadamente con…', opts: ['El círculo polar ártico', 'La isoterma de 10 °C del mes más cálido', 'La isoterma de 0 °C del mes más frío', 'El paralelo 70°'], a: 1, ex: 'Por debajo de 10 °C en el mes más cálido no crecen árboles.' },
-        { q: 'La isoterma de 10 °C del mes más cálido baja más al sur en…', opts: ['Noruega', 'La bahía de Hudson y el Labrador', 'Siberia central', 'Islandia'], a: 1, ex: 'Corrientes frías y un mar helado hasta el verano; en Noruega la deriva noratlántica la empuja al norte.' },
-        { q: 'En el solsticio de verano, el polo recibe en el techo de la atmósfera…', opts: ['Menos energía que el ecuador', 'Más energía que el ecuador, pero sigue frío', 'Ninguna energía', 'La misma que en invierno'], a: 1, ex: 'El Sol no se pone, pero está bajo, y la nieve y el hielo reflejan buena parte de la radiación.' },
-        { q: 'El casquete de hielo de la Antártida se formó…', opts: ['En la última glaciación', 'Hace unos 34 millones de años', 'Hace 10.000 años', 'En la Pequeña Edad del Hielo'], a: 1, ex: 'En el tránsito del Eoceno al Oligoceno, cuando el océano Austral aisló el continente.' },
+        { q: 'La isoterma de 10 °C del mes más cálido baja más al sur en…', opts: ['La costa noruega', 'Hudson y el Labrador', 'Siberia central', 'Escocia e Islandia'], a: 1, ex: 'Corrientes frías y un mar helado hasta el verano; en Noruega la deriva noratlántica la empuja al norte.' },
+        { q: 'En el solsticio de verano, el polo recibe en el techo de la atmósfera…', opts: ['Menos energía que el ecuador', 'Más energía que el ecuador', 'Ninguna energía en absoluto', 'La misma que en invierno'], a: 1, ex: 'El Sol no se pone; aun así hace frío, porque está bajo y la nieve y el hielo reflejan buena parte de la radiación.' },
+        { q: 'El casquete de hielo de la Antártida se formó…', opts: ['En la última glaciación', 'Hace unos 34 millones de años', 'Hace 10.000 años', 'En la Pequeña Edad del Hielo'], a: 1, ex: 'En el tránsito del Eoceno al Oligoceno, cuando bajó el CO₂ atmosférico (y se abrieron los pasos oceánicos que rodean el continente).' },
       ]));
   },
 });

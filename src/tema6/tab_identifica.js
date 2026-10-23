@@ -53,7 +53,7 @@ H.tab({
       const next = H.h('button', { class: 'btn acc sm', type: 'button', style: { marginTop: '8px' } }, 'Otro climograma →'); next.onclick = pick; fb.append(next);
     };
     const gCard = H.h('div', { class: 'card' }, H.h('h3', {}, 'El climograma misterioso ', score),
-      H.h('div', { class: 'grid2' }, H.h('div', {}, cc, hint), H.h('div', {}, H.h('p', { class: 'small' }, '¿Qué clima es? Recuerda los criterios: más de 18 °C todos los meses, zona cálida; el mes más cálido por debajo de 10 °C, zona fría; entre medias, la templada, y en cualquier zona, seco si la lluvia no alcanza el umbral de aridez.'), btns, fb)));
+      H.h('div', { class: 'grid2' }, H.h('div', {}, cc, hint), H.h('div', {}, H.h('p', { class: 'small' }, '¿Qué clima es? Recuerda los criterios: 18 °C o más todos los meses, zona cálida; el mes más cálido por debajo de 10 °C, zona fría; entre medias, la templada, y en cualquier zona, seco si la lluvia no alcanza el umbral de aridez.'), btns, fb)));
     pick();
 
     /* =============== 2 · las vacaciones (actividad complementaria) =============== */

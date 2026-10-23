@@ -3,7 +3,7 @@ H.tab({
   id: 'subtropicales', nav: 'Mediterráneo y chino', title: 'Mediterráneo y chino',
   init(el) {
     el.append(H.intro('La zona templada · apartados 2.1 y 2.2', 'Dos climas a la misma latitud: el mediterráneo y el chino',
-      'Entre 25° y 40° de latitud, los anticiclones subtropicales dominan el verano. En la fachada occidental de los continentes, su flanco oriental hace descender el aire y lo enfría sobre corrientes frías: verano seco, el clima mediterráneo (Cs). En la oriental, su flanco occidental empuja aire tropical marítimo, cálido y húmedo: verano lluvioso, el clima chino o subtropical húmedo (Cfa). En invierno ambos reciben las borrascas de los vientos del oeste.',
+      'Entre 25° y 40° de latitud, los anticiclones subtropicales dominan el verano. En la fachada occidental de los continentes, su flanco oriental hace descender el aire, que se calienta y se estabiliza, y las corrientes frías enfrían su base: verano seco, el clima mediterráneo (Cs). En la oriental, su flanco occidental empuja aire tropical marítimo, cálido y húmedo: verano lluvioso, el clima chino o subtropical húmedo (Cfa). En invierno ambos reciben las borrascas de los vientos del oeste.',
       'Manual: apartados 2.1 y 2.2<br>Cuadros 6.5-6.7; figs. 6.9 y 6.10'));
     el.append(T5.optCtrl());
     const byName = (n) => T5.ST.find((s) => s.name.startsWith(n));
@@ -77,7 +77,7 @@ H.tab({
       } });
     T4.hover(wcv, wmp, (lat, lon) => { let b = null, bd = 1e9; for (const w of WINDS) { const d = Math.hypot(w[1][0] - lon, w[1][1] - lat); if (d < bd) { bd = d; b = w; } } return bd < 1.6 ? `<b>${b[0]}</b>: ${b[4]}` : null; });
     const wCard = H.h('div', { class: 'card' }, H.h('h3', {}, 'Los vientos regionales del Mediterráneo'),
-      H.h('p', { class: 'sub' }, 'Ilustración propia. En azul, vientos fríos que bajan de las montañas o del interior de Europa hacia el mar en invierno; en rojo, vientos cálidos que llegan del Sáhara; en gris, los del estrecho. Pasa el puntero por el origen de cada flecha.'),
+      H.h('p', { class: 'sub' }, 'Ilustración propia. En azul, vientos del norte, fríos o frescos, que bajan de las montañas o del interior de Europa hacia el mar (casi todos en invierno; los etesios, en verano); en rojo, vientos cálidos que llegan del Sáhara; en gris, los del estrecho. Pasa el puntero por el origen de cada flecha.'),
       H.h('div', { class: 'viz framed' }, wcv));
 
     /* =============== 5 · balance hídrico (ejercicio 2) =============== */
@@ -135,13 +135,13 @@ H.tab({
       H.fix('cuadros 6.5 y 6.7, apartado 2.2', [
         'Cuadro 6.5: s no exige que el mes más seco sea «muy inferior a 30 mm»: el mes más seco del verano ha de recibir menos de 30 mm (40 en los mapas actuales) y menos de un tercio del más lluvioso del invierno. Para Cf, «el mes más seco supera los 30 mm» no es un criterio: f significa que no se cumplen ni s ni w.',
         'Csa y Csb no se distinguen por estar en la cuenca mediterránea o junto a una corriente fría, sino por el mes más cálido (22 °C). En la cuenca mediterránea también hay Csb, sobre todo donde la altitud suaviza el verano: en España, 1.302 municipios.',
-        'Cuadro 6.7: la «beta dálmata» es la bora; el «chehili» del Magreb es el chergui (Marruecos) o el chili (Túnez); el «shirocco», el siroco.',
-        'La baja del golfo de Génova no es térmica: es una ciclogénesis de sotavento, al pie de los Alpes.',
+        'Cuadro 6.7: la «beta dálmata» es la bora; el «chehili» es el nombre magrebí del siroco local (chergui en Marruecos, chili en Túnez); el «shirocco», el siroco.',
+        'La baja del golfo de Génova no es una baja térmica sino, sobre todo, una ciclogénesis de sotavento al pie de los Alpes, que el mar cálido refuerza.',
         'Fig. 6.10: Oporto no figura en las normales de la OMM; se usa San Francisco, de clima Csb por la corriente fría de California.',
       ]),
       H.selfCheck([
-        { q: 'El verano seco del clima mediterráneo se debe sobre todo a…', opts: ['Las borrascas del frente polar', 'El anticiclón subtropical, desplazado hacia el norte', 'Las corrientes marinas cálidas', 'El monzón de verano'], a: 1, ex: 'En verano el anticiclón sube de latitud y su aire, que desciende, impide las lluvias; en invierno baja y deja pasar las borrascas del oeste.' },
-        { q: 'A la latitud de San Francisco, la costa este de Norteamérica tiene…', opts: ['Un clima mediterráneo', 'Un clima subtropical húmedo, con lluvia todo el año', 'Un desierto costero', 'Un clima de tundra'], a: 1, ex: 'Nueva York es Cfa: el aire tropical marítimo del flanco occidental del anticiclón le da veranos húmedos.' },
+        { q: 'El verano seco del clima mediterráneo se debe sobre todo a…', opts: ['Las borrascas del frente polar', 'El anticiclón subtropical', 'Las corrientes marinas cálidas', 'El monzón de verano'], a: 1, ex: 'En verano el anticiclón se desplaza hacia el polo y su aire, que desciende, impide las lluvias; en invierno baja y deja pasar las borrascas del oeste.' },
+        { q: 'A la latitud de San Francisco, la costa este de Norteamérica tiene…', opts: ['Un clima mediterráneo', 'Un clima subtropical húmedo', 'Un desierto costero', 'Un clima de tundra'], a: 1, ex: 'Nueva York es Cfa: el aire tropical marítimo del flanco occidental del anticiclón le da veranos húmedos.' },
         { q: 'Csa y Csb se distinguen por…', opts: ['La cantidad de lluvia de invierno', 'La temperatura del mes más cálido', 'La presencia de corrientes frías', 'La duración de la sequía'], a: 1, ex: 'Con 22 °C o más en el mes más cálido, Csa; con menos, Csb.' },
         { q: 'En el balance hídrico de un clima mediterráneo, el déficit se concentra en…', opts: ['Los meses de invierno', 'Los meses de verano', 'La primavera', 'Se reparte por igual'], a: 1, ex: 'La máxima evapotranspiración coincide con la mínima lluvia.' },
       ]));
