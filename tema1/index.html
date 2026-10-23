@@ -66,7 +66,7 @@ section.tab.active{display:block;animation:fade .25s ease}
 .grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px}
 .grid2.even{grid-template-columns:1fr 1fr}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-@media (max-width:900px){.grid2,.grid2.even,.grid3{grid-template-columns:1fr}.intro{grid-template-columns:1fr}.intro .ref{text-align:left}}
+@media (max-width:900px){.grid2,.grid2.even,.grid3{grid-template-columns:minmax(0,1fr)}.intro{grid-template-columns:1fr}.intro .ref{text-align:left}}
 
 .viz{position:relative;width:100%}
 .viz canvas,.viz svg{display:block;width:100%;height:auto;border-radius:8px}
@@ -206,6 +206,29 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding-top:14px;font-si
 .brand .kicker .home-link:hover{border-bottom-color:#f3efe4}
 @media (max-width:700px){header.top{position:static}.brand .kicker{font-size:0;letter-spacing:0}.brand .kicker .home-link{font-size:.75rem;letter-spacing:.1em}.brand .title{font-size:1.05rem}main{padding:16px 12px 50px}.site-foot{padding:12px 12px 34px}h2{font-size:1.4rem}.card{padding:14px 12px}}
 .ro.wide{grid-column:1/-1}.ro.wide .v{font-size:1.1rem}
+
+/* Köppen (temas 5 y 6) */
+.kchip{display:inline-block;font-family:var(--mono);font-weight:700;border-radius:6px;padding:1px 7px;border:1px solid rgba(28,40,54,.25);font-size:.92em;line-height:1.5}
+.kchip.big{font-size:1.9rem;padding:2px 14px;border-radius:10px}
+.ktrace{list-style:none;counter-reset:k;margin:6px 0 0;padding:0}
+.ktrace li{counter-increment:k;position:relative;border-left:3px solid var(--line);padding:5px 0 7px 30px;margin:0}
+.ktrace li::before{content:counter(k);position:absolute;left:-12px;top:5px;width:21px;height:21px;border-radius:50%;background:var(--card);border:2px solid var(--line);font-size:.75rem;font-weight:700;text-align:center;line-height:17px;color:var(--muted)}
+.ktrace li.yes{border-left-color:var(--ok)}.ktrace li.yes::before{border-color:var(--ok);color:var(--ok)}
+.ktrace li .q{font-weight:600;font-size:.9rem}.ktrace li .a{font-size:.86rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.optbox{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:0 0 14px;background:#fff}
+.optbox summary{cursor:pointer;font-weight:600;font-size:.9rem}
+.optgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:10px}
+.optgrid .k{font-size:.8rem;font-weight:600;margin-bottom:4px}.optgrid .small{margin:.4em 0 0;font-size:.78rem}
+.klegend{display:grid;gap:4px;font-size:.8rem}
+.kl-row{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.kl-g{font-family:var(--serif);font-weight:700;width:18px}
+.kl-i{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:1px 6px;font-family:var(--mono);font-size:.78rem;cursor:pointer}
+.kl-i[disabled]{cursor:default}.kl-i.on{border-color:var(--ink);background:var(--soft)}
+.kl-i i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid rgba(28,40,54,.3)}
+.kletters{font-size:.9rem;color:var(--muted)}.kletters b{font-family:var(--mono);color:var(--ink)}
+.vs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}@media (max-width:700px){.vs{grid-template-columns:minmax(0,1fr)}}
+table.t.mini td,table.t.mini th{padding:3px 4px;font-size:.8rem}
+table.t input.cell{width:100%;min-width:44px;padding:2px 4px;font-size:.82rem;text-align:right;font-family:var(--mono)}
 </style>
 </head>
 <body>
@@ -491,10 +514,14 @@ const H = (() => {
     qs.forEach((q, i) => {
       const fb = H.h('div', { class: 'fb' });
       const opts = H.h('div', { class: 'opts' });
-      q.opts.forEach((o, j) => {
-        const b = H.h('button', { class: 'opt', type: 'button', html: `<span class="l">${'abcd'[j]})</span><span>${o}</span>` });
+      /* opciones en orden aleatorio (distinto en cada carga y al reiniciar), para que la posición no delate la respuesta */
+      const ord = q.opts.map((_, j) => j);
+      for (let k = ord.length - 1; k > 0; k--) { const r = Math.floor(Math.random() * (k + 1)); [ord[k], ord[r]] = [ord[r], ord[k]]; }
+      ord.forEach((j, pos) => {
+        const o = q.opts[j];
+        const b = H.h('button', { class: 'opt', type: 'button', html: `<span class="l">${'abcdef'[pos]})</span><span>${o}</span>` });
         b.onclick = () => {
-          H.$$('.opt', opts).forEach((x, k) => { x.disabled = true; if (k === q.a) x.classList.add('ok'); });
+          H.$$('.opt', opts).forEach((x, k) => { x.disabled = true; if (ord[k] === q.a) x.classList.add('ok'); });
           const good = j === q.a; if (!good) b.classList.add('ko');
           done++; if (good) ok++;
           score.textContent = `${ok} / ${qs.length}`;

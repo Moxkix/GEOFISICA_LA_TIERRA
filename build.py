@@ -105,9 +105,24 @@ TEMAS = {
                'tab_vertical.js', 'tab_mareas.js', 'tab_olas.js', 'tab_corrientes.js', 'tab_ekman.js', 'tab_botella.js', 'tab_abisal.js',
                'tab_nivel.js', 'tab_clima.js', 'tab_cuestionario.js'],
     ),
+    'tema5': dict(
+        copernicus=True,
+        title='Tema 5 · Clasificación de los climas. Climas azonales',
+        desc='Interactivos del Tema 5 de Geografía General I (Geografía Física, UNED): clasificación de los climas (Köppen), los climas del mundo y de los municipios españoles, climas secos y de montaña, y el clima en el tiempo.',
+        header='Tema 5 · La diversidad climática I. Clasificación de los climas. Los climas azonales',
+        data=[('LAND', 'data/land2.json'), ('MUN', 'data/mun.json'), ('ST', 'data/tema2/stations.json'), ('COAST', 'data/tema3/coast_eu.json'),
+              ('KMUNDO', 'data/tema5/koppen_mundo.json'), ('KES', 'data/tema5/koppen_espana.json'), ('DESIERTOS', 'data/tema5/desiertos.json'),
+              ('HADCRUT', 'data/tema5/hadcrut.json'), ('LGMR', 'data/tema5/lgmr.json')],
+        files=['_config.js', '../tema2/common2.js', '../tema3/common3.js', '../tema4/common4.js', 'koppen.js', 'common5.js', 'tab_inicio.js', 'tab_clasificar.js',
+               'tab_koppen.js', 'tab_mapa.js', 'tab_espana.js', 'tab_secos.js', 'tab_montana.js', 'tab_tiempo.js', 'tab_cuestionario.js'],
+    ),
 }
 
 for key, t in TEMAS.items():
+    for var, path in t['data']:
+        f = R / path
+        if f.exists() and f.stat().st_size < 50_000_000 and '"prueba":true' in f.read_text()[:400000]:
+            print(f'¡AVISO! {path} es un archivo de PRUEBA: no publicar')
     src = R / 'src' / key
     js = data_js(t['data']) + CORE + '\n' + '\n'.join((src / f).read_text() for f in t['files'] if (src / f).exists()) + '\nH.start();\n'
     html = page(t['title'], t['desc'], t['header'], js, copernicus=t.get('copernicus', False))

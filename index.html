@@ -74,7 +74,7 @@ section.tab.active{display:block;animation:fade .25s ease}
 .grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px}
 .grid2.even{grid-template-columns:1fr 1fr}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-@media (max-width:900px){.grid2,.grid2.even,.grid3{grid-template-columns:1fr}.intro{grid-template-columns:1fr}.intro .ref{text-align:left}}
+@media (max-width:900px){.grid2,.grid2.even,.grid3{grid-template-columns:minmax(0,1fr)}.intro{grid-template-columns:1fr}.intro .ref{text-align:left}}
 
 .viz{position:relative;width:100%}
 .viz canvas,.viz svg{display:block;width:100%;height:auto;border-radius:8px}
@@ -215,6 +215,29 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding-top:14px;font-si
 @media (max-width:700px){header.top{position:static}.brand .kicker{font-size:0;letter-spacing:0}.brand .kicker .home-link{font-size:.75rem;letter-spacing:.1em}.brand .title{font-size:1.05rem}main{padding:16px 12px 50px}.site-foot{padding:12px 12px 34px}h2{font-size:1.4rem}.card{padding:14px 12px}}
 .ro.wide{grid-column:1/-1}.ro.wide .v{font-size:1.1rem}
 
+/* Köppen (temas 5 y 6) */
+.kchip{display:inline-block;font-family:var(--mono);font-weight:700;border-radius:6px;padding:1px 7px;border:1px solid rgba(28,40,54,.25);font-size:.92em;line-height:1.5}
+.kchip.big{font-size:1.9rem;padding:2px 14px;border-radius:10px}
+.ktrace{list-style:none;counter-reset:k;margin:6px 0 0;padding:0}
+.ktrace li{counter-increment:k;position:relative;border-left:3px solid var(--line);padding:5px 0 7px 30px;margin:0}
+.ktrace li::before{content:counter(k);position:absolute;left:-12px;top:5px;width:21px;height:21px;border-radius:50%;background:var(--card);border:2px solid var(--line);font-size:.75rem;font-weight:700;text-align:center;line-height:17px;color:var(--muted)}
+.ktrace li.yes{border-left-color:var(--ok)}.ktrace li.yes::before{border-color:var(--ok);color:var(--ok)}
+.ktrace li .q{font-weight:600;font-size:.9rem}.ktrace li .a{font-size:.86rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.optbox{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:0 0 14px;background:#fff}
+.optbox summary{cursor:pointer;font-weight:600;font-size:.9rem}
+.optgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:10px}
+.optgrid .k{font-size:.8rem;font-weight:600;margin-bottom:4px}.optgrid .small{margin:.4em 0 0;font-size:.78rem}
+.klegend{display:grid;gap:4px;font-size:.8rem}
+.kl-row{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.kl-g{font-family:var(--serif);font-weight:700;width:18px}
+.kl-i{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:1px 6px;font-family:var(--mono);font-size:.78rem;cursor:pointer}
+.kl-i[disabled]{cursor:default}.kl-i.on{border-color:var(--ink);background:var(--soft)}
+.kl-i i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid rgba(28,40,54,.3)}
+.kletters{font-size:.9rem;color:var(--muted)}.kletters b{font-family:var(--mono);color:var(--ink)}
+.vs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}@media (max-width:700px){.vs{grid-template-columns:minmax(0,1fr)}}
+table.t.mini td,table.t.mini th{padding:3px 4px;font-size:.8rem}
+table.t input.cell{width:100%;min-width:44px;padding:2px 4px;font-size:.82rem;text-align:right;font-family:var(--mono)}
+
 .portada-head{background:var(--ink);color:#f3efe4;padding:34px 20px 30px}
 .portada-head .in{max-width:1080px;margin:0 auto}
 .portada-head .kicker{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:#d9b48f}
@@ -339,6 +362,39 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding-top:14px;font-si
         <li>Nivel del mar, El Niño y ciclones tropicales</li>
       </ul>
       <span class="go">Abrir el Tema 4 →</span>
+    </div>
+  </a>
+  <a class="tema" href="tema5/index.html">
+    <div class="band" style="background:#45663a">
+      <svg viewBox="0 0 320 118" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <rect x="78" y="16" width="22" height="22" rx="3" fill="#0000ff"/>
+        <rect x="104" y="16" width="22" height="22" rx="3" fill="#ff0000"/>
+        <rect x="130" y="16" width="22" height="22" rx="3" fill="#ffff00"/>
+        <rect x="78" y="42" width="22" height="22" rx="3" fill="#ffaa00"/>
+        <rect x="104" y="42" width="22" height="22" rx="3" fill="#64ff50"/>
+        <rect x="130" y="42" width="22" height="22" rx="3" fill="#007d7d"/>
+        <rect x="78" y="68" width="22" height="22" rx="3" fill="#c8c800"/>
+        <rect x="104" y="68" width="22" height="22" rx="3" fill="#b2b2b2"/>
+        <rect x="130" y="68" width="22" height="22" rx="3" fill="#ff00ff"/>
+        <path d="M170 118 L242 28 L314 118Z" fill="#2f4a28"/>
+        <path d="M188 96 L296 96 L314 118 L170 118Z" fill="#6f8f4a"/>
+        <path d="M207 72 L277 72 L296 96 L188 96Z" fill="#4f7a3a"/>
+        <path d="M226 48 L258 48 L277 72 L207 72Z" fill="#9aa59a"/>
+        <path d="M242 28 L258 48 L226 48Z" fill="#f3efe4"/>
+        <circle cx="302" cy="22" r="11" fill="#f3d27a"/>
+      </svg>
+      <span class="num">5</span>
+    </div>
+    <div class="body">
+      <h2>La clasificación de los climas</h2>
+      <p class="sub">La diversidad climática I. Los climas azonales</p>
+      <ul>
+        <li>Criterios y clasificación de Köppen paso a paso</li>
+        <li>Mapas de Köppen del mundo y de los 8.132 municipios</li>
+        <li>Climas secos y climas de montaña</li>
+        <li>El clima desde la última glaciación</li>
+      </ul>
+      <span class="go">Abrir el Tema 5 →</span>
     </div>
   </a>
 </div>
