@@ -109,7 +109,7 @@ H.tab({
         prev = { v, la };
       }
     }
-    const ich = H.chart(H.h('canvas'), 0.36);
+    const ich = H.chart(H.h('canvas'), (w) => Math.max(w * 0.36, 300));
     const at = (lon) => { let b = iso[0]; for (const p of iso) if (Math.abs(p[0] - lon) < Math.abs(b[0] - lon)) b = p; return b; };
     const MK = [[-170, 'Bering'], [-125, 'Mackenzie'], [-85, 'bahía de Hudson'], [-60, 'Labrador'], [-20, 'Islandia'], [18, 'Noruega'], [100, 'Siberia central'], [158, 'Kamchatka']];
     ich.draw({ xMin: -180, xMax: 180, yMin: 50, yMax: 76, pad: { l: 46, b: 34 }, xTicks: [-180, -120, -60, 0, 60, 120, 180].map((v) => ({ v, label: T4.lonName(v) })), yTicks: [50, 55, 60, 65, 70, 75].map((v) => ({ v, label: v + '° N' })),
@@ -131,7 +131,7 @@ H.tab({
     const TX = {
       f618: 'Los dos extremos de la zona fría. Nuuk: tundra oceánica, con 15 °C de amplitud y precipitación abundante. El Polo Sur: hielo perpetuo, 33 °C de amplitud, un invierno «sin núcleo» (de abril a septiembre la temperatura apenas cambia, en torno a −58 °C) y casi sin precipitación.',
       tun: 'Las dos variedades de tundra del manual: la oceánica de Nuuk, con inviernos moderados y precipitación abundante todo el año, y la de Utqiaġvik, en la costa del océano Ártico, helado casi todo el año, con inviernos mucho más fríos, 30 °C de amplitud y precipitación escasa, de verano.',
-      gro: 'Nuuk, en la costa, y una celda del centro del casquete de Groenlandia, a unos 3.200 m (TerraClimate): ningún mes llega a 0 °C. La altitud del casquete, más que la latitud, explica el hielo perpetuo, como en la Antártida.',
+      gro: 'Nuuk, en la costa, y una celda del centro del casquete de Groenlandia, a unos 3.200 m (TerraClimate): ningún mes llega a 0 °C. La altitud del casquete, más que la latitud, explica el hielo perpetuo, como en la Antártida. Las precipitaciones de TerraClimate sobre el hielo no son fiables: en la cumbre del casquete se acumulan unos 200-250 mm de agua al año.',
       sur: 'En el hemisferio sur no hay continentes a 55°-65° S salvo el extremo de Sudamérica: Ushuaia (55° S) y Punta Arenas (53° S) tienen veranos muy frescos (unos 10 °C) e inviernos suaves, con poca amplitud por la influencia del océano. Ushuaia queda por debajo de 10 °C (ET) y Punta Arenas apenas por encima (Cfc).',
     };
     const get = (id) => (id === 'polo' ? polo() : id === 'groen' ? T6.fromCell(T5.cell(72.6, -38.5), 'Centro de Groenlandia') : T6.fromSt(T5.byId(id)));
@@ -141,7 +141,7 @@ H.tab({
     setF('f618');
 
     /* =============== 4 · el Sol en el polo =============== */
-    const sch = H.chart(H.h('canvas'), 0.4);
+    const sch = H.chart(H.h('canvas'), (w) => Math.max(w * 0.4, 280));
     const days = Array.from({ length: 73 }, (_, i) => 1 + i * 5);
     const ser = [[90, '#1c2836'], [70, '#2c5f9e'], [45, '#3f8f6b'], [0, '#b4531d']].map(([lat, c]) => ({ pts: days.map((d) => { const s = H.sun(H.dateFromDoy(d).getTime()); return [d, H.toaInsolation(lat, s.decl, s.R)]; }), color: c, width: 2.2, lat }));
     const jun = H.doyOf(new Date(Date.UTC(H.year, 5, 21))), sJ = H.sun(H.dateFromDoy(jun).getTime());

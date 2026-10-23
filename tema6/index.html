@@ -2934,7 +2934,7 @@ H.tab({
         prev = { v, la };
       }
     }
-    const ich = H.chart(H.h('canvas'), 0.36);
+    const ich = H.chart(H.h('canvas'), (w) => Math.max(w * 0.36, 300));
     const at = (lon) => { let b = iso[0]; for (const p of iso) if (Math.abs(p[0] - lon) < Math.abs(b[0] - lon)) b = p; return b; };
     const MK = [[-170, 'Bering'], [-125, 'Mackenzie'], [-85, 'bahía de Hudson'], [-60, 'Labrador'], [-20, 'Islandia'], [18, 'Noruega'], [100, 'Siberia central'], [158, 'Kamchatka']];
     ich.draw({ xMin: -180, xMax: 180, yMin: 50, yMax: 76, pad: { l: 46, b: 34 }, xTicks: [-180, -120, -60, 0, 60, 120, 180].map((v) => ({ v, label: T4.lonName(v) })), yTicks: [50, 55, 60, 65, 70, 75].map((v) => ({ v, label: v + '° N' })),
@@ -2956,7 +2956,7 @@ H.tab({
     const TX = {
       f618: 'Los dos extremos de la zona fría. Nuuk: tundra oceánica, con 15 °C de amplitud y precipitación abundante. El Polo Sur: hielo perpetuo, 33 °C de amplitud, un invierno «sin núcleo» (de abril a septiembre la temperatura apenas cambia, en torno a −58 °C) y casi sin precipitación.',
       tun: 'Las dos variedades de tundra del manual: la oceánica de Nuuk, con inviernos moderados y precipitación abundante todo el año, y la de Utqiaġvik, en la costa del océano Ártico, helado casi todo el año, con inviernos mucho más fríos, 30 °C de amplitud y precipitación escasa, de verano.',
-      gro: 'Nuuk, en la costa, y una celda del centro del casquete de Groenlandia, a unos 3.200 m (TerraClimate): ningún mes llega a 0 °C. La altitud del casquete, más que la latitud, explica el hielo perpetuo, como en la Antártida.',
+      gro: 'Nuuk, en la costa, y una celda del centro del casquete de Groenlandia, a unos 3.200 m (TerraClimate): ningún mes llega a 0 °C. La altitud del casquete, más que la latitud, explica el hielo perpetuo, como en la Antártida. Las precipitaciones de TerraClimate sobre el hielo no son fiables: en la cumbre del casquete se acumulan unos 200-250 mm de agua al año.',
       sur: 'En el hemisferio sur no hay continentes a 55°-65° S salvo el extremo de Sudamérica: Ushuaia (55° S) y Punta Arenas (53° S) tienen veranos muy frescos (unos 10 °C) e inviernos suaves, con poca amplitud por la influencia del océano. Ushuaia queda por debajo de 10 °C (ET) y Punta Arenas apenas por encima (Cfc).',
     };
     const get = (id) => (id === 'polo' ? polo() : id === 'groen' ? T6.fromCell(T5.cell(72.6, -38.5), 'Centro de Groenlandia') : T6.fromSt(T5.byId(id)));
@@ -2966,7 +2966,7 @@ H.tab({
     setF('f618');
 
     /* =============== 4 · el Sol en el polo =============== */
-    const sch = H.chart(H.h('canvas'), 0.4);
+    const sch = H.chart(H.h('canvas'), (w) => Math.max(w * 0.4, 280));
     const days = Array.from({ length: 73 }, (_, i) => 1 + i * 5);
     const ser = [[90, '#1c2836'], [70, '#2c5f9e'], [45, '#3f8f6b'], [0, '#b4531d']].map(([lat, c]) => ({ pts: days.map((d) => { const s = H.sun(H.dateFromDoy(d).getTime()); return [d, H.toaInsolation(lat, s.decl, s.R)]; }), color: c, width: 2.2, lat }));
     const jun = H.doyOf(new Date(Date.UTC(H.year, 5, 21))), sJ = H.sun(H.dateFromDoy(jun).getTime());
@@ -3111,7 +3111,7 @@ H.tab({
       for (let v = 0; v <= p.max; v += step) { const y = G - v * sc; s += `<line x1="${L}" x2="${Wd}" y1="${y}" y2="${y}" stroke="rgba(28,40,54,.08)"/><text x="${L - 5}" y="${y + 3}" font-size="10" text-anchor="end" fill="#5a6878">${H.f(v, v % 1 ? 1 : 0)} m</text>`; }
       const trunk = (x, h, w, c = '#6b4f35') => `<rect x="${x - w / 2}" y="${G - h}" width="${w}" height="${h}" fill="${c}"/>`;
       const crown = (x, y, rx, ry, c) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${c}" stroke="rgba(0,0,0,.15)"/>`;
-      const broad = (x, h, cw, c) => { const ch = Math.min(cw * 0.75, h * 0.45); return trunk(x, h - ch * 0.4, Math.max(2, cw * 0.07)) + crown(x, G - h + ch / 2, cw / 2, ch / 2, c); };
+      const broad = (x, h, cw, c, chf) => { const ch = chf ? h * chf : Math.min(cw * 0.75, h * 0.45); return trunk(x, h - ch * 0.4, Math.max(2, cw * 0.07)) + crown(x, G - h + ch / 2, cw / 2, ch / 2, c); };
       const flat = (x, h, cw, c) => trunk(x, h - 3, 3) + `<path d="M${x - cw / 2} ${G - h + 4} Q ${x} ${G - h - 7} ${x + cw / 2} ${G - h + 4} Z" fill="${c}" stroke="rgba(0,0,0,.15)"/>`;
       const conif = (x, h, w, c) => { let o = trunk(x, h * 0.25, 3); for (let q = 0; q < 4; q++) { const top = G - h + q * h * 0.18, bot = top + h * 0.34; const ww = w * (0.45 + q * 0.2); o += `<path d="M${x} ${top} L ${x - ww / 2} ${bot} L ${x + ww / 2} ${bot} Z" fill="${c}" stroke="rgba(0,0,0,.12)"/>`; } return o; };
       const shrub = (x, h, w, c) => crown(x, G - h / 2, w / 2, h / 2, c);
@@ -3130,14 +3130,14 @@ H.tab({
         b += trunk(L + 340, 10 * sc, 22, '#8a6a4a') + crown(L + 340, G - 10.5 * sc, 30, 10, '#7f9a48');
         b += shrub(L + 180, 3 * sc, 30, '#8aa04a') + shrub(L + 480, 2.6 * sc, 26, '#8aa04a');
       } else if (key === 'medit') {
-        for (const [x, h, w] of [[L + 40, 12, 60], [L + 120, 14, 66], [L + 205, 11, 56]]) b += broad(x, h * sc, w, '#3f5f34');
+        for (const [x, h, w] of [[L + 45, 11, 96], [L + 135, 13, 104], [L + 215, 10, 86]]) b += broad(x, h * sc, w, '#3f5f34', 0.5);
         b += `<text x="${L + 120}" y="22" font-size="11" text-anchor="middle" fill="#1c2836">encinar</text>`;
         for (let x = L + 250; x < L + 420; x += 18) b += shrub(x + r() * 6, (2 + r() * 2) * sc, 22, r() > 0.5 ? '#5d7a3a' : '#7a8a46');
         b += `<text x="${L + 335}" y="22" font-size="11" text-anchor="middle" fill="#1c2836">maquis</text>`;
         for (let x = L + 440; x < Wd - 5; x += 14) b += shrub(x + r() * 6, (0.4 + r() * 0.6) * sc, 13, r() > 0.5 ? '#8a9a5a' : '#9aa070');
         b += `<text x="${L + 520}" y="22" font-size="11" text-anchor="middle" fill="#1c2836">garriga</text>`;
       } else if (key === 'oceano') {
-        for (let x = L + 15; x < L + 360; x += 34) b += broad(x + r() * 8, (24 + r() * 10) * sc, 46, r() > 0.4 ? '#5d9a4a' : '#6aa452');
+        for (let x = L + 15; x < L + 360; x += 34) b += broad(x + r() * 8, (24 + r() * 10) * sc, 64, r() > 0.4 ? '#5d9a4a' : '#6aa452', 0.5);
         for (let x = L + 20; x < L + 360; x += 30) b += shrub(x + r() * 8, (2 + r() * 3) * sc, 20, '#7aa45a');
         for (let x = L + 380; x < Wd - 5; x += 13) b += shrub(x + r() * 5, (0.6 + r() * 1) * sc, 14, r() > 0.5 ? '#8a6a8a' : '#9a8a40');
         b += `<text x="${L + 190}" y="22" font-size="11" text-anchor="middle" fill="#1c2836">hayedo y robledal</text><text x="${L + 470}" y="${G - 3.5 * sc}" font-size="11" text-anchor="middle" fill="#1c2836">landa</text>`;
@@ -3197,6 +3197,179 @@ H.tab({
         { q: 'El horizonte blanquecino de un podzol se debe a…', opts: ['La acumulación de cal', 'El lavado de los minerales por ácidos orgánicos', 'La ceniza de los incendios', 'El hielo del permafrost'], a: 1, ex: 'Los ácidos de la hojarasca de coníferas y brezos arrastran el hierro y el aluminio hacia el horizonte B.' },
         { q: 'Los manglares faltan en las costas de Perú y Namibia porque…', opts: ['Allí no hay mareas', 'Las corrientes frías enfrían el mar', 'Son costas acantiladas', 'Llueve demasiado'], a: 1, ex: 'Las corrientes de Humboldt y Benguela mantienen el agua fría; los manglares necesitan aguas cálidas todo el año.' },
       ]));
+  },
+});
+
+/* ===================== ? · IDENTIFICA EL CLIMA ===================== */
+H.tab({
+  id: 'identifica', nav: 'Identifica el clima', title: 'Identifica el clima',
+  init(el) {
+    el.append(H.intro('Ejercicio 4 y actividades complementarias', 'Identifica el clima a partir de sus datos',
+      'Un climograma real, sin nombre, de una estación de las normales 1991-2020 de la OMM. Fíjate en la temperatura del mes más frío y del más cálido, en la amplitud, en cuánto llueve y en qué estación: ¿qué clima zonal es? Después, el viaje de vacaciones que propone el manual entre Innsbruck, El Cairo y Nueva Orleans.',
+      'Manual: ejercicio de autoevaluación 4<br>y actividades complementarias'));
+    el.append(T5.optCtrl());
+
+    /* =============== 1 · el juego =============== */
+    const POOL = T5.ST.filter((s) => s.ta && s.pr);
+    const G = { s: null, n: 0, ok: 0, done: false, last: [] };
+    const cc = T6.climoCard();
+    const hint = H.h('p', { class: 'small' });
+    const btns = H.h('div', { class: 'zleg', style: { marginTop: '6px' } });
+    const fb = H.h('div');
+    const score = H.h('span', { class: 'score' }, '0 / 0');
+    const pick = () => {
+      // tres de cada cuatro, del mundo; una, de España
+      const es = Math.random() < 0.25, cand = POOL.filter((s) => s.es === es && !G.last.includes(s.id));
+      G.s = cand[Math.floor(Math.random() * cand.length)]; G.last = [G.s.id].concat(G.last).slice(0, 25); G.done = false;
+      const s = G.s;
+      cc.set({ T: s.ta.slice(0, 12), P: s.pr.slice(0, 12), lat: s.lat, title: 'Estación misteriosa', sub: `${s.lat >= 0 ? 'hemisferio norte' : 'hemisferio sur'} · ${H.f(s.elev)} m` });
+      H.$$('.cc-type, .cc-num', cc).forEach((e) => { e.style.visibility = 'hidden'; });
+      hint.textContent = `Pista: está en el ${s.lat >= 0 ? 'hemisferio norte' : 'hemisferio sur'}, a ${H.f(s.elev)} m de altitud.`;
+      fb.innerHTML = ''; drawBtns();
+    };
+    const drawBtns = () => {
+      btns.innerHTML = '';
+      for (const k of T6.KEYS) {
+        const b = H.h('button', { type: 'button', html: `<i style="background:${T6.css(k)}"></i>${T6.ZON[k].s}` });
+        b.onclick = () => answer(k, b); btns.append(b);
+      }
+    };
+    const answer = (k, b) => {
+      if (G.done) return; G.done = true; G.n++;
+      const s = G.s, r = T5.cls(s), z = T6.zonal(r.type), good = k === z; if (good) G.ok++;
+      score.textContent = `${G.ok} / ${G.n}`;
+      H.$$('button', btns).forEach((x) => { x.disabled = true; });
+      b.classList.add('on');
+      H.$$('.cc-type, .cc-num', cc).forEach((e) => { e.style.visibility = 'visible'; });
+      const st = T6.stats(s.ta.slice(0, 12), s.pr.slice(0, 12), s.lat);
+      const why = [];
+      if (z === 'sec') why.push(`la precipitación (${H.f(st.Pann)} mm) no llega al umbral de aridez`);
+      else if (r.type[0] === 'A') why.push(`todos los meses superan 18 °C (el más frío, ${T5.fT(st.Tmin)})`, st.Pdry >= 60 ? 'llueve todos los meses más de 60 mm' : `el mes más seco recibe ${T5.fMM(st.Pdry)}`);
+      else if (r.type[0] === 'E') why.push(`el mes más cálido no llega a 10 °C (${T5.fT(st.Tmax)})`);
+      else {
+        why.push(`el mes más frío tiene ${T5.fT(st.Tmin)} (${r.type[0] === 'C' ? 'por encima' : 'por debajo'} del umbral C/D) y el más cálido ${T5.fT(st.Tmax)}`);
+        why.push(r.type[1] === 's' ? 'el verano es seco' : r.type[1] === 'w' ? 'el invierno es seco' : 'llueve todo el año');
+      }
+      fb.innerHTML = `<div class="fb show ${good ? 'ok' : 'ko'}" style="display:block"><b>${good ? 'Correcto.' : 'No es correcto.'}</b> Es <b>${T5.stLabel(s)}</b>, ${T6.both(r.type)}, porque ${why.join(' y ')}. Amplitud anual: ${H.f(st.amp, 1)} °C.</div>`;
+      const d = H.h('details', { class: 'open-q', style: { marginTop: '8px' } }, H.h('summary', {}, 'Ver la clasificación paso a paso'), T5.trace(r)); fb.append(d);
+      const next = H.h('button', { class: 'btn acc sm', type: 'button', style: { marginTop: '8px' } }, 'Otro climograma →'); next.onclick = pick; fb.append(next);
+    };
+    const gCard = H.h('div', { class: 'card' }, H.h('h3', {}, 'El climograma misterioso ', score),
+      H.h('div', { class: 'grid2' }, H.h('div', {}, cc, hint), H.h('div', {}, H.h('p', { class: 'small' }, '¿Qué clima es? Recuerda los criterios: más de 18 °C todos los meses, zona cálida; el mes más cálido por debajo de 10 °C, zona fría; entre medias, la templada, y en cualquier zona, seco si la lluvia no alcanza el umbral de aridez.'), btns, fb)));
+    pick();
+
+    /* =============== 2 · las vacaciones (actividad complementaria) =============== */
+    const CITIES = [['11120', 'Innsbruck'], ['62366', 'El Cairo'], ['72231', 'Nueva Orleans']];
+    const cards = CITIES.map(([id]) => { const c = T6.climoCard(); const s = T5.byId(id); c.set(Object.assign(T6.fromSt(s), { extra: () => `máximas de ${T5.fT(Math.min(...s.tx.slice(0, 12)), 0)} a ${T5.fT(Math.max(...s.tx.slice(0, 12)), 0)}` })); return c; });
+    const PER = [['nav', 'Navidad', [11, 0]], ['ss', 'Semana Santa', [2, 3]], ['ver', 'Verano (julio-agosto)', [6, 7]]];
+    const sels = {};
+    const tbl = H.h('table', { class: 't' });
+    const mean = (a, ms) => ms.reduce((x, m) => x + a[m], 0) / ms.length;
+    tbl.innerHTML = `<thead><tr><th>Fechas</th>${CITIES.map(([id, n]) => `<th>${n}</th>`).join('')}<th>Tu elección</th></tr></thead>`;
+    const tb = H.h('tbody');
+    for (const [k, n, ms] of PER) {
+      const tr = H.h('tr', {}, H.h('td', {}, H.h('b', {}, n)));
+      for (const [id] of CITIES) { const s = T5.byId(id); tr.append(H.h('td', { class: 'small' }, `máx. ${T5.fT(mean(s.tx, ms), 0)} · mín. ${T5.fT(mean(s.tn, ms), 0)} · ${H.f(ms.reduce((x, m) => x + s.pr[m], 0) / ms.length)} mm/mes`)); }
+      const sel = H.h('select', {}); sel.append(H.h('option', { value: '' }, 'Elige…')); CITIES.forEach(([, c]) => sel.append(H.h('option', { value: c }, c))); sels[k] = sel;
+      tr.append(H.h('td', {}, sel)); tb.append(tr);
+    }
+    tbl.append(tb);
+    const vOut = H.h('div');
+    const chk = H.h('button', { class: 'btn acc sm', type: 'button' }, 'Comprobar');
+    const PROP = {
+      nav: ['El Cairo', 'En diciembre y enero El Cairo tiene máximas de unos 20 °C, sol y casi ninguna lluvia. Innsbruck está bajo cero por la noche (la elección si lo que buscas es esquiar) y Nueva Orleans es templada pero lluviosa, con más de 120 mm al mes.'],
+      ss: ['El Cairo', 'En marzo y abril El Cairo tiene 24-28 °C de máxima sin lluvia, antes del calor extremo; Nueva Orleans también es agradable (22-26 °C), aunque llueve más de 100 mm al mes; Innsbruck sale apenas del invierno.'],
+      ver: ['Innsbruck', 'En julio y agosto las máximas llegan a 33-35 °C en El Cairo y Nueva Orleans, y Nueva Orleans, con su humedad y el comienzo de la temporada de huracanes, es bochornosa. Innsbruck, a 578 m en los Alpes, tiene máximas de unos 24 °C, aunque con tormentas por la tarde: es su estación más lluviosa.'],
+    };
+    chk.onclick = () => {
+      vOut.innerHTML = PER.map(([k, n]) => { const v = sels[k].value, [p, t] = PROP[k]; return `<p class="small"><b>${n}:</b> ${v ? (v === p ? '✓ ' : `tu elección, ${v}; la propuesta, `) : 'sin elegir; la propuesta, '}<b>${p}</b>. ${t}</p>`; }).join('') +
+        '<p class="small">Los climas: Innsbruck, oceánico degradado hacia el continental (Cfb con −3 °C, Dfb con 0 °C), por su posición en el interior de los Alpes; El Cairo, desierto cálido (BWh), por el anticiclón subtropical y la lejanía de las fuentes de humedad; Nueva Orleans, subtropical húmedo (Cfa), en la fachada oriental de Norteamérica, con aire tropical del golfo de México.</p>';
+    };
+    const vCard = H.h('div', { class: 'card' }, H.h('h3', {}, '¿Innsbruck, El Cairo o Nueva Orleans?'),
+      H.h('p', { class: 'sub' }, 'La actividad complementaria del manual: elige el mejor destino, por su clima, para Navidad, Semana Santa y el verano. En la tabla, las medias de las máximas y mínimas diarias y la lluvia de esos meses (OMM 1991-2020).'),
+      H.h('div', { class: 'grid3' }, ...cards), H.h('div', { style: { overflowX: 'auto', marginTop: '10px' } }, tbl), chk, vOut);
+
+    el.append(gCard, vCard);
+  },
+});
+
+/* ===================== CUESTIONARIO FINAL ===================== */
+H.tab({
+  id: 'cuestionario', nav: 'Cuestionario', title: 'Cuestionario final',
+  init(el) {
+    el.append(H.intro('Repaso del tema', 'Cuestionario final',
+      'Veinte preguntas sobre todo el tema, en orden aleatorio. Responde todas y pulsa «Corregir»: verás la puntuación, la explicación de cada pregunta y un enlace al interactivo donde repasarla.',
+      'Tema 6 completo'));
+    const BANK = [
+      ["mosaico", "La zona intertropical ocupa, aproximadamente,…", ["El 20 % de las tierras emergidas", "Más de un tercio de las tierras emergidas", "La mitad de las tierras emergidas", "Menos del 10 % de las tierras"], 1, "En torno al 35 % con la Antártida; el manual dice el 20 %."],
+      ["mosaico", "Entre 30° y 40° de latitud, en la fachada occidental de los continentes, domina el clima…", ["Chino", "Mediterráneo", "Continental", "Oceánico"], 1, "El anticiclón subtropical domina allí el verano."],
+      ["mosaico", "Los climas continentales y subárticos (D) son casi exclusivos del hemisferio norte porque…", ["El sur recibe menos radiación", "Al sur faltan continentes entre 40° y 65°", "El frente polar no llega al sur", "Las corrientes cálidas los impiden"], 1, "Sin grandes continentes, el océano suaviza los inviernos."],
+      ["intertropicales", "En la zona intertropical las estaciones las marca sobre todo…", ["La temperatura", "La precipitación", "La duración del día", "El viento"], 1, "Todos los meses superan los 18 °C; lo que cambia es la lluvia."],
+      ["intertropicales", "Un clima A cuyo mes más seco recibe 70 mm es…", ["Af", "Am", "Aw", "BSh"], 0, "Con 60 mm o más en el mes más seco, Af."],
+      ["intertropicales", "La línea 100 − P/25 de la fig. 6.2 separa…", ["Af de Am", "Am de Aw", "Aw de BSh", "A de C"], 1, "Por encima de ella, la lluvia anual compensa la estación seca (Am)."],
+      ["intertropicales", "La lluvia anual de la mitad de las celdas de selva (Af) está entre…", ["500 y 1.000 mm", "2.200 y 3.200 mm", "1.000 y 1.500 mm", "5.000 y 8.000 mm"], 1, "La mediana es de unos 2.650 mm; el manual da 1.500-2.000."],
+      ["intertropicales", "Al alejarse del ecuador hacia los trópicos, la estación seca…", ["Desaparece", "Se alarga", "Se traslada al verano", "No cambia"], 1, "Es el paso de la selva a la sabana y a la estepa."],
+      ["intertropicales", "Chromow definió las regiones monzónicas por…", ["Una lluvia anual de más de 2.000 mm", "Un giro del viento de al menos 120° entre estaciones", "Una temperatura media de más de 25 °C", "La presencia de ciclones tropicales"], 1, "El monzón es, ante todo, un cambio estacional de rumbo del viento."],
+      ["intertropicales", "El monzón de invierno en la India es un viento…", ["Del suroeste y húmedo", "Del nordeste, continental y seco", "Del oeste, con borrascas", "Del sur, que cruza el ecuador"], 1, "Sale del anticiclón térmico siberiano: es la estación seca."],
+      ["subtropicales", "Nueva York y San Francisco, casi a la misma latitud, tienen climas distintos porque…", ["Uno está a más altitud", "Están en fachadas opuestas del continente", "Uno está en el hemisferio sur", "Uno recibe monzones"], 1, "San Francisco, fachada occidental (Csb); Nueva York, oriental (Cfa)."],
+      ["subtropicales", "Csa y Csb se diferencian por…", ["La lluvia de invierno", "La temperatura del mes más cálido", "Las corrientes marinas", "La duración de la sequía"], 1, "Con 22 °C o más en el mes más cálido, a; con menos, b."],
+      ["subtropicales", "El clima chino en Asia tiene inviernos más secos que en América porque…", ["El monzón de verano es más débil", "El anticiclón siberiano es más fuerte que el canadiense", "Recibe más ciclones tropicales", "Está más cerca del ecuador"], 1, "El aire continental de Siberia frena las borrascas invernales."],
+      ["subtropicales", "La «beta dálmata» del cuadro 6.7 es en realidad…", ["La bora", "El siroco", "El mistral", "El levante"], 0, "Un viento frío del nordeste que cae sobre la costa dálmata."],
+      ["subtropicales", "En el balance hídrico del clima mediterráneo, el déficit de agua se concentra en…", ["El invierno", "El verano", "El otoño", "La primavera"], 1, "La mayor evapotranspiración coincide con la menor lluvia."],
+      ["subtropicales", "Los ríos más irregulares de la zona templada, con estiaje y crecidas súbitas de otoño, son los…", ["Oceánicos", "Mediterráneos", "Continentales", "Del clima chino"], 1, "Sequía estival y lluvias torrenciales de otoño."],
+      ["oceanico", "Con las normales 1991-2020, Lyon tiene un clima…", ["Cfb, oceánico", "Cfa, subtropical húmedo", "Dfb, continental", "Csb, mediterráneo"], 1, "Su mes más cálido llega a 22,6 °C."],
+      ["oceanico", "Brest y Gander están a la misma latitud; Gander tiene inviernos mucho más fríos porque…", ["Está a más altitud", "Le llegan el viento del continente y una corriente fría", "Llueve menos", "Está más al norte"], 1, "Brest recibe el aire del océano templado por la deriva noratlántica."],
+      ["oceanico", "Según la fig. 6.14, al aumentar la continentalidad…", ["Disminuye la amplitud térmica", "Aumentan la amplitud y la lluvia de verano", "La lluvia pasa al invierno", "El invierno se suaviza"], 1, "El anticiclón térmico invernal bloquea las borrascas; el verano trae convección."],
+      ["oceanico", "Con las normales 1991-2020, Ulán Bator es…", ["Dwb", "BSk", "Dfc", "ET"], 1, "Sus 273 mm no alcanzan el umbral de aridez."],
+      ["oceanico", "Los chernozems, o tierras negras, se forman bajo…", ["La taiga", "La pradera de los climas continentales", "La selva ecuatorial", "El bosque mediterráneo"], 1, "Las raíces de las gramíneas acumulan un horizonte de humus muy espeso."],
+      ["polares", "El límite entre la tundra y la taiga coincide aproximadamente con…", ["El círculo polar", "La isoterma de 10 °C del mes más cálido", "El paralelo 70°", "La isoterma de 0 °C del mes más frío"], 1, "Por debajo de 10 °C en el mes más cálido no crecen árboles."],
+      ["polares", "La isoterma de 10 °C del mes más cálido llega más al sur en…", ["Noruega", "La bahía de Hudson y el Labrador", "Siberia central", "Escocia"], 1, "Corrientes frías y un mar helado hasta el verano."],
+      ["polares", "La tundra oceánica de Nuuk recibe al año unos…", ["100 mm", "875 mm", "250 mm", "2.500 mm"], 1, "Mucho más que los «menos de 250 mm» del cuadro 6.11."],
+      ["polares", "El casquete antártico se formó…", ["En la última glaciación", "Hace unos 34 millones de años", "En el Holoceno", "En la Pequeña Edad del Hielo"], 1, "En el tránsito del Eoceno al Oligoceno."],
+      ["polares", "En el solsticio de verano, el polo recibe en el techo de la atmósfera…", ["Menos radiación que el ecuador", "Más radiación que el ecuador", "Ninguna radiación", "La misma que en invierno"], 1, "El Sol no se pone, pero está bajo y la nieve refleja buena parte."],
+      ["polares", "Un clima con todos los meses por debajo de 0 °C es…", ["ET", "EF", "Dfd", "BWk"], 1, "Hielo perpetuo."],
+      ["vegetacion", "Los manglares faltan en las costas de Perú y Namibia porque…", ["No hay mareas", "Las corrientes frías enfrían el mar", "Son costas muy lluviosas", "Están en latitudes templadas"], 1, "Necesitan aguas cálidas todo el año."],
+      ["vegetacion", "La vegetación esclerófila, de hoja pequeña, dura y perenne, es propia del clima…", ["Oceánico", "Mediterráneo", "Ecuatorial", "Subártico"], 1, "Resiste la sequía del verano: encinas, alcornoques, acebuches."],
+      ["vegetacion", "Los suelos de la selva ecuatorial son…", ["Muy fértiles, con mucho humus", "Pobres, muy lavados y ricos en óxidos de hierro", "Negros, con mucho calcio", "Helados en profundidad"], 1, "Ferralsoles: los nutrientes están en la vegetación, no en el suelo."],
+      ["vegetacion", "El horizonte blanquecino del podzol se debe a…", ["La acumulación de cal", "El lavado por ácidos orgánicos", "La ceniza de incendios", "La sal del mar"], 1, "La hojarasca ácida arrastra el hierro y el aluminio hacia abajo."],
+      ["identifica", "Un climograma con 27 °C todo el año y más de 100 mm todos los meses corresponde al clima…", ["Monzónico", "Ecuatorial", "De sabana", "Chino"], 1, "Sin estación seca y siempre cálido: Af."],
+    ];
+    const box = H.h('div');
+    let qs = [], answers = [];
+    const build = () => {
+      qs = [...BANK].sort(() => Math.random() - 0.5).slice(0, 20).map(([tab, q, opts, a, ex]) => { const idx = opts.map((_, i) => i).sort(() => Math.random() - 0.5); return { tab, q, opts: idx.map((i) => opts[i]), a: idx.indexOf(a), ex }; });
+      answers = new Array(qs.length).fill(null);
+      box.innerHTML = '';
+      const prog = H.h('p', { class: 'small' }, `0 de ${qs.length} respondidas`);
+      const list = H.h('div', { class: 'card' });
+      qs.forEach((q, i) => {
+        const opts = H.h('div', { class: 'opts' });
+        q.opts.forEach((o, j) => { const b = H.h('button', { class: 'opt', type: 'button', html: `<span class="l">${'abcd'[j]})</span><span>${o}</span>` }); b.onclick = () => { if (box.dataset.done) return; answers[i] = j; H.$$('.opt', opts).forEach((x, k) => { x.style.borderColor = k === j ? 'var(--ink)' : ''; x.style.background = k === j ? 'var(--soft)' : ''; }); prog.textContent = `${answers.filter((x) => x !== null).length} de ${qs.length} respondidas`; }; opts.append(b); });
+        list.append(H.h('div', { class: 'q' }, H.h('div', { class: 'qt', html: `<span class="n">${i + 1}.</span>${q.q}` }), opts, H.h('div', { class: 'fb' })));
+      });
+      const corr = H.h('button', { class: 'btn acc', type: 'button' }, 'Corregir');
+      const again = H.h('button', { class: 'btn ghost', type: 'button', style: { display: 'none' } }, 'Nuevo cuestionario');
+      const result = H.h('div');
+      corr.onclick = () => {
+        const pend = answers.filter((x) => x === null).length;
+        if (pend && !confirm(`Te faltan ${pend} preguntas. ¿Corregir de todos modos?`)) return;
+        box.dataset.done = '1'; let ok = 0; const weak = {};
+        H.$$('.q', list).forEach((qe, i) => {
+          const q = qs[i], good = answers[i] === q.a; if (good) ok++; else weak[q.tab] = (weak[q.tab] || 0) + 1;
+          H.$$('.opt', qe).forEach((x, k) => { x.disabled = true; x.style.background = ''; x.style.borderColor = ''; if (k === q.a) x.classList.add('ok'); else if (k === answers[i]) x.classList.add('ko'); });
+          const t = H.TABS.find((x) => x.id === q.tab);
+          const fb = H.$('.fb', qe); fb.className = 'fb show ' + (good ? 'ok' : 'ko'); fb.innerHTML = `<b>${good ? 'Correcto.' : answers[i] === null ? 'Sin responder.' : 'No es correcto.'}</b>${q.ex} <a href="#${q.tab}">Repasar en «${t.nav}» →</a>`;
+        });
+        const nota = ok / qs.length * 10;
+        const wk = Object.entries(weak).sort((a, b) => b[1] - a[1]).map(([k, n]) => { const t = H.TABS.find((x) => x.id === k); return `<a href="#${k}">${t.nav}</a> (${n})`; });
+        result.innerHTML = `<div class="result-box"><div class="big">${H.f(nota, 1)}</div><div>${ok} aciertos de ${qs.length}</div>${wk.length ? `<p class="small">Conviene repasar: ${wk.join(' · ')}</p>` : '<p class="small">Ningún fallo. Tema dominado.</p>'}</div>`;
+        corr.style.display = 'none'; again.style.display = ''; result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      };
+      again.onclick = () => { delete box.dataset.done; build(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+      box.append(prog, list, result, H.h('div', { class: 'exam-nav' }, corr, again));
+    };
+    build();
+    el.append(box);
   },
 });
 

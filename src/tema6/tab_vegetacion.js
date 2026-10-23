@@ -103,7 +103,7 @@ H.tab({
       for (let v = 0; v <= p.max; v += step) { const y = G - v * sc; s += `<line x1="${L}" x2="${Wd}" y1="${y}" y2="${y}" stroke="rgba(28,40,54,.08)"/><text x="${L - 5}" y="${y + 3}" font-size="10" text-anchor="end" fill="#5a6878">${H.f(v, v % 1 ? 1 : 0)} m</text>`; }
       const trunk = (x, h, w, c = '#6b4f35') => `<rect x="${x - w / 2}" y="${G - h}" width="${w}" height="${h}" fill="${c}"/>`;
       const crown = (x, y, rx, ry, c) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${c}" stroke="rgba(0,0,0,.15)"/>`;
-      const broad = (x, h, cw, c) => { const ch = Math.min(cw * 0.75, h * 0.45); return trunk(x, h - ch * 0.4, Math.max(2, cw * 0.07)) + crown(x, G - h + ch / 2, cw / 2, ch / 2, c); };
+      const broad = (x, h, cw, c, chf) => { const ch = chf ? h * chf : Math.min(cw * 0.75, h * 0.45); return trunk(x, h - ch * 0.4, Math.max(2, cw * 0.07)) + crown(x, G - h + ch / 2, cw / 2, ch / 2, c); };
       const flat = (x, h, cw, c) => trunk(x, h - 3, 3) + `<path d="M${x - cw / 2} ${G - h + 4} Q ${x} ${G - h - 7} ${x + cw / 2} ${G - h + 4} Z" fill="${c}" stroke="rgba(0,0,0,.15)"/>`;
       const conif = (x, h, w, c) => { let o = trunk(x, h * 0.25, 3); for (let q = 0; q < 4; q++) { const top = G - h + q * h * 0.18, bot = top + h * 0.34; const ww = w * (0.45 + q * 0.2); o += `<path d="M${x} ${top} L ${x - ww / 2} ${bot} L ${x + ww / 2} ${bot} Z" fill="${c}" stroke="rgba(0,0,0,.12)"/>`; } return o; };
       const shrub = (x, h, w, c) => crown(x, G - h / 2, w / 2, h / 2, c);
@@ -122,14 +122,14 @@ H.tab({
         b += trunk(L + 340, 10 * sc, 22, '#8a6a4a') + crown(L + 340, G - 10.5 * sc, 30, 10, '#7f9a48');
         b += shrub(L + 180, 3 * sc, 30, '#8aa04a') + shrub(L + 480, 2.6 * sc, 26, '#8aa04a');
       } else if (key === 'medit') {
-        for (const [x, h, w] of [[L + 40, 12, 60], [L + 120, 14, 66], [L + 205, 11, 56]]) b += broad(x, h * sc, w, '#3f5f34');
+        for (const [x, h, w] of [[L + 45, 11, 96], [L + 135, 13, 104], [L + 215, 10, 86]]) b += broad(x, h * sc, w, '#3f5f34', 0.5);
         b += `<text x="${L + 120}" y="22" font-size="11" text-anchor="middle" fill="#1c2836">encinar</text>`;
         for (let x = L + 250; x < L + 420; x += 18) b += shrub(x + r() * 6, (2 + r() * 2) * sc, 22, r() > 0.5 ? '#5d7a3a' : '#7a8a46');
         b += `<text x="${L + 335}" y="22" font-size="11" text-anchor="middle" fill="#1c2836">maquis</text>`;
         for (let x = L + 440; x < Wd - 5; x += 14) b += shrub(x + r() * 6, (0.4 + r() * 0.6) * sc, 13, r() > 0.5 ? '#8a9a5a' : '#9aa070');
         b += `<text x="${L + 520}" y="22" font-size="11" text-anchor="middle" fill="#1c2836">garriga</text>`;
       } else if (key === 'oceano') {
-        for (let x = L + 15; x < L + 360; x += 34) b += broad(x + r() * 8, (24 + r() * 10) * sc, 46, r() > 0.4 ? '#5d9a4a' : '#6aa452');
+        for (let x = L + 15; x < L + 360; x += 34) b += broad(x + r() * 8, (24 + r() * 10) * sc, 64, r() > 0.4 ? '#5d9a4a' : '#6aa452', 0.5);
         for (let x = L + 20; x < L + 360; x += 30) b += shrub(x + r() * 8, (2 + r() * 3) * sc, 20, '#7aa45a');
         for (let x = L + 380; x < Wd - 5; x += 13) b += shrub(x + r() * 5, (0.6 + r() * 1) * sc, 14, r() > 0.5 ? '#8a6a8a' : '#9a8a40');
         b += `<text x="${L + 190}" y="22" font-size="11" text-anchor="middle" fill="#1c2836">hayedo y robledal</text><text x="${L + 470}" y="${G - 3.5 * sc}" font-size="11" text-anchor="middle" fill="#1c2836">landa</text>`;
