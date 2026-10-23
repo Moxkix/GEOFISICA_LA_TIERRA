@@ -229,6 +229,19 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding-top:14px;font-si
 .vs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}@media (max-width:700px){.vs{grid-template-columns:minmax(0,1fr)}}
 table.t.mini td,table.t.mini th{padding:3px 4px;font-size:.8rem}
 table.t input.cell{width:100%;min-width:44px;padding:2px 4px;font-size:.82rem;text-align:right;font-family:var(--mono)}
+/* ---------- Tema 6: climas zonales ---------- */
+.kchip.zchip{font-family:var(--sans);font-weight:700;font-size:.82em}
+.ccard{display:grid;gap:6px;align-content:start}
+.ccard .cc-type{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ccard .cc-num{font-size:.84rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.zleg{display:flex;flex-wrap:wrap;gap:5px 6px;font-size:.8rem}
+.zleg button{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:.8rem}
+.zleg button.on{border-color:var(--ink);background:var(--soft)}
+.zleg button i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid rgba(28,40,54,.3)}
+.zleg .zg{flex-basis:100%;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:2px}
+.illu svg{width:100%;height:auto;display:block}
+.pairs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px}
+.cmap .edge.thin{stroke-width:.8;opacity:.55}
 </style>
 </head>
 <body>
@@ -287,7 +300,12 @@ const H = (() => {
     return e;
   };
   /* plantilla HTML -> nodo */
-  H.html = (s) => { const t = document.createElement('template'); t.innerHTML = s.trim(); return t.content.firstElementChild; };
+  /* de una cadena HTML a un elemento; si hay varios elementos raíz, se envuelven en un div que no altera la maquetación */
+  H.html = (s) => {
+    const t = document.createElement('template'); t.innerHTML = s.trim();
+    if (t.content.children.length <= 1) return t.content.firstElementChild;
+    const d = document.createElement('div'); d.style.display = 'contents'; d.append(t.content); return d;
+  };
 
   /* ---------- formato (es-ES) ---------- */
   H.f = (x, d = 0) => Number(x).toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: true });
@@ -1112,7 +1130,7 @@ const T3 = (() => {
         ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#1f6f8b'; ctx.fillText(H.f(pv), P.l - 4, y);
         if (u <= 100) { ctx.textAlign = 'left'; ctx.fillStyle = '#b0393a'; ctx.fillText(u / 2 + '°', w - P.r + 4, y); }
       }
-      if (tmin < 0) for (let v = -10; v >= tmin; v -= 10) { ctx.textAlign = 'left'; ctx.fillStyle = '#b0393a'; ctx.fillText(v + '°', w - P.r + 4, Yv(v * 2)); }
+      if (tmin < 0) for (let v = -10; v >= tmin; v -= 10) { ctx.textAlign = 'left'; ctx.fillStyle = '#b0393a'; ctx.fillText(String(v).replace('-', '−') + '°', w - P.r + 4, Yv(v * 2)); }
       if (comp) { ctx.strokeStyle = 'rgba(31,111,139,.6)'; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(P.l, Yv(100)); ctx.lineTo(w - P.r, Yv(100)); ctx.stroke(); ctx.setLineDash([]); if (!o.small) { ctx.fillStyle = '#1f6f8b'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText('por encima de 100 mm, escala reducida', P.l + 4, Yv(100) - 2); } }
       // barras
       s.pr.slice(0, 12).forEach((v, i) => {
@@ -1127,7 +1145,9 @@ const T3 = (() => {
       ctx.fillStyle = '#5a6878'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
       const ml = o.small ? 'EFMAMJJASOND'.split('') : H.MES3;
       ml.forEach((m, i) => ctx.fillText(m, P.l + (i + 0.5) * pw, Yv(ylo) + 4));
-      if (o.title) { ctx.font = 'bold 12px system-ui'; ctx.fillStyle = '#1c2836'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(o.title, P.l, 4); ctx.font = '10.5px system-ui'; ctx.fillStyle = '#5a6878'; ctx.textAlign = 'right'; ctx.fillText(o.sub || '', w - P.r, 5); }
+      // marcas sobre el eje de meses (p. ej., pasos del Sol por el cenit): {m: mes fraccionario 0-12, label}
+      if (o.marks) for (const mk of o.marks) { const x = P.l + mk.m * pw, y = P.t + 2; ctx.fillStyle = mk.color || '#d08a00'; ctx.beginPath(); ctx.arc(x, y + 5, 4.5, 0, 7); ctx.fill(); ctx.strokeStyle = mk.color || '#d08a00'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(x, y + 10); ctx.lineTo(x, Yv(ylo)); ctx.stroke(); ctx.setLineDash([]); if (mk.label && !o.small) { ctx.font = '9.5px system-ui'; ctx.textAlign = x > w - P.r - 40 ? 'right' : 'left'; ctx.textBaseline = 'middle'; ctx.fillText(mk.label, x + (x > w - P.r - 40 ? -7 : 7), y + 5); } }
+      if (o.title) { ctx.font = 'bold 12px system-ui'; ctx.fillStyle = '#1c2836'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(o.title, P.l, 4); const tw = ctx.measureText(o.title).width; ctx.font = '10.5px system-ui'; ctx.fillStyle = '#5a6878'; ctx.textAlign = 'right'; if (o.sub && P.l + tw + 12 + ctx.measureText(o.sub).width <= w - P.r) ctx.fillText(o.sub, w - P.r, 5); }
     });
     c.draw = (s, o = {}) => { c.s = s; c.o = o; st.redraw(); };
     c.st = st;
