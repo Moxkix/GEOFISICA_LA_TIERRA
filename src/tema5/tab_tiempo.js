@@ -64,7 +64,7 @@ H.tab({
       T4.hover(mcv, mp, (lat, lon) => { const v = gm.at(lat, lon); return v === v ? `${T4.ll(lat, lon, 0)} · ${H.fs(v, 1)} °C` : null; });
       mc.append(H.h('h3', {}, `El Último Máximo Glaciar, hace unos ${H.f(M.ka || 21)}.000 años`),
         H.h('p', { class: 'sub' }, `Diferencia de la temperatura media anual del aire en superficie entre el Último Máximo Glaciar (${M.lab || '19.000-23.000 años'}) y la época preindustrial, según la reanálisis de Osman y otros (2021). Sustituye la fig. 5.3, que reproduce la reconstrucción CLIMAP de 1976.`),
-        H.h('div', { class: 'viz framed' }, mcv), T3.legend(col, -40, 1, [-40, -30, -20, -10, -5, 0], (v) => H.fs(v) + ' °C'),
+        H.h('div', { class: 'viz framed' }, mcv), T3.legend(col, -40, 1, [-40, -30, -20, -10, 0], (v) => H.fs(v) + ' °C'),
         H.html(`<p class="hint">El enfriamiento fue máximo sobre los mantos de hielo de Norteamérica y Escandinavia (de 25 a más de 40 °C, también porque la superficie del hielo estaba a 2-3 km de altura) y mucho menor en los trópicos (unos 4 °C), aunque mayor que el que daba CLIMAP. En la península ibérica, unos 7 °C. En el conjunto del planeta, ${H.f(LG.gmst.dLGM, 1)} °C. El nivel del mar estaba unos 125 m más bajo (Tema 4, «Nivel del mar»).</p>`));
       el.append(mc);
     }
@@ -84,7 +84,7 @@ H.tab({
         series: [{ pts: c.T61.map((t, i) => [i + 1, t]), color: '#1f6f8b', width: 2.4 }, { pts: c.T.map((t, i) => [i + 1, t]), color: '#b4531d', width: 2.8 }] });
       muRo.innerHTML = `<div class="ro"><div class="k">1961-1990</div><div class="v">${T5.chip(t61)} <small>${T5.fT(c.T61.reduce((a, b) => a + b, 0) / 12)} · ${H.f(p61)} mm</small></div></div>
         <div class="ro hl"><div class="k">1991-2020</div><div class="v">${T5.chip(t91)} <small>${T5.fT(c.T.reduce((a, b) => a + b, 0) / 12)} · ${H.f(p91)} mm</small></div></div>
-        <div class="ro bl"><div class="k">Cambio</div><div class="v">${H.fs(dA, 1)} °C <small>· ${H.fs((p91 / p61 - 1) * 100, 0)} % de lluvia · más en ${H.MESES[d.indexOf(Math.max(...d))]}</small></div></div>
+        <div class="ro bl"><div class="k">Cambio</div><div class="v">${H.fs(dA, 1)} °C <small>· ${H.fs((p91 / p61 - 1) * 100, 0)} % de lluvia · el mes que más se calienta: ${H.MESES[d.indexOf(Math.max(...d))]}</small></div></div>
         ${t61 !== t91 ? `<div class="ro wide"><div class="v"><small>Tu municipio ha cambiado de tipo de Köppen: de ${T5.chip(t61)} a ${T5.chip(t91)}. Mira en la pestaña «España» cuántos municipios lo han hecho.</small></div></div>` : ''}`;
     };
     mu.append(H.h('h3', {}, 'Las normales cambian: tu municipio'), H.h('p', { class: 'sub' }, 'Temperatura media de cada mes en tu municipio con las dos normales (TerraClimate). Los climogramas del manual usan las series 1961-1990 y 1971-2000; las de los interactivos, la vigente 1991-2020.'),

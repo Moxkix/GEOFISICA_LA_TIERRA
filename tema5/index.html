@@ -2381,7 +2381,12 @@ H.tab({
     const card = H.h('div', { class: 'card' });
     const perSeg = H.seg([['91', '1991-2020'], ['61', '1961-1990'], ['chg', 'Cambios']], S.per, (v) => { S.per = v; invalidate(); });
     const leg = H.h('div');
-    const present = () => [...new Set(C91.concat(C61).filter(Boolean))].sort((a, b) => KG.CODES.indexOf(a) - KG.CODES.indexOf(b));
+    /* tipos presentes en los municipios y en las celdas de los dos mapas (las cumbres sin municipios también cuentan) */
+    const present = () => {
+      const s = new Set(C91.concat(C61).filter(Boolean));
+      for (const R of [KS.pen, KS.can]) if (R) for (const per of ['91', '61']) { const a = R.K[per][T5.combo()]; for (let i = 0; i < a.length; i++) { const v = a[i]; if (v === v && v > 0) s.add(KG.CODES[Math.round(v) - 1]); } }
+      return [...s].sort((a, b) => KG.CODES.indexOf(a) - KG.CODES.indexOf(b));
+    };
     const drawLeg = () => { leg.innerHTML = ''; const l = T5.legend(present(), (t) => { S.filt = S.filt === t ? null : t; invalidate(); drawLeg(); }); H.$$('.kl-i', l).forEach((b) => { if (S.filt && b.textContent === S.filt) b.classList.add('on'); }); leg.append(l); };
     drawLeg();
     card.append(H.h('div', { class: 'row', style: { marginBottom: '8px' } }, H.h('div', { style: { flex: '2 1 300px' } }, perSeg)),
@@ -2427,7 +2432,7 @@ H.tab({
         </tbody></table></div>
         <div><p><b>${H.f(changed)}</b> municipios de ${H.f(tot)} (${H.f(changed / tot * 100, 1)} %) han cambiado de tipo entre 1961-1990 y 1991-2020.</p>
         <table class="t mini"><thead><tr><th>Cambio</th><th>Municipios</th></tr></thead><tbody>${Object.entries(tr).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([k, v]) => `<tr><td>${k.split(' → ').map((x) => T5.chip(x)).join(' → ')}</td><td class="num">${H.f(v)}</td></tr>`).join('')}</tbody></table>
-        ${prov ? `<p class="small" style="margin-top:8px">En la provincia de ${prov} han cambiado ${H.f(inProv.length)} municipios${inProv.length ? ': ' + inProv.slice(0, 25).map(([m, i]) => `${m.name} (${C61[i]} → ${C91[i]})`).join(', ') + (inProv.length > 25 ? '…' : '') : ''}.</p>` : ''}</div></div>`;
+        ${prov ? `<p class="small" style="margin-top:8px">En la provincia de ${prov} han cambiado ${H.f(inProv.length)} municipios${inProv.length ? ': ' + inProv.slice(0, 25).map(([m, i]) => `${m.name} (${C61[i]} → ${C91[i]})`).join(', ') + (inProv.length > 25 ? '…' : '.') : '.'}</p>` : ''}</div></div>`;
     };
     cc.append(H.h('h3', {}, 'Los municipios, tipo a tipo'), cOut);
 
@@ -2439,7 +2444,7 @@ H.tab({
     el.append(H.selfCheck([
       { q: 'El tipo de clima más extendido en los municipios españoles es…', opts: ['Cfb, oceánico', 'Csa, mediterráneo de verano caluroso', 'BSk, estepa fría', 'Dfb, continental húmedo'], a: 1, ex: 'Unos 3.200 de los 8.132 municipios con los criterios del manual: buena parte de la mitad sur, el valle del Ebro y el litoral mediterráneo.' },
       { q: 'El cambio de tipo más frecuente entre 1961-1990 y 1991-2020 es…', opts: ['De Csa a Cfb', 'De Csb a Csa', 'De BSk a Cfb', 'De ET a EF'], a: 1, ex: 'Más de mil municipios: su mes más cálido ha pasado a superar los 22 °C de media. Es la consecuencia más directa del calentamiento de los veranos; le sigue Cfb → Cfa.' },
-      { q: 'En España, los climas D y E aparecen…', opts: ['En la costa cantábrica', 'Solo en las cumbres más altas: con el umbral de −3 °C, únicamente en el Pirineo', 'En Canarias', 'En la Meseta norte'], a: 1, ex: 'Con el umbral de 0 °C aparecen también en Sierra Nevada y en algunas cumbres del Sistema Central, la Cordillera Cantábrica y el Sistema Ibérico. Ningún municipio tiene un clima D con el umbral del manual.' },
+      { q: 'Con las normales 1991-2020, los climas D y E aparecen en España…', opts: ['En la costa cantábrica y en los valles atlánticos', 'Solo en las cumbres del Pirineo, si el umbral es −3 °C', 'En las cumbres del Teide y de La Palma', 'En los páramos más fríos de la Meseta norte'], a: 1, ex: 'Con el umbral de 0 °C aparecen también en Sierra Nevada y en algunas cumbres del Sistema Central, la Cordillera Cantábrica y el Sistema Ibérico. En 1961-1990, con el umbral de −3 °C, también había celdas D y E en Sierra Nevada y en los Picos de Europa. Ningún municipio tiene un clima D con el umbral del manual.' },
     ]));
   },
 });
@@ -2856,7 +2861,7 @@ H.tab({
       T4.hover(mcv, mp, (lat, lon) => { const v = gm.at(lat, lon); return v === v ? `${T4.ll(lat, lon, 0)} · ${H.fs(v, 1)} °C` : null; });
       mc.append(H.h('h3', {}, `El Último Máximo Glaciar, hace unos ${H.f(M.ka || 21)}.000 años`),
         H.h('p', { class: 'sub' }, `Diferencia de la temperatura media anual del aire en superficie entre el Último Máximo Glaciar (${M.lab || '19.000-23.000 años'}) y la época preindustrial, según la reanálisis de Osman y otros (2021). Sustituye la fig. 5.3, que reproduce la reconstrucción CLIMAP de 1976.`),
-        H.h('div', { class: 'viz framed' }, mcv), T3.legend(col, -40, 1, [-40, -30, -20, -10, -5, 0], (v) => H.fs(v) + ' °C'),
+        H.h('div', { class: 'viz framed' }, mcv), T3.legend(col, -40, 1, [-40, -30, -20, -10, 0], (v) => H.fs(v) + ' °C'),
         H.html(`<p class="hint">El enfriamiento fue máximo sobre los mantos de hielo de Norteamérica y Escandinavia (de 25 a más de 40 °C, también porque la superficie del hielo estaba a 2-3 km de altura) y mucho menor en los trópicos (unos 4 °C), aunque mayor que el que daba CLIMAP. En la península ibérica, unos 7 °C. En el conjunto del planeta, ${H.f(LG.gmst.dLGM, 1)} °C. El nivel del mar estaba unos 125 m más bajo (Tema 4, «Nivel del mar»).</p>`));
       el.append(mc);
     }
@@ -2876,7 +2881,7 @@ H.tab({
         series: [{ pts: c.T61.map((t, i) => [i + 1, t]), color: '#1f6f8b', width: 2.4 }, { pts: c.T.map((t, i) => [i + 1, t]), color: '#b4531d', width: 2.8 }] });
       muRo.innerHTML = `<div class="ro"><div class="k">1961-1990</div><div class="v">${T5.chip(t61)} <small>${T5.fT(c.T61.reduce((a, b) => a + b, 0) / 12)} · ${H.f(p61)} mm</small></div></div>
         <div class="ro hl"><div class="k">1991-2020</div><div class="v">${T5.chip(t91)} <small>${T5.fT(c.T.reduce((a, b) => a + b, 0) / 12)} · ${H.f(p91)} mm</small></div></div>
-        <div class="ro bl"><div class="k">Cambio</div><div class="v">${H.fs(dA, 1)} °C <small>· ${H.fs((p91 / p61 - 1) * 100, 0)} % de lluvia · más en ${H.MESES[d.indexOf(Math.max(...d))]}</small></div></div>
+        <div class="ro bl"><div class="k">Cambio</div><div class="v">${H.fs(dA, 1)} °C <small>· ${H.fs((p91 / p61 - 1) * 100, 0)} % de lluvia · el mes que más se calienta: ${H.MESES[d.indexOf(Math.max(...d))]}</small></div></div>
         ${t61 !== t91 ? `<div class="ro wide"><div class="v"><small>Tu municipio ha cambiado de tipo de Köppen: de ${T5.chip(t61)} a ${T5.chip(t91)}. Mira en la pestaña «España» cuántos municipios lo han hecho.</small></div></div>` : ''}`;
     };
     mu.append(H.h('h3', {}, 'Las normales cambian: tu municipio'), H.h('p', { class: 'sub' }, 'Temperatura media de cada mes en tu municipio con las dos normales (TerraClimate). Los climogramas del manual usan las series 1961-1990 y 1971-2000; las de los interactivos, la vigente 1991-2020.'),

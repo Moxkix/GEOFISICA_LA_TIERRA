@@ -47,7 +47,12 @@ H.tab({
     const card = H.h('div', { class: 'card' });
     const perSeg = H.seg([['91', '1991-2020'], ['61', '1961-1990'], ['chg', 'Cambios']], S.per, (v) => { S.per = v; invalidate(); });
     const leg = H.h('div');
-    const present = () => [...new Set(C91.concat(C61).filter(Boolean))].sort((a, b) => KG.CODES.indexOf(a) - KG.CODES.indexOf(b));
+    /* tipos presentes en los municipios y en las celdas de los dos mapas (las cumbres sin municipios también cuentan) */
+    const present = () => {
+      const s = new Set(C91.concat(C61).filter(Boolean));
+      for (const R of [KS.pen, KS.can]) if (R) for (const per of ['91', '61']) { const a = R.K[per][T5.combo()]; for (let i = 0; i < a.length; i++) { const v = a[i]; if (v === v && v > 0) s.add(KG.CODES[Math.round(v) - 1]); } }
+      return [...s].sort((a, b) => KG.CODES.indexOf(a) - KG.CODES.indexOf(b));
+    };
     const drawLeg = () => { leg.innerHTML = ''; const l = T5.legend(present(), (t) => { S.filt = S.filt === t ? null : t; invalidate(); drawLeg(); }); H.$$('.kl-i', l).forEach((b) => { if (S.filt && b.textContent === S.filt) b.classList.add('on'); }); leg.append(l); };
     drawLeg();
     card.append(H.h('div', { class: 'row', style: { marginBottom: '8px' } }, H.h('div', { style: { flex: '2 1 300px' } }, perSeg)),
@@ -93,7 +98,7 @@ H.tab({
         </tbody></table></div>
         <div><p><b>${H.f(changed)}</b> municipios de ${H.f(tot)} (${H.f(changed / tot * 100, 1)} %) han cambiado de tipo entre 1961-1990 y 1991-2020.</p>
         <table class="t mini"><thead><tr><th>Cambio</th><th>Municipios</th></tr></thead><tbody>${Object.entries(tr).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([k, v]) => `<tr><td>${k.split(' → ').map((x) => T5.chip(x)).join(' → ')}</td><td class="num">${H.f(v)}</td></tr>`).join('')}</tbody></table>
-        ${prov ? `<p class="small" style="margin-top:8px">En la provincia de ${prov} han cambiado ${H.f(inProv.length)} municipios${inProv.length ? ': ' + inProv.slice(0, 25).map(([m, i]) => `${m.name} (${C61[i]} → ${C91[i]})`).join(', ') + (inProv.length > 25 ? '…' : '') : ''}.</p>` : ''}</div></div>`;
+        ${prov ? `<p class="small" style="margin-top:8px">En la provincia de ${prov} han cambiado ${H.f(inProv.length)} municipios${inProv.length ? ': ' + inProv.slice(0, 25).map(([m, i]) => `${m.name} (${C61[i]} → ${C91[i]})`).join(', ') + (inProv.length > 25 ? '…' : '.') : '.'}</p>` : ''}</div></div>`;
     };
     cc.append(H.h('h3', {}, 'Los municipios, tipo a tipo'), cOut);
 
@@ -105,7 +110,7 @@ H.tab({
     el.append(H.selfCheck([
       { q: 'El tipo de clima más extendido en los municipios españoles es…', opts: ['Cfb, oceánico', 'Csa, mediterráneo de verano caluroso', 'BSk, estepa fría', 'Dfb, continental húmedo'], a: 1, ex: 'Unos 3.200 de los 8.132 municipios con los criterios del manual: buena parte de la mitad sur, el valle del Ebro y el litoral mediterráneo.' },
       { q: 'El cambio de tipo más frecuente entre 1961-1990 y 1991-2020 es…', opts: ['De Csa a Cfb', 'De Csb a Csa', 'De BSk a Cfb', 'De ET a EF'], a: 1, ex: 'Más de mil municipios: su mes más cálido ha pasado a superar los 22 °C de media. Es la consecuencia más directa del calentamiento de los veranos; le sigue Cfb → Cfa.' },
-      { q: 'En España, los climas D y E aparecen…', opts: ['En la costa cantábrica', 'Solo en las cumbres más altas: con el umbral de −3 °C, únicamente en el Pirineo', 'En Canarias', 'En la Meseta norte'], a: 1, ex: 'Con el umbral de 0 °C aparecen también en Sierra Nevada y en algunas cumbres del Sistema Central, la Cordillera Cantábrica y el Sistema Ibérico. Ningún municipio tiene un clima D con el umbral del manual.' },
+      { q: 'Con las normales 1991-2020, los climas D y E aparecen en España…', opts: ['En la costa cantábrica y en los valles atlánticos', 'Solo en las cumbres del Pirineo, si el umbral es −3 °C', 'En las cumbres del Teide y de La Palma', 'En los páramos más fríos de la Meseta norte'], a: 1, ex: 'Con el umbral de 0 °C aparecen también en Sierra Nevada y en algunas cumbres del Sistema Central, la Cordillera Cantábrica y el Sistema Ibérico. En 1961-1990, con el umbral de −3 °C, también había celdas D y E en Sierra Nevada y en los Picos de Europa. Ningún municipio tiene un clima D con el umbral del manual.' },
     ]));
   },
 });
